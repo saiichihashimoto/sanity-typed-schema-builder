@@ -1,4 +1,5 @@
 **/.DS_Store
+*.tsbuildinfo
 .env.*.local
 .env.local
 .idea
@@ -7,4 +8,3 @@
 Brewfile.lock.json
 dist
 node_modules
-tsconfig.tsbuildinfo
