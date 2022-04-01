@@ -1,4 +1,11 @@
 {
   "name": "use-stripe-payment-request",
-  "repository": "github:saiichihashimoto/use-stripe-payment-request"
+  "repository": "github:saiichihashimoto/use-stripe-payment-request",
+  "version": "0.0.0-development",
+  "scripts": {
+    "semantic-release": "semantic-release"
+  },
+  "devDependencies": {
+    "semantic-release": "^19.0.2"
+  }
 }
