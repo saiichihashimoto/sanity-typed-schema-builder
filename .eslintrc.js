@@ -1,7 +1,7 @@
 /* eslint sort-keys-fix/sort-keys-fix: ["error", "asc", { natural: true }] -- This rule is ONLY for this .eslintrc.js file, not as a rule in our codebase. */
 /* eslint-disable sort-keys-fix/sort-keys-fix -- Usually, our eslint comment pairs are enabling then disabling rules. Since we can only properly configure this by globally enabling it, we immediately disable it here (and reenable at the bottom), so we can have disable then enable pairs around objects. */
 
-const testFiles = ["**/*.spec.*", "jest.setup.ts"];
+const testFiles = ["**/*.spec.*"];
 
 /**
  * @type {import('eslint').Linter.Config}
@@ -18,6 +18,14 @@ const config = {
     "sort-keys-fix",
     "unicorn",
   ],
+  settings: {
+    "import/extensions": [".ts"],
+    "import/resolver": {
+      node: {
+        extensions: [".ts"],
+      },
+    },
+  },
   extends: [
     "plugin:eslint-comments/recommended",
     "plugin:fp/recommended",
@@ -254,6 +262,7 @@ const config = {
           {
             ignoreExports: ["src/index.ts"],
             missingExports: true,
+            src: ["src/**/!(*.spec.*)"],
             unusedExports: true,
           },
         ],
