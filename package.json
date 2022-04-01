@@ -2,23 +2,55 @@
   "name": "use-stripe-payment-request",
   "version": "0.0.0-development",
   "repository": "github:saiichihashimoto/use-stripe-payment-request",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "prebuild": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "tsc --project tsconfig.build.json",
+    "dev": "jest --watch",
     "lint": "run-p --aggregate-output --continue-on-error lint:*",
+    "lint:eslint": "eslint --color --ext .js,.ts,.tsx --config ./.eslintrc.strict.js --ignore-pattern '!.*' .",
     "lint:prettier": "prettier --color --check .",
     "lint:sort-package-json": "sort-package-json \"**/package.json\" \"!node_modules/**\" --check",
     "prepare": "is-ci || run-p --continue-on-error prepare:*",
     "prepare:brew": "brew bundle",
     "prepare:husky": "husky install",
-    "test": "echo TODO"
+    "test": "jest"
   },
   "devDependencies": {
+    "@jest/globals": "27.5.1",
+    "@jest/types": "27.5.1",
+    "@types/jest": "27.4.1",
+    "@typescript-eslint/eslint-plugin": "5.17.0",
+    "@typescript-eslint/parser": "5.17.0",
+    "eslint": "8.12.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-eslint-comments": "3.2.0",
+    "eslint-plugin-fp": "2.3.0",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-jest": "26.1.3",
+    "eslint-plugin-jsx-a11y": "6.5.1",
+    "eslint-plugin-lodash-fp": "2.2.0-a1",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "6.0.0",
+    "eslint-plugin-react": "7.29.4",
+    "eslint-plugin-sort-keys-fix": "1.1.2",
+    "eslint-plugin-typescript-sort-keys": "2.1.0",
+    "eslint-plugin-unicorn": "42.0.0",
     "husky": "7.0.4",
     "imagemin-lint-staged": "0.4.0",
     "is-ci": "3.0.1",
+    "jest": "27.5.1",
     "lint-staged": "12.3.7",
     "npm-run-all": "4.1.5",
     "prettier": "2.6.1",
     "semantic-release": "19.0.2",
-    "sort-package-json": "1.48.1"
+    "sort-package-json": "1.48.1",
+    "ts-jest": "27.1.4",
+    "ts-node": "10.7.0",
+    "typescript": "4.6.3"
   }
 }
