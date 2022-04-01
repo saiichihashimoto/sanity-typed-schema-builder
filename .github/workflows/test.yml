@@ -1,0 +1,16 @@
+name: "Checks"
+on: pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3.0.0
+        with:
+          node-version: "14.x"
+      - run: npm install -g npm@6.14.15
+      - run: npm ci
+
+      - run: npm run test

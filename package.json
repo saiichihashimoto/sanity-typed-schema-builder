@@ -1,8 +1,24 @@
 {
   "name": "use-stripe-payment-request",
-  "repository": "github:saiichihashimoto/use-stripe-payment-request",
   "version": "0.0.0-development",
+  "repository": "github:saiichihashimoto/use-stripe-payment-request",
+  "scripts": {
+    "lint": "run-p --aggregate-output --continue-on-error lint:*",
+    "lint:prettier": "prettier --color --check .",
+    "lint:sort-package-json": "sort-package-json \"**/package.json\" \"!node_modules/**\" --check",
+    "prepare": "is-ci || run-p --continue-on-error prepare:*",
+    "prepare:brew": "brew bundle",
+    "prepare:husky": "husky install",
+    "test": "echo TODO"
+  },
   "devDependencies": {
-    "semantic-release": "^19.0.2"
+    "husky": "7.0.4",
+    "imagemin-lint-staged": "0.4.0",
+    "is-ci": "3.0.1",
+    "lint-staged": "12.3.7",
+    "npm-run-all": "4.1.5",
+    "prettier": "2.6.1",
+    "semantic-release": "19.0.2",
+    "sort-package-json": "1.48.1"
   }
 }
