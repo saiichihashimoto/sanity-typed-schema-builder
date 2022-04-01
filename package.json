@@ -2,7 +2,12 @@
   "name": "use-stripe-payment-request",
   "version": "0.0.0-development",
   "repository": "github:saiichihashimoto/use-stripe-payment-request",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "prebuild": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "tsc",
     "lint": "run-p --aggregate-output --continue-on-error lint:*",
     "lint:eslint": "eslint --color --ext .js,.ts,.tsx --config ./.eslintrc.strict.js --ignore-pattern '!.*' .",
     "lint:prettier": "prettier --color --check .",
@@ -14,6 +19,7 @@
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.17.0",
+    "@typescript-eslint/parser": "5.17.0",
     "eslint": "8.12.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-prettier": "8.5.0",

@@ -252,6 +252,7 @@ const config = {
         "import/no-unused-modules": [
           "error",
           {
+            ignoreExports: ["src/index.ts"],
             missingExports: true,
             unusedExports: true,
           },
