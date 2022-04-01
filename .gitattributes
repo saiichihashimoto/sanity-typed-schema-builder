@@ -1,0 +1,3 @@
+*.svg -diff
+package-lock.json -diff
+public/.well-known/apple-developer-merchantid-domain-association -diff

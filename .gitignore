@@ -1,0 +1,10 @@
+**/.DS_Store
+.env.*.local
+.env.local
+.idea
+.next
+.vercel
+Brewfile.lock.json
+dist
+node_modules
+tsconfig.tsbuildinfo
