@@ -1,1 +1,1 @@
-export default "b;aj";
+export const usePaymentRequest = "Hello World";
