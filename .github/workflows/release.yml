@@ -1,3 +1,4 @@
+# https://github.com/semantic-release/semantic-release/blob/master/docs/recipes/ci-configurations/github-actions.md#node-project-configuration
 name: Release
 on:
   push:
