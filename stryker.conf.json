@@ -1,0 +1,11 @@
+{
+  "checkers": ["typescript"],
+  "packageManager": "npm",
+  "reporters": ["clear-text", "progress"],
+  "testRunner": "jest",
+  "tsconfigFile": "tsconfig.json",
+  "jest": {
+    "configFile": "jest.config.js"
+  },
+  "thresholds": { "high": 100, "low": 100, "break": 100 }
+}

@@ -13,13 +13,13 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "strictNullChecks": true
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
 }
