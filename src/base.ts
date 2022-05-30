@@ -1,4 +1,4 @@
-export interface SanityType<Value, Definition> {
+export interface SanityType<Value, Definition extends FieldDef<any, any>> {
   _value: Value;
   schema: () => Definition;
 }

@@ -9,7 +9,7 @@ describe("boolean", () => {
     expect(schema).toEqual({ type: "boolean" });
   });
 
-  it("passes through schema fields", () => {
+  it("passes through schema values", () => {
     const schema: BooleanFieldDef = s.boolean({ hidden: false }).schema();
 
     expect(schema).toHaveProperty("hidden", false);
@@ -17,9 +17,12 @@ describe("boolean", () => {
 
   it("infers a boolean", () => {
     const type = s.boolean();
-    const inferredValue: s.infer<typeof type> = true;
-    const value: boolean = inferredValue;
+
+    const value = true;
+    const inferredValue: s.infer<typeof type> = value;
+    const otherValue: boolean = inferredValue;
 
     expect(inferredValue).toEqual(value);
+    expect(inferredValue).toEqual(otherValue);
   });
 });
