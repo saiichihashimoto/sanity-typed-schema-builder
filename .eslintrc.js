@@ -134,8 +134,9 @@ const config = {
         "@typescript-eslint/array-type": [
           "error",
           {
-            default: "array",
-            readonly: "array",
+            // Mirrors DefinitelyTyped, which helps with migrating
+            default: "array-simple",
+            readonly: "array-simple",
           },
         ],
         "@typescript-eslint/consistent-indexed-object-style": "error",

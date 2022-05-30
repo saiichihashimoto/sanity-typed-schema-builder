@@ -1,1 +1,3 @@
-export const foo = "Hello World";
+import * as s from "./builder";
+
+export { s };
