@@ -39,7 +39,7 @@
     "eslint-plugin-lodash-fp": "2.2.0-a1",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.0.0",
-    "eslint-plugin-react": "7.29.4",
+    "eslint-plugin-react": "7.30.0",
     "eslint-plugin-sort-keys-fix": "1.1.2",
     "eslint-plugin-typescript-sort-keys": "2.1.0",
     "eslint-plugin-unicorn": "42.0.0",
