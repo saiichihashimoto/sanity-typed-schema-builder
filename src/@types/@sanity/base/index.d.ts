@@ -9,7 +9,7 @@ type MaybePromise<T> = T | Promise<T>;
 // TODO [@types/sanity__base@>0.0.0] remove this once we have a version of @types/sanity__base
 
 /** @link https://www.sanity.io/docs/validation */
-interface Rule<ExtendingRule, Value> {
+interface Rule<Value, ExtendingRule extends Rule<Value, ExtendingRule>> {
   custom: (
     validator: (
       value: Value | undefined,
@@ -127,7 +127,7 @@ interface FieldDef<Rule, Value>
 }
 
 /** @link https://www.sanity.io/docs/boolean-type#validation */
-interface BooleanRule extends Rule<BooleanRule, boolean> {}
+interface BooleanRule extends Rule<boolean, BooleanRule> {}
 
 /** @link https://www.sanity.io/docs/boolean-type */
 interface BooleanFieldDef extends FieldDef<BooleanRule, boolean> {
@@ -136,7 +136,7 @@ interface BooleanFieldDef extends FieldDef<BooleanRule, boolean> {
 }
 
 /** @link https://www.sanity.io/docs/date-type#validation */
-interface DateRule extends Rule<DateRule, string> {}
+interface DateRule extends Rule<string, DateRule> {}
 
 /** @link https://www.sanity.io/docs/date-type */
 interface DateFieldDef extends FieldDef<DateRule, string> {
@@ -149,7 +149,7 @@ interface DateFieldDef extends FieldDef<DateRule, string> {
 
 /** @link https://www.sanity.io/docs/datetime-type#validation */
 interface DatetimeRule
-  extends Rule<DatetimeRule, string>,
+  extends Rule<string, DatetimeRule>,
     MinMaxRule<DatetimeRule> {}
 
 /** @link https://www.sanity.io/docs/datetime-type */
@@ -170,7 +170,7 @@ interface GeopointValue {
 }
 
 /** @link https://www.sanity.io/docs/geopoint-type#validation */
-interface GeopointRule extends Rule<GeopointRule, GeopointValue> {}
+interface GeopointRule extends Rule<GeopointValue, GeopointRule> {}
 
 /** @link https://www.sanity.io/docs/geopoint-type */
 interface GeopointFieldDef extends FieldDef<GeopointRule, GeopointValue> {
@@ -184,7 +184,7 @@ interface GeopointFieldDef extends FieldDef<GeopointRule, GeopointValue> {
 }
 
 /** @link https://www.sanity.io/plugins/sanity-plugin-mux-input */
-interface MuxVideoAssetRule extends Rule<MuxVideoAssetRule, string> {}
+interface MuxVideoAssetRule extends Rule<string, MuxVideoAssetRule> {}
 
 /** @link https://www.sanity.io/plugins/sanity-plugin-mux-input */
 interface MuxVideoAssetFieldDef extends FieldDef<MuxVideoAssetRule, string> {
@@ -195,7 +195,7 @@ interface MuxVideoAssetFieldDef extends FieldDef<MuxVideoAssetRule, string> {
 }
 
 /** @link https://www.sanity.io/docs/number-type#validation */
-interface NumberRule extends Rule<NumberRule, number>, MinMaxRule<NumberRule> {
+interface NumberRule extends Rule<number, NumberRule>, MinMaxRule<NumberRule> {
   greaterThan: (limit: number) => NumberRule;
   integer: () => NumberRule;
   lessThan: (limit: number) => NumberRule;
@@ -216,7 +216,7 @@ interface ReferenceValue {
 }
 
 /** @link https://www.sanity.io/docs/reference-type#validation */
-interface ReferenceRule extends Rule<ReferenceRule, ReferenceValue> {}
+interface ReferenceRule extends Rule<ReferenceValue, ReferenceRule> {}
 
 /** @link https://www.sanity.io/docs/reference-type */
 interface ReferenceFieldDef<DocumentNames extends string>
@@ -239,7 +239,7 @@ interface ReferenceFieldDef<DocumentNames extends string>
 }
 
 /** @link https://www.sanity.io/docs/slug-type#validation */
-interface SlugRule extends Rule<SlugRule, string> {}
+interface SlugRule extends Rule<string, SlugRule> {}
 
 /** @link https://www.sanity.io/docs/slug-typen */
 interface SlugDef<FieldNames extends string>
@@ -263,7 +263,7 @@ interface SlugDef<FieldNames extends string>
 
 /** @link https://www.sanity.io/docs/string-type#validation */
 interface StringRule
-  extends Rule<StringRule, string>,
+  extends Rule<string, StringRule>,
     LengthRule<StringRule>,
     MinMaxRule<StringRule>,
     StringContentRule<StringRule> {}
@@ -276,7 +276,7 @@ interface StringFieldDef extends FieldDef<StringRule, string> {
 
 /** @link https://www.sanity.io/docs/text-type#validation */
 interface TextRule
-  extends Rule<TextRule, string>,
+  extends Rule<string, TextRule>,
     LengthRule<TextRule>,
     MinMaxRule<TextRule>,
     StringContentRule<TextRule> {}
@@ -287,7 +287,7 @@ interface TextFieldDef extends FieldDef<TextRule, string> {
 }
 
 /** @link https://www.sanity.io/docs/url-type#validation */
-interface URLRule extends Rule<URLRule, string> {
+interface URLRule extends Rule<string, URLRule> {
   uri: (options: {
     allowRelative?: boolean;
     relativeOnly?: boolean;
@@ -335,7 +335,7 @@ type OfType<DocumentNames extends string, ObjectNames extends string> =
 
 /** @link https://www.sanity.io/docs/array-type#validation */
 interface ArrayRule
-  extends Rule<ArrayRule, unknown[]>,
+  extends Rule<unknown[], ArrayRule>,
     LengthRule<ArrayRule>,
     MinMaxRule<ArrayRule> {
   unique: () => ArrayRule;
@@ -363,7 +363,7 @@ interface BlockEditor {
 }
 
 /** @link https://www.sanity.io/docs/block-type#validation */
-interface BlockRule extends Rule<BlockRule, unknown> {}
+interface BlockRule extends Rule<unknown, BlockRule> {}
 
 /** @link https://www.sanity.io/docs/block-type */
 interface BlockFieldDef<
@@ -395,22 +395,26 @@ interface BlockFieldDef<
 }
 
 /** @link https://www.sanity.io/docs/object-type#validation */
-interface ObjectRule extends Rule<ObjectRule, unknown> {}
+interface ObjectRule extends Rule<unknown, ObjectRule> {}
+
+type FieldTypeFields<
+  DocumentNames extends string,
+  ObjectNames extends string,
+  FieldNames extends string
+> =
+  | ArrayFieldDef<DocumentNames, ObjectNames>
+  | NonPrimitiveFieldDef<DocumentNames, ObjectNames, FieldNames>
+  | PrimitiveFieldDef
+  | (FieldDef<ObjectRule, { [Field in FieldNames]?: unknown }> & {
+      type: ObjectNames;
+    });
 
 type FieldType<
   DocumentNames extends string,
   ObjectNames extends string,
   Name extends string,
   FieldNames extends string
-> = NamedDef<Name> &
-  (
-    | ArrayFieldDef<DocumentNames, ObjectNames>
-    | NonPrimitiveFieldDef<DocumentNames, ObjectNames, FieldNames>
-    | PrimitiveFieldDef
-    | (FieldDef<ObjectRule, { [Field in FieldNames]?: unknown }> & {
-        type: ObjectNames;
-      })
-  );
+> = NamedDef<Name> & FieldTypeFields<DocumentNames, ObjectNames, FieldNames>;
 
 type FileValue<FieldNames extends string> = Record<
   Exclude<FieldNames, "_type" | "asset">,
@@ -460,7 +464,7 @@ interface FileOptions {
 
 /** @link https://www.sanity.io/docs/arfileray-type#validation */
 interface FileRule<FieldNames extends string>
-  extends Rule<FileRule<FieldNames>, FileValue<FieldNames>> {}
+  extends Rule<FileValue<FieldNames>, FileRule<FieldNames>> {}
 
 /** @link https://www.sanity.io/docs/file-type */
 interface FileFieldDef<
@@ -495,7 +499,7 @@ type ImageValue<FieldNames extends string> = Record<
 
 /** @link https://www.sanity.io/docs/image-type#validation */
 interface ImageRule<FieldNames extends string>
-  extends Rule<ImageRule<FieldNames>, ImageValue<FieldNames>> {}
+  extends Rule<ImageValue<FieldNames>, ImageRule<FieldNames>> {}
 
 /** @link https://www.sanity.io/docs/image-type */
 interface ImageFieldDef<
