@@ -19,10 +19,10 @@ const config = {
     "unicorn",
   ],
   settings: {
-    "import/extensions": [".ts"],
+    "import/extensions": [".js", ".ts"],
     "import/resolver": {
       node: {
-        extensions: [".ts"],
+        extensions: [".mjs", ".js", ".json", ".node", ".ts"],
       },
     },
   },

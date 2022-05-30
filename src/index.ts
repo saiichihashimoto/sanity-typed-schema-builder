@@ -1,1 +1,1 @@
-export const usePaymentRequest = "Hello World";
+export const foo = "Hello World";

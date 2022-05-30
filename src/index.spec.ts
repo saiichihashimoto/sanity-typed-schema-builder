@@ -1,9 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { usePaymentRequest } from ".";
+import { foo } from ".";
 
-describe("usePaymentRequest", () => {
+describe("foo", () => {
   it("Hello World", () => {
-    expect(usePaymentRequest).toEqual("Hello World");
+    expect(foo).toEqual("Hello World");
   });
 });

@@ -1,6 +1,7 @@
 {
   "checkers": ["typescript"],
   "packageManager": "npm",
+  "mutate": ["src/**/*.ts", "!**/*.{d,spec}.ts"],
   "reporters": ["clear-text", "progress"],
   "testRunner": "jest",
   "tsconfigFile": "tsconfig.json",

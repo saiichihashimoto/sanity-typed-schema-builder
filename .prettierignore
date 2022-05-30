@@ -1,3 +1,4 @@
 .next
+.stryker-tmp
 .vercel
 dist
