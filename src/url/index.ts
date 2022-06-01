@@ -1,4 +1,4 @@
-import type { InferDefinition, InferValue, SanityType } from "../base";
+import type { InferDefinition, InferValue, SanityType } from "../types";
 
 interface URLType extends SanityType<string, URLFieldDef> {}
 

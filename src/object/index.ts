@@ -1,6 +1,6 @@
 import { identity } from "lodash/fp";
 
-import type { InferDefinition, InferValue, SanityType } from "../base";
+import type { InferDefinition, InferValue, SanityType } from "../types";
 
 interface FieldOptions<
   FieldNames extends string,

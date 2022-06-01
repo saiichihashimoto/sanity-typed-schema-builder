@@ -1,4 +1,4 @@
-import type { InferDefinition, InferValue, SanityType } from "../base";
+import type { InferDefinition, InferValue, SanityType } from "../types";
 
 interface BooleanType extends SanityType<boolean, BooleanFieldDef> {}
 

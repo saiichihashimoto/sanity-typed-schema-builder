@@ -1,6 +1,6 @@
 import { identity } from "lodash/fp";
 
-import type { InferDefinition, InferValue, SanityType } from "../base";
+import type { InferDefinition, InferValue, SanityType } from "../types";
 import type { DocumentDef } from "@sanity/base";
 
 interface FieldOptions<
