@@ -69,6 +69,14 @@ const config = {
         tsx: "never",
       },
     ],
+    "import/no-unused-modules": [
+      "error",
+      {
+        ignoreExports: [...testFiles, "**/*.d.ts", "**/*.js", "src/index.ts"],
+        missingExports: true,
+        unusedExports: true,
+      },
+    ],
     "import/order": [
       "error",
       {
@@ -250,23 +258,6 @@ const config = {
       rules: {
         // HACK The sort-keys-fix pairs sometimes have a technically unnecessary disable, but removing them cascades into other eslint errors. I couldn't disable no-unused-disable on specific comments or globally for this file via a comment. Might be related to these limitations: https://mysticatea.github.io/eslint-plugin-eslint-comments/rules/no-unused-disable.html#known-limitations
         "eslint-comments/no-unused-disable": "off",
-      },
-      /* eslint-disable sort-keys-fix/sort-keys-fix -- Sorting rules */
-    },
-    {
-      files: ["**/*"],
-      excludedFiles: [...testFiles, "./*", "**/*.d.*"],
-      /* eslint-enable sort-keys-fix/sort-keys-fix -- Sorting rules */
-      rules: {
-        "import/no-unused-modules": [
-          "error",
-          {
-            ignoreExports: ["src/index.ts"],
-            missingExports: true,
-            src: ["src/**/!(*.spec.*)"],
-            unusedExports: true,
-          },
-        ],
       },
       /* eslint-disable sort-keys-fix/sort-keys-fix -- Sorting rules */
     },

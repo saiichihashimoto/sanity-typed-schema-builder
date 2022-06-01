@@ -2,12 +2,13 @@ import { identity } from "lodash/fp";
 
 import type { InferDefinition, InferValue, SanityType } from "../base";
 import type { OptionalFromUndefined } from "../utils";
+import type { DocumentDef } from "@sanity/base";
 
 interface FieldOptions<Optional extends boolean> {
   optional?: Optional;
 }
 
-type ObjectValue<
+type DocumentValue<
   FieldNames extends string,
   Fields extends {
     [field in FieldNames]: SanityType<
@@ -17,9 +18,14 @@ type ObjectValue<
   }
 > = OptionalFromUndefined<{
   [field in keyof Fields]: InferValue<Fields[field]>;
-}>;
+}> & {
+  _createdAt: string;
+  _rev: string;
+  _type: string;
+  _updatedAt: string;
+};
 
-interface ObjectType<
+interface DocumentType<
   FieldNames extends string,
   Fields extends {
     [field in FieldNames]: SanityType<
@@ -28,8 +34,8 @@ interface ObjectType<
     >;
   }
 > extends SanityType<
-    ObjectValue<FieldNames, Fields>,
-    ObjectFieldDef<never, never, FieldNames, never, never>
+    DocumentValue<FieldNames, Fields>,
+    DocumentDef<string, never, FieldNames, never, never, never>
   > {
   field: <
     Name extends string,
@@ -40,7 +46,7 @@ interface ObjectType<
     name: Name,
     type: SanityType<Value, Definition>,
     options?: FieldOptions<Optional>
-  ) => ObjectType<
+  ) => DocumentType<
     FieldNames | Name,
     Fields & {
       [name in Name]: SanityType<
@@ -51,7 +57,7 @@ interface ObjectType<
   >;
 }
 
-const objectInternal = <
+const documentInternal = <
   FieldNames extends string,
   Fields extends {
     [field in FieldNames]: SanityType<
@@ -61,7 +67,7 @@ const objectInternal = <
   }
 >(
   def: Omit<
-    InferDefinition<ObjectType<never, Record<never, never>>>,
+    InferDefinition<DocumentType<never, Record<never, never>>>,
     "fields" | "type"
   >,
   fields: Array<
@@ -75,11 +81,11 @@ const objectInternal = <
       };
     }[FieldNames]
   >
-): ObjectType<FieldNames, Fields> => ({
-  _value: undefined as unknown as ObjectValue<FieldNames, Fields>,
+): DocumentType<FieldNames, Fields> => ({
+  _value: undefined as unknown as DocumentValue<FieldNames, Fields>,
   schema: () => ({
     ...def,
-    type: "object",
+    type: "document",
     // @ts-expect-error -- FIXME Fix this now
     fields: fields.map(({ name, type, options: { optional = false } = {} }) => {
       const schema = type.schema();
@@ -97,12 +103,12 @@ const objectInternal = <
   }),
   field: (name, type, options) =>
     // @ts-expect-error -- FIXME Technically, FieldNames and Name can overlap, which upsets this type system.
-    objectInternal(def, [...fields, { name, options, type }]),
+    documentInternal(def, [...fields, { name, options, type }]),
 });
 
-export const object = (
+export const document = (
   def: Omit<
-    InferDefinition<ObjectType<never, Record<never, never>>>,
+    InferDefinition<DocumentType<never, Record<never, never>>>,
     "fields" | "type"
-  > = {}
-): ObjectType<never, Record<never, never>> => objectInternal(def, []);
+  >
+): DocumentType<never, Record<never, never>> => documentInternal(def, []);
