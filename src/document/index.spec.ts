@@ -70,7 +70,10 @@ describe("document", () => {
   });
 
   it("adds fields", () => {
-    const type = s.document({ name: "foo" }).field("foo", s.boolean());
+    const type = s.document({ name: "foo" }).field({
+      name: "foo",
+      type: s.boolean(),
+    });
     const schema: MyDocumentDef = type.schema();
 
     expect(schema).toHaveProperty("fields", [
@@ -105,9 +108,11 @@ describe("document", () => {
   });
 
   it("allows optional fields", () => {
-    const type = s
-      .document({ name: "foo" })
-      .field("foo", s.boolean(), { optional: true });
+    const type = s.document({ name: "foo" }).field({
+      name: "foo",
+      optional: true,
+      type: s.boolean(),
+    });
     const schema: MyDocumentDef = type.schema();
 
     expect(schema).toHaveProperty("fields", [
