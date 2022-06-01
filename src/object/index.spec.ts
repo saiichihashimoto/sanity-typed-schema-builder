@@ -54,7 +54,10 @@ describe("object", () => {
   });
 
   it("adds fields", () => {
-    const type = s.object().field("foo", s.boolean());
+    const type = s.object().field({
+      name: "foo",
+      type: s.boolean(),
+    });
     const schema: MyObjectFieldDef = type.schema();
 
     expect(schema).toHaveProperty("fields", [
@@ -83,7 +86,11 @@ describe("object", () => {
   });
 
   it("allows optional fields", () => {
-    const type = s.object().field("foo", s.boolean(), { optional: true });
+    const type = s.object().field({
+      name: "foo",
+      optional: true,
+      type: s.boolean(),
+    });
     const schema: MyObjectFieldDef = type.schema();
 
     expect(schema).toHaveProperty("fields", [
