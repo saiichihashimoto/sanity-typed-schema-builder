@@ -2,7 +2,16 @@ import { describe, expect, it } from "@jest/globals";
 
 import { s } from "..";
 
-type MyObjectFieldDef = ObjectFieldDef<never, never, string, never, never>;
+import type { DocumentDef } from "@sanity/base";
+
+type MyDocumentDef = DocumentDef<string, never, string, never, never, never>;
+
+interface DocumentValue {
+  _createdAt: string;
+  _rev: string;
+  _type: string;
+  _updatedAt: string;
+}
 
 const mockRule = () => {
   const rule = {
@@ -30,32 +39,39 @@ const mockRule = () => {
   return rule;
 };
 
-describe("object", () => {
+describe("document", () => {
   it("builds a sanity config", () => {
-    const schema: MyObjectFieldDef = s.object().schema();
+    const schema: MyDocumentDef = s.document({ name: "foo" }).schema();
 
-    expect(schema).toEqual({ type: "object", fields: [] });
+    expect(schema).toEqual({ name: "foo", type: "document", fields: [] });
   });
 
   it("passes through schema values", () => {
-    const schema: MyObjectFieldDef = s.object({ hidden: false }).schema();
+    const schema: MyDocumentDef = s
+      .document({ name: "foo", title: "Foo" })
+      .schema();
 
-    expect(schema).toHaveProperty("hidden", false);
+    expect(schema).toHaveProperty("title", "Foo");
   });
 
-  it("infers an object", () => {
-    const type = s.object();
-    const value: Record<never, never> = {};
+  it("infers a document", () => {
+    const type = s.document({ name: "foo" });
+    const value: DocumentValue = {
+      _createdAt: "somedatestring",
+      _rev: "somerevstring",
+      _type: "foo",
+      _updatedAt: "somedatestring",
+    };
     const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: Record<never, never> = { ...inferredValue };
+    const otherValue: DocumentValue = { ...inferredValue };
 
     expect(inferredValue).toEqual(value);
     expect(inferredValue).toEqual(otherValue);
   });
 
   it("adds fields", () => {
-    const type = s.object().field("foo", s.boolean());
-    const schema: MyObjectFieldDef = type.schema();
+    const type = s.document({ name: "foo" }).field("foo", s.boolean());
+    const schema: MyDocumentDef = type.schema();
 
     expect(schema).toHaveProperty("fields", [
       {
@@ -74,17 +90,25 @@ describe("object", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).toEqual(required);
 
-    const value: { foo: boolean } = { foo: true };
+    const value: DocumentValue & { foo: boolean } = {
+      _createdAt: "somedatestring",
+      _rev: "somerevstring",
+      _type: "foo",
+      _updatedAt: "somedatestring",
+      foo: true,
+    };
     const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: { foo: boolean } = { ...inferredValue };
+    const otherValue: DocumentValue & { foo: boolean } = { ...inferredValue };
 
     expect(inferredValue).toEqual(value);
     expect(inferredValue).toEqual(otherValue);
   });
 
   it("allows optional fields", () => {
-    const type = s.object().field("foo", s.boolean(), { optional: true });
-    const schema: MyObjectFieldDef = type.schema();
+    const type = s
+      .document({ name: "foo" })
+      .field("foo", s.boolean(), { optional: true });
+    const schema: MyDocumentDef = type.schema();
 
     expect(schema).toHaveProperty("fields", [
       {
@@ -102,9 +126,14 @@ describe("object", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).not.toEqual(required);
 
-    const value: { foo?: boolean } = {};
+    const value: DocumentValue & { foo?: boolean } = {
+      _createdAt: "somedatestring",
+      _rev: "somerevstring",
+      _type: "foo",
+      _updatedAt: "somedatestring",
+    };
     const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: { foo?: boolean } = { ...inferredValue };
+    const otherValue: DocumentValue & { foo?: boolean } = { ...inferredValue };
 
     expect(inferredValue).toEqual(value);
     expect(inferredValue).toEqual(otherValue);
