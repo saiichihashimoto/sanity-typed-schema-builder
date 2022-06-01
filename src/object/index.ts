@@ -9,6 +9,7 @@ interface FieldOptions<
   Definition extends FieldTypeFields<never, never, FieldNames | Name>,
   Optional extends boolean
 > {
+  description?: string;
   name: Name;
   optional?: Optional;
   type: SanityType<Value, Definition>;
@@ -63,7 +64,7 @@ const objectInternal = <
 >(
   def: Omit<
     InferDefinition<ObjectType<never, Record<never, never>>>,
-    "fields" | "type"
+    "description" | "fields" | "type"
   >,
   fields: Array<
     {
@@ -82,12 +83,12 @@ const objectInternal = <
     ...def,
     type: "object",
     // @ts-expect-error -- FIXME Fix this now
-    fields: fields.map(({ name, type, optional = false }) => {
+    fields: fields.map(({ type, optional = false, ...props }) => {
       const schema = type.schema();
 
       return {
         ...schema,
-        name,
+        ...props,
         validation: optional
           ? schema.validation
           : (rule: Parameters<NonNullable<typeof schema.validation>>[0]) =>
