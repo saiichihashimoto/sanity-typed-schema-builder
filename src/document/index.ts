@@ -24,6 +24,11 @@ interface DocumentType<
       [field in keyof Fields as undefined extends InferValue<Fields[field]>
         ? field
         : never]?: InferValue<Fields[field]>;
+    } & {
+      _createdAt: string;
+      _rev: string;
+      _type: string;
+      _updatedAt: string;
     },
     DocumentDef<string, never, FieldNames, never, never, never>
   > {
