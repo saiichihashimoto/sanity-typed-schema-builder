@@ -1,29 +1,11 @@
 import { identity } from "lodash/fp";
 
 import type { InferDefinition, InferValue, SanityType } from "../base";
-import type { OptionalFromUndefined } from "../utils";
 import type { DocumentDef } from "@sanity/base";
 
 interface FieldOptions<Optional extends boolean> {
   optional?: Optional;
 }
-
-type DocumentValue<
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: SanityType<
-      any,
-      FieldTypeFields<never, never, FieldNames>
-    >;
-  }
-> = OptionalFromUndefined<{
-  [field in keyof Fields]: InferValue<Fields[field]>;
-}> & {
-  _createdAt: string;
-  _rev: string;
-  _type: string;
-  _updatedAt: string;
-};
 
 interface DocumentType<
   FieldNames extends string,
@@ -34,7 +16,20 @@ interface DocumentType<
     >;
   }
 > extends SanityType<
-    DocumentValue<FieldNames, Fields>,
+    {
+      [field in keyof Fields as undefined extends InferValue<Fields[field]>
+        ? never
+        : field]: InferValue<Fields[field]>;
+    } & {
+      [field in keyof Fields as undefined extends InferValue<Fields[field]>
+        ? field
+        : never]?: InferValue<Fields[field]>;
+    } & {
+      _createdAt: string;
+      _rev: string;
+      _type: string;
+      _updatedAt: string;
+    },
     DocumentDef<string, never, FieldNames, never, never, never>
   > {
   field: <
@@ -82,7 +77,7 @@ const documentInternal = <
     }[FieldNames]
   >
 ): DocumentType<FieldNames, Fields> => ({
-  _value: undefined as unknown as DocumentValue<FieldNames, Fields>,
+  _value: undefined as unknown as InferValue<DocumentType<FieldNames, Fields>>,
   schema: () => ({
     ...def,
     type: "document",

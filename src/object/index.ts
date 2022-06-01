@@ -1,23 +1,10 @@
 import { identity } from "lodash/fp";
 
 import type { InferDefinition, InferValue, SanityType } from "../base";
-import type { OptionalFromUndefined } from "../utils";
 
 interface FieldOptions<Optional extends boolean> {
   optional?: Optional;
 }
-
-type ObjectValue<
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: SanityType<
-      any,
-      FieldTypeFields<never, never, FieldNames>
-    >;
-  }
-> = OptionalFromUndefined<{
-  [field in keyof Fields]: InferValue<Fields[field]>;
-}>;
 
 interface ObjectType<
   FieldNames extends string,
@@ -28,7 +15,15 @@ interface ObjectType<
     >;
   }
 > extends SanityType<
-    ObjectValue<FieldNames, Fields>,
+    {
+      [field in keyof Fields as undefined extends InferValue<Fields[field]>
+        ? never
+        : field]: InferValue<Fields[field]>;
+    } & {
+      [field in keyof Fields as undefined extends InferValue<Fields[field]>
+        ? field
+        : never]?: InferValue<Fields[field]>;
+    },
     ObjectFieldDef<never, never, FieldNames, never, never>
   > {
   field: <
@@ -76,7 +71,7 @@ const objectInternal = <
     }[FieldNames]
   >
 ): ObjectType<FieldNames, Fields> => ({
-  _value: undefined as unknown as ObjectValue<FieldNames, Fields>,
+  _value: undefined as unknown as InferValue<ObjectType<FieldNames, Fields>>,
   schema: () => ({
     ...def,
     type: "object",
