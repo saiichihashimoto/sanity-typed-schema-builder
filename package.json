@@ -23,7 +23,7 @@
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "@jest/globals": "27.5.1",
+    "@jest/globals": "28.1.0",
     "@jest/types": "27.5.1",
     "@stryker-mutator/core": "5.6.1",
     "@stryker-mutator/jest-runner": "5.6.1",
