@@ -1,13 +1,20 @@
-import type { InferDefinition, InferValue, SanityType } from "../types";
+import { z } from "zod";
 
-interface URLType extends SanityType<string, URLFieldDef> {}
+import type { SanityType } from "../types";
+
+interface URLType extends SanityType<URLFieldDef, string> {}
 
 export const url = (
-  def: Omit<InferDefinition<URLType>, "description" | "type"> = {}
-): URLType => ({
-  _value: undefined as unknown as InferValue<URLType>,
-  schema: () => ({
-    ...def,
-    type: "url",
-  }),
-});
+  def: Omit<URLFieldDef, "description" | "type"> = {}
+): URLType => {
+  const zod = z.string().url();
+
+  return {
+    zod,
+    parse: zod.parse.bind(zod),
+    schema: () => ({
+      ...def,
+      type: "url",
+    }),
+  };
+};

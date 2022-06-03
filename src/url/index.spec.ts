@@ -1,28 +1,33 @@
 import { describe, expect, it } from "@jest/globals";
+import { ZodError } from "zod";
 
 import { s } from "..";
 
 describe("url", () => {
-  it("builds a sanity config", () => {
-    const schema: URLFieldDef = s.url().schema();
+  it("builds a sanity config", () =>
+    expect(s.url().schema()).toEqual({
+      type: "url",
+    }));
 
-    expect(schema).toEqual({ type: "url" });
-  });
+  it("passes through schema values", () =>
+    expect(s.url({ hidden: false }).schema()).toHaveProperty("hidden", false));
 
-  it("passes through schema values", () => {
-    const schema: URLFieldDef = s.url({ hidden: false }).schema();
-
-    expect(schema).toHaveProperty("hidden", false);
-  });
-
-  it("infers a string", () => {
+  it("parses into a string", () => {
     const type = s.url();
 
-    const value = "https://example.com/img.jpg";
-    const inferredValue: s.infer<typeof type> = value;
-    const otherValue: string = inferredValue;
+    const value: s.input<typeof type> = "https://example.com/img.jpg";
+    const parsedValue: s.output<typeof type> = type.parse(value);
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    expect(parsedValue).toEqual(value);
+  });
+
+  it("enforces a url", () => {
+    const type = s.url();
+
+    const value = "not a url";
+
+    expect(() => {
+      type.parse(value);
+    }).toThrow(ZodError);
   });
 });

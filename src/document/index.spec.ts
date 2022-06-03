@@ -2,17 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 
 import { s } from "..";
 
-import type { DocumentDef } from "@sanity/base";
-
-type MyDocumentDef = DocumentDef<string, never, string, never, never, never>;
-
-interface DocumentValue {
-  _createdAt: string;
-  _rev: string;
-  _type: string;
-  _updatedAt: string;
-}
-
 const mockRule = () => {
   const rule = {
     custom: () => rule,
@@ -40,33 +29,36 @@ const mockRule = () => {
 };
 
 describe("document", () => {
-  it("builds a sanity config", () => {
-    const schema: MyDocumentDef = s.document({ name: "foo" }).schema();
+  it("builds a sanity config", () =>
+    expect(s.document({ name: "foo" }).schema()).toEqual({
+      name: "foo",
+      type: "document",
+      fields: [],
+    }));
 
-    expect(schema).toEqual({ name: "foo", type: "document", fields: [] });
-  });
+  it("passes through schema values", () =>
+    expect(s.document({ name: "foo", title: "Foo" }).schema()).toHaveProperty(
+      "title",
+      "Foo"
+    ));
 
-  it("passes through schema values", () => {
-    const schema: MyDocumentDef = s
-      .document({ name: "foo", title: "Foo" })
-      .schema();
-
-    expect(schema).toHaveProperty("title", "Foo");
-  });
-
-  it("infers a document", () => {
+  it("parses into an document", () => {
     const type = s.document({ name: "foo" });
-    const value: DocumentValue = {
-      _createdAt: "somedatestring",
+
+    const value: s.input<typeof type> = {
+      _createdAt: "2022-06-03T03:24:55.395Z",
+      _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
-      _updatedAt: "somedatestring",
+      _updatedAt: "2022-06-03T03:24:55.395Z",
     };
-    const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: DocumentValue = { ...inferredValue };
+    const parsedValue: s.output<typeof type> = type.parse(value);
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    expect(parsedValue).toEqual({
+      ...value,
+      _createdAt: new Date("2022-06-03T03:24:55.395Z"),
+      _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
+    });
   });
 
   it("adds fields", () => {
@@ -74,7 +66,7 @@ describe("document", () => {
       name: "foo",
       type: s.boolean(),
     });
-    const schema: MyDocumentDef = type.schema();
+    const schema = type.schema();
 
     expect(schema).toHaveProperty("fields", [
       {
@@ -93,18 +85,21 @@ describe("document", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).toEqual(required);
 
-    const value: DocumentValue & { foo: boolean } = {
-      _createdAt: "somedatestring",
+    const value: s.input<typeof type> = {
+      _createdAt: "2022-06-03T03:24:55.395Z",
+      _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
-      _updatedAt: "somedatestring",
+      _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
     };
-    const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: DocumentValue & { foo: boolean } = { ...inferredValue };
+    const parsedValue: s.output<typeof type> = type.parse(value);
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    expect(parsedValue).toEqual({
+      ...value,
+      _createdAt: new Date("2022-06-03T03:24:55.395Z"),
+      _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
+    });
   });
 
   it("allows optional fields", () => {
@@ -113,7 +108,8 @@ describe("document", () => {
       optional: true,
       type: s.boolean(),
     });
-    const schema: MyDocumentDef = type.schema();
+
+    const schema = type.schema();
 
     expect(schema).toHaveProperty("fields", [
       {
@@ -131,16 +127,19 @@ describe("document", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).not.toEqual(required);
 
-    const value: DocumentValue & { foo?: boolean } = {
-      _createdAt: "somedatestring",
+    const value: s.input<typeof type> = {
+      _createdAt: "2022-06-03T03:24:55.395Z",
+      _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
-      _updatedAt: "somedatestring",
+      _updatedAt: "2022-06-03T03:24:55.395Z",
     };
-    const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: DocumentValue & { foo?: boolean } = { ...inferredValue };
+    const parsedValue: s.output<typeof type> = type.parse(value);
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    expect(parsedValue).toEqual({
+      ...value,
+      _createdAt: new Date("2022-06-03T03:24:55.395Z"),
+      _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
+    });
   });
 });

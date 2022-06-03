@@ -1,116 +1,153 @@
-import { identity } from "lodash/fp";
+import { fromPairs } from "lodash/fp";
+import { z } from "zod";
 
-import type { InferDefinition, InferValue, SanityType } from "../types";
+import { fieldsSchema } from "../fields";
+
+import type {
+  FieldOptions,
+  InferName,
+  InferOptional,
+  InferZod,
+} from "../fields";
+import type {
+  InferInput,
+  InferOutput,
+  SanityType,
+  UndefinedAsOptional,
+} from "../types";
 import type { DocumentDef } from "@sanity/base";
-
-interface FieldOptions<
-  FieldNames extends string,
-  Name extends string,
-  Value,
-  Definition extends FieldTypeFields<never, never, FieldNames | Name>,
-  Optional extends boolean
-> {
-  description?: string;
-  name: Name;
-  optional?: Optional;
-  type: SanityType<Value, Definition>;
-}
+import type { SanityDocument } from "@sanity/types";
+import type { ZodType } from "zod";
 
 interface DocumentType<
+  DocumentName extends string,
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: SanityType<
-      any,
-      FieldTypeFields<never, never, FieldNames>
-    >;
+    [field in FieldNames]: FieldOptions<field, any, any, any>;
   }
 > extends SanityType<
-    {
-      [field in keyof Fields as undefined extends InferValue<Fields[field]>
-        ? never
-        : field]: InferValue<Fields[field]>;
-    } & {
-      [field in keyof Fields as undefined extends InferValue<Fields[field]>
-        ? field
-        : never]?: InferValue<Fields[field]>;
-    } & {
-      _createdAt: string;
-      _rev: string;
-      _type: string;
-      _updatedAt: string;
-    },
-    DocumentDef<string, never, FieldNames, never, never, never>
+    DocumentDef<DocumentName, never, FieldNames, never, never, never>,
+    UndefinedAsOptional<
+      {
+        [field in keyof Fields]: InferOptional<Fields[field]> extends true
+          ? InferInput<Fields[field]["type"]> | undefined
+          : InferInput<Fields[field]["type"]>;
+      } & Pick<SanityDocument, "_createdAt" | "_id" | "_rev" | "_updatedAt"> & {
+          _type: DocumentName;
+        }
+    >,
+    UndefinedAsOptional<
+      {
+        [field in keyof Fields]: InferOptional<Fields[field]> extends true
+          ? InferOutput<Fields[field]["type"]> | undefined
+          : InferOutput<Fields[field]["type"]>;
+      } & Pick<SanityDocument, "_id" | "_rev"> & {
+          _createdAt: Date;
+          _type: DocumentName;
+          _updatedAt: Date;
+        }
+    >
   > {
   field: <
     Name extends string,
-    Value,
-    Definition extends FieldTypeFields<never, never, FieldNames | Name>,
+    Input,
+    Output,
+    NewFieldNames extends FieldNames | Name,
     Optional extends boolean = false
   >(
-    options: FieldOptions<FieldNames, Name, Value, Definition, Optional>
+    options: FieldOptions<Name, Input, Output, Optional>
   ) => DocumentType<
-    FieldNames | Name,
+    DocumentName,
+    NewFieldNames,
+    // @ts-expect-error -- Not sure how to solve this
     Fields & {
-      [name in Name]: SanityType<
-        Optional extends false ? Value : Value | undefined,
-        Definition
-      >;
+      [field in Name]: FieldOptions<field, Input, Output, Optional>;
     }
   >;
 }
 
 const documentInternal = <
+  DocumentName extends string,
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: SanityType<
-      any,
-      FieldTypeFields<never, never, FieldNames>
-    >;
+    [field in FieldNames]: FieldOptions<field, any, any, any>;
   }
 >(
-  def: Omit<
-    InferDefinition<DocumentType<never, Record<never, never>>>,
-    "description" | "fields" | "type"
+  {
+    name,
+    ...def
+  }: Omit<
+    DocumentDef<DocumentName, never, FieldNames, never, never, never>,
+    "description" | "fields" | "preview" | "type"
   >,
-  fields: Array<
-    {
-      [Name in FieldNames]: FieldOptions<
-        FieldNames,
-        Name,
-        InferValue<Fields[Name]>,
-        InferDefinition<Fields[Name]>,
-        InferValue<Fields[Name]> extends undefined ? true : false
-      >;
-    }[FieldNames]
-  >
-): DocumentType<FieldNames, Fields> => ({
-  _value: undefined as unknown as InferValue<DocumentType<FieldNames, Fields>>,
-  schema: () => ({
-    ...def,
-    type: "document",
-    // @ts-expect-error -- FIXME Fix this now
-    fields: fields.map(({ type, optional = false, ...props }) => {
-      const schema = type.schema();
+  fields: Array<Fields[FieldNames]>
+): DocumentType<DocumentName, FieldNames, Fields> => {
+  type Tuple = {
+    [field in FieldNames]: [
+      InferName<Fields[field]>,
+      InferOptional<Fields[field]> extends true
+        ? z.ZodOptional<InferZod<Fields[field]>>
+        : InferZod<Fields[field]>
+    ];
+  }[FieldNames];
 
-      return {
-        ...schema,
-        ...props,
-        validation: optional
-          ? schema.validation
-          : (rule: Parameters<NonNullable<typeof schema.validation>>[0]) =>
-              // @ts-expect-error -- FIXME Fix this now
-              (schema.validation ?? identity)(rule.required()),
-      };
+  const tuples = fields.map(
+    ({ name, optional, type }) =>
+      [name, !optional ? type.zod : type.zod.optional()] as const
+  ) as Tuple[];
+
+  type ZodObject = {
+    [field in FieldNames as InferName<Fields[field]>]: InferOptional<
+      Fields[field]
+    > extends true
+      ? z.ZodOptional<InferZod<Fields[field]>>
+      : InferZod<Fields[field]>;
+  };
+
+  const zod = z.object(fromPairs(tuples) as ZodObject).extend({
+    _createdAt: z.string().transform((v) => new Date(v)),
+    _id: z.string(),
+    _rev: z.string(),
+    _type: z.literal(name),
+    _updatedAt: z.string().transform((v) => new Date(v)),
+  }) as unknown as ZodType<
+    InferOutput<DocumentType<DocumentName, FieldNames, Fields>>,
+    any,
+    InferInput<DocumentType<DocumentName, FieldNames, Fields>>
+  >;
+
+  return {
+    zod,
+    parse: zod.parse.bind(zod),
+    schema: () => ({
+      ...def,
+      name,
+      type: "document",
+      fields: fieldsSchema(fields),
     }),
-  }),
-  field: (options) =>
-    // @ts-expect-error -- FIXME Technically, FieldNames and Name can overlap, which upsets this type system.
-    documentInternal(def, [...fields, options]),
-});
+    field: <
+      Name extends string,
+      Input,
+      Output,
+      NewFieldNames extends FieldNames | Name,
+      Optional extends boolean = false
+    >(
+      options: FieldOptions<Name, Input, Output, Optional>
+    ) =>
+      documentInternal<
+        DocumentName,
+        NewFieldNames,
+        // @ts-expect-error -- Not sure how to solve this
+        Fields & {
+          [field in Name]: FieldOptions<field, Input, Output, Optional>;
+        }
+      >({ name, ...def }, [...fields, options]),
+  };
+};
 
-export const document = (
+export const document = <DocumentName extends string>(
   def: Omit<
-    InferDefinition<DocumentType<never, Record<never, never>>>,
-    "fields" | "type"
+    DocumentDef<DocumentName, never, never, never, never, never>,
+    "description" | "fields" | "preview" | "type"
   >
-): DocumentType<never, Record<never, never>> => documentInternal(def, []);
+) => documentInternal<DocumentName, never, Record<never, never>>(def, []);
