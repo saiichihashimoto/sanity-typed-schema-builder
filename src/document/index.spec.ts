@@ -1,6 +1,10 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { s } from "..";
+import { boolean } from "../boolean";
+
+import { document } from ".";
+
+import type { InferInput, InferOutput } from "../types";
 
 const mockRule = () => {
   const rule = {
@@ -30,29 +34,29 @@ const mockRule = () => {
 
 describe("document", () => {
   it("builds a sanity config", () =>
-    expect(s.document({ name: "foo" }).schema()).toEqual({
+    expect(document({ name: "foo" }).schema()).toEqual({
       name: "foo",
       type: "document",
       fields: [],
     }));
 
   it("passes through schema values", () =>
-    expect(s.document({ name: "foo", title: "Foo" }).schema()).toHaveProperty(
+    expect(document({ name: "foo", title: "Foo" }).schema()).toHaveProperty(
       "title",
       "Foo"
     ));
 
   it("parses into an document", () => {
-    const type = s.document({ name: "foo" });
+    const type = document({ name: "foo" });
 
-    const value: s.input<typeof type> = {
+    const value: InferInput<typeof type> = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
     };
-    const parsedValue: s.output<typeof type> = type.parse(value);
+    const parsedValue: InferOutput<typeof type> = type.parse(value);
 
     expect(parsedValue).toEqual({
       ...value,
@@ -62,9 +66,9 @@ describe("document", () => {
   });
 
   it("adds fields", () => {
-    const type = s.document({ name: "foo" }).field({
+    const type = document({ name: "foo" }).field({
       name: "foo",
-      type: s.boolean(),
+      type: boolean(),
     });
     const schema = type.schema();
 
@@ -85,7 +89,7 @@ describe("document", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).toEqual(required);
 
-    const value: s.input<typeof type> = {
+    const value: InferInput<typeof type> = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
@@ -93,7 +97,7 @@ describe("document", () => {
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
     };
-    const parsedValue: s.output<typeof type> = type.parse(value);
+    const parsedValue: InferOutput<typeof type> = type.parse(value);
 
     expect(parsedValue).toEqual({
       ...value,
@@ -103,10 +107,10 @@ describe("document", () => {
   });
 
   it("allows optional fields", () => {
-    const type = s.document({ name: "foo" }).field({
+    const type = document({ name: "foo" }).field({
       name: "foo",
       optional: true,
-      type: s.boolean(),
+      type: boolean(),
     });
 
     const schema = type.schema();
@@ -127,14 +131,14 @@ describe("document", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).not.toEqual(required);
 
-    const value: s.input<typeof type> = {
+    const value: InferInput<typeof type> = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
     };
-    const parsedValue: s.output<typeof type> = type.parse(value);
+    const parsedValue: InferOutput<typeof type> = type.parse(value);
 
     expect(parsedValue).toEqual({
       ...value,

@@ -1,28 +1,30 @@
 import { describe, expect, it } from "@jest/globals";
 import { ZodError } from "zod";
 
-import { s } from "..";
+import { url } from ".";
+
+import type { InferInput, InferOutput } from "../types";
 
 describe("url", () => {
   it("builds a sanity config", () =>
-    expect(s.url().schema()).toEqual({
+    expect(url().schema()).toEqual({
       type: "url",
     }));
 
   it("passes through schema values", () =>
-    expect(s.url({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(url({ hidden: false }).schema()).toHaveProperty("hidden", false));
 
   it("parses into a string", () => {
-    const type = s.url();
+    const type = url();
 
-    const value: s.input<typeof type> = "https://example.com/img.jpg";
-    const parsedValue: s.output<typeof type> = type.parse(value);
+    const value: InferInput<typeof type> = "https://example.com/img.jpg";
+    const parsedValue: InferOutput<typeof type> = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
 
   it("enforces a url", () => {
-    const type = s.url();
+    const type = url();
 
     const value = "not a url";
 
