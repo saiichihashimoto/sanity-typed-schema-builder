@@ -1,14 +1,8 @@
-import { fromPairs } from "lodash/fp";
 import { z } from "zod";
 
-import { fieldsSchema } from "../fields";
+import { fieldsSchema, fieldsZod } from "../fields";
 
-import type {
-  FieldOptions,
-  InferName,
-  InferOptional,
-  InferZod,
-} from "../fields";
+import type { FieldOptions, InferOptional } from "../fields";
 import type {
   InferInput,
   InferOutput,
@@ -82,35 +76,16 @@ const documentInternal = <
   >,
   fields: Array<Fields[FieldNames]>
 ): DocumentType<DocumentName, FieldNames, Fields> => {
-  type Tuple = {
-    [field in FieldNames]: [
-      InferName<Fields[field]>,
-      InferOptional<Fields[field]> extends true
-        ? z.ZodOptional<InferZod<Fields[field]>>
-        : InferZod<Fields[field]>
-    ];
-  }[FieldNames];
-
-  const tuples = fields.map(
-    ({ name, optional, type }) =>
-      [name, !optional ? type.zod : type.zod.optional()] as const
-  ) as Tuple[];
-
-  type ZodObject = {
-    [field in FieldNames as InferName<Fields[field]>]: InferOptional<
-      Fields[field]
-    > extends true
-      ? z.ZodOptional<InferZod<Fields[field]>>
-      : InferZod<Fields[field]>;
-  };
-
-  const zod = z.object(fromPairs(tuples) as ZodObject).extend({
-    _createdAt: z.string().transform((v) => new Date(v)),
-    _id: z.string(),
-    _rev: z.string(),
-    _type: z.literal(name),
-    _updatedAt: z.string().transform((v) => new Date(v)),
-  }) as unknown as ZodType<
+  const zod = z.intersection(
+    fieldsZod(fields),
+    z.object({
+      _createdAt: z.string().transform((v) => new Date(v)),
+      _id: z.string(),
+      _rev: z.string(),
+      _type: z.literal(name),
+      _updatedAt: z.string().transform((v) => new Date(v)),
+    })
+  ) as unknown as ZodType<
     InferOutput<DocumentType<DocumentName, FieldNames, Fields>>,
     any,
     InferInput<DocumentType<DocumentName, FieldNames, Fields>>

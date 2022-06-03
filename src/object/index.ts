@@ -1,21 +1,12 @@
-import { fromPairs } from "lodash/fp";
-import { z } from "zod";
+import { fieldsSchema, fieldsZod } from "../fields";
 
-import { fieldsSchema } from "../fields";
-
-import type {
-  FieldOptions,
-  InferName,
-  InferOptional,
-  InferZod,
-} from "../fields";
+import type { FieldOptions, InferOptional } from "../fields";
 import type {
   InferInput,
   InferOutput,
   SanityType,
   UndefinedAsOptional,
 } from "../types";
-import type { ZodType } from "zod";
 
 interface ObjectType<
   FieldNames extends string,
@@ -64,33 +55,7 @@ const objectInternal = <
   >,
   fields: Array<Fields[FieldNames]>
 ): ObjectType<FieldNames, Fields> => {
-  type Tuple = {
-    [field in FieldNames]: [
-      InferName<Fields[field]>,
-      InferOptional<Fields[field]> extends true
-        ? z.ZodOptional<InferZod<Fields[field]>>
-        : InferZod<Fields[field]>
-    ];
-  }[FieldNames];
-
-  const tuples = fields.map(
-    ({ name, optional, type }) =>
-      [name, !optional ? type.zod : type.zod.optional()] as const
-  ) as Tuple[];
-
-  type ZodObject = {
-    [field in FieldNames as InferName<Fields[field]>]: InferOptional<
-      Fields[field]
-    > extends true
-      ? z.ZodOptional<InferZod<Fields[field]>>
-      : InferZod<Fields[field]>;
-  };
-
-  const zod = z.object(fromPairs(tuples) as ZodObject) as unknown as ZodType<
-    InferOutput<ObjectType<FieldNames, Fields>>,
-    any,
-    InferInput<ObjectType<FieldNames, Fields>>
-  >;
+  const zod = fieldsZod(fields);
 
   return {
     zod,
