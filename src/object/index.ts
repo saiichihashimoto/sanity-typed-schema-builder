@@ -1,54 +1,53 @@
-import { identity } from "lodash/fp";
+import { fromPairs } from "lodash/fp";
+import { z } from "zod";
 
-import type { InferDefinition, InferValue, SanityType } from "../types";
+import { fieldsSchema } from "../fields";
 
-interface FieldOptions<
-  FieldNames extends string,
-  Name extends string,
-  Value,
-  Definition extends FieldTypeFields<never, never, FieldNames | Name>,
-  Optional extends boolean
-> {
-  description?: string;
-  name: Name;
-  optional?: Optional;
-  type: SanityType<Value, Definition>;
-}
+import type {
+  FieldOptions,
+  InferName,
+  InferOptional,
+  InferZod,
+} from "../fields";
+import type {
+  InferInput,
+  InferOutput,
+  SanityType,
+  UndefinedAsOptional,
+} from "../types";
+import type { ZodType } from "zod";
 
 interface ObjectType<
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: SanityType<
-      any,
-      FieldTypeFields<never, never, FieldNames>
-    >;
+    [field in FieldNames]: FieldOptions<field, any, any, any>;
   }
 > extends SanityType<
-    {
-      [field in keyof Fields as undefined extends InferValue<Fields[field]>
-        ? never
-        : field]: InferValue<Fields[field]>;
-    } & {
-      [field in keyof Fields as undefined extends InferValue<Fields[field]>
-        ? field
-        : never]?: InferValue<Fields[field]>;
-    },
-    ObjectFieldDef<never, never, FieldNames, never, never>
+    ObjectFieldDef<never, never, FieldNames, never, never>,
+    UndefinedAsOptional<{
+      [field in keyof Fields]: InferOptional<Fields[field]> extends true
+        ? InferInput<Fields[field]["type"]> | undefined
+        : InferInput<Fields[field]["type"]>;
+    }>,
+    UndefinedAsOptional<{
+      [field in keyof Fields]: InferOptional<Fields[field]> extends true
+        ? InferOutput<Fields[field]["type"]> | undefined
+        : InferOutput<Fields[field]["type"]>;
+    }>
   > {
   field: <
     Name extends string,
-    Value,
-    Definition extends FieldTypeFields<never, never, FieldNames | Name>,
+    Input,
+    Output,
+    NewFieldNames extends FieldNames | Name,
     Optional extends boolean = false
   >(
-    options: FieldOptions<FieldNames, Name, Value, Definition, Optional>
+    options: FieldOptions<Name, Input, Output, Optional>
   ) => ObjectType<
-    FieldNames | Name,
+    NewFieldNames,
+    // @ts-expect-error -- Not sure how to solve this
     Fields & {
-      [name in Name]: SanityType<
-        Optional extends false ? Value : Value | undefined,
-        Definition
-      >;
+      [field in Name]: FieldOptions<field, Input, Output, Optional>;
     }
   >;
 }
@@ -56,55 +55,73 @@ interface ObjectType<
 const objectInternal = <
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: SanityType<
-      any,
-      FieldTypeFields<never, never, FieldNames>
-    >;
+    [field in FieldNames]: FieldOptions<field, any, any, any>;
   }
 >(
   def: Omit<
-    InferDefinition<ObjectType<never, Record<never, never>>>,
-    "description" | "fields" | "type"
+    ObjectFieldDef<never, never, string, never, never>,
+    "description" | "fields" | "preview" | "type"
   >,
-  fields: Array<
-    {
-      [Name in FieldNames]: FieldOptions<
-        FieldNames,
-        Name,
-        InferValue<Fields[Name]>,
-        InferDefinition<Fields[Name]>,
-        InferValue<Fields[Name]> extends undefined ? true : false
-      >;
-    }[FieldNames]
-  >
-): ObjectType<FieldNames, Fields> => ({
-  _value: undefined as unknown as InferValue<ObjectType<FieldNames, Fields>>,
-  schema: () => ({
-    ...def,
-    type: "object",
-    // @ts-expect-error -- FIXME Fix this now
-    fields: fields.map(({ type, optional = false, ...props }) => {
-      const schema = type.schema();
+  fields: Array<Fields[FieldNames]>
+): ObjectType<FieldNames, Fields> => {
+  type Tuple = {
+    [field in FieldNames]: [
+      InferName<Fields[field]>,
+      InferOptional<Fields[field]> extends true
+        ? z.ZodOptional<InferZod<Fields[field]>>
+        : InferZod<Fields[field]>
+    ];
+  }[FieldNames];
 
-      return {
-        ...schema,
-        ...props,
-        validation: optional
-          ? schema.validation
-          : (rule: Parameters<NonNullable<typeof schema.validation>>[0]) =>
-              // @ts-expect-error -- FIXME Fix this now
-              (schema.validation ?? identity)(rule.required()),
-      };
+  const tuples = fields.map(
+    ({ name, optional, type }) =>
+      [name, !optional ? type.zod : type.zod.optional()] as const
+  ) as Tuple[];
+
+  type ZodObject = {
+    [field in FieldNames as InferName<Fields[field]>]: InferOptional<
+      Fields[field]
+    > extends true
+      ? z.ZodOptional<InferZod<Fields[field]>>
+      : InferZod<Fields[field]>;
+  };
+
+  const zod = z.object(fromPairs(tuples) as ZodObject) as unknown as ZodType<
+    InferOutput<ObjectType<FieldNames, Fields>>,
+    any,
+    InferInput<ObjectType<FieldNames, Fields>>
+  >;
+
+  return {
+    zod,
+    parse: zod.parse.bind(zod),
+    schema: () => ({
+      ...def,
+      type: "object",
+      fields: fieldsSchema(fields),
     }),
-  }),
-  field: (options) =>
-    // @ts-expect-error -- FIXME Technically, FieldNames and Name can overlap, which upsets this type system.
-    objectInternal(def, [...fields, options]),
-});
+    field: <
+      Name extends string,
+      Input,
+      Output,
+      NewFieldNames extends FieldNames | Name,
+      Optional extends boolean = false
+    >(
+      options: FieldOptions<Name, Input, Output, Optional>
+    ) =>
+      objectInternal<
+        NewFieldNames,
+        // @ts-expect-error -- Not sure how to solve this
+        Fields & {
+          [field in Name]: FieldOptions<field, Input, Output, Optional>;
+        }
+      >(def, [...fields, options]),
+  };
+};
 
 export const object = (
   def: Omit<
-    InferDefinition<ObjectType<never, Record<never, never>>>,
-    "fields" | "type"
+    ObjectFieldDef<never, never, never, never, never>,
+    "description" | "fields" | "preview" | "type"
   > = {}
-): ObjectType<never, Record<never, never>> => objectInternal(def, []);
+) => objectInternal<never, Record<never, never>>(def, []);

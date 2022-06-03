@@ -3,4 +3,8 @@ export { document } from "./document";
 export { object } from "./object";
 export { url } from "./url";
 
-export type { InferValue as infer } from "./types";
+export type {
+  InferInput as infer,
+  InferInput as input,
+  InferOutput as output,
+} from "./types";

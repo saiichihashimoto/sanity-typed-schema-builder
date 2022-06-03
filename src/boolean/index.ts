@@ -1,13 +1,20 @@
-import type { InferDefinition, InferValue, SanityType } from "../types";
+import { z } from "zod";
 
-interface BooleanType extends SanityType<boolean, BooleanFieldDef> {}
+import type { SanityType } from "../types";
+
+interface BooleanType extends SanityType<BooleanFieldDef, boolean> {}
 
 export const boolean = (
-  def: Omit<InferDefinition<BooleanType>, "description" | "type"> = {}
-): BooleanType => ({
-  _value: undefined as unknown as InferValue<BooleanType>,
-  schema: () => ({
-    ...def,
-    type: "boolean",
-  }),
-});
+  def: Omit<BooleanFieldDef, "description" | "type"> = {}
+): BooleanType => {
+  const zod = z.boolean();
+
+  return {
+    zod,
+    parse: zod.parse.bind(zod),
+    schema: () => ({
+      ...def,
+      type: "boolean",
+    }),
+  };
+};

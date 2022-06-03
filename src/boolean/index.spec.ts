@@ -3,26 +3,23 @@ import { describe, expect, it } from "@jest/globals";
 import { s } from "..";
 
 describe("boolean", () => {
-  it("builds a sanity config", () => {
-    const schema: BooleanFieldDef = s.boolean().schema();
+  it("builds a sanity config", () =>
+    expect(s.boolean().schema()).toEqual({
+      type: "boolean",
+    }));
 
-    expect(schema).toEqual({ type: "boolean" });
-  });
+  it("passes through schema values", () =>
+    expect(s.boolean({ hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
-  it("passes through schema values", () => {
-    const schema: BooleanFieldDef = s.boolean({ hidden: false }).schema();
-
-    expect(schema).toHaveProperty("hidden", false);
-  });
-
-  it("infers a boolean", () => {
+  it("parses into a boolean", () => {
     const type = s.boolean();
 
-    const value = true;
-    const inferredValue: s.infer<typeof type> = value;
-    const otherValue: boolean = inferredValue;
+    const value: s.input<typeof type> = true;
+    const parsedValue: s.output<typeof type> = type.parse(value);
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    expect(parsedValue).toEqual(value);
   });
 });

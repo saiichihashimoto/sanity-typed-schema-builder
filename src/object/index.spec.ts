@@ -2,8 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 
 import { s } from "..";
 
-type MyObjectFieldDef = ObjectFieldDef<never, never, string, never, never>;
-
 const mockRule = () => {
   const rule = {
     custom: () => rule,
@@ -31,26 +29,25 @@ const mockRule = () => {
 };
 
 describe("object", () => {
-  it("builds a sanity config", () => {
-    const schema: MyObjectFieldDef = s.object().schema();
+  it("builds a sanity config", () =>
+    expect(s.object().schema()).toEqual({
+      type: "object",
+      fields: [],
+    }));
 
-    expect(schema).toEqual({ type: "object", fields: [] });
-  });
+  it("passes through schema values", () =>
+    expect(s.object({ hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
-  it("passes through schema values", () => {
-    const schema: MyObjectFieldDef = s.object({ hidden: false }).schema();
-
-    expect(schema).toHaveProperty("hidden", false);
-  });
-
-  it("infers an object", () => {
+  it("parses into an object", () => {
     const type = s.object();
-    const value: Record<never, never> = {};
-    const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: Record<never, never> = { ...inferredValue };
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    const value: s.input<typeof type> = {};
+    const parsedValue: s.output<typeof type> = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
   });
 
   it("adds fields", () => {
@@ -58,7 +55,8 @@ describe("object", () => {
       name: "foo",
       type: s.boolean(),
     });
-    const schema: MyObjectFieldDef = type.schema();
+
+    const schema = type.schema();
 
     expect(schema).toHaveProperty("fields", [
       {
@@ -77,12 +75,10 @@ describe("object", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).toEqual(required);
 
-    const value: { foo: boolean } = { foo: true };
-    const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: { foo: boolean } = { ...inferredValue };
+    const value: s.input<typeof type> = { foo: true };
+    const parsedValue: s.output<typeof type> = type.parse(value);
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    expect(parsedValue).toEqual(value);
   });
 
   it("allows optional fields", () => {
@@ -91,7 +87,8 @@ describe("object", () => {
       optional: true,
       type: s.boolean(),
     });
-    const schema: MyObjectFieldDef = type.schema();
+
+    const schema = type.schema();
 
     expect(schema).toHaveProperty("fields", [
       {
@@ -109,11 +106,9 @@ describe("object", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).not.toEqual(required);
 
-    const value: { foo?: boolean } = {};
-    const inferredValue: s.infer<typeof type> = { ...value };
-    const otherValue: { foo?: boolean } = { ...inferredValue };
+    const value: s.input<typeof type> = {};
+    const parsedValue: s.output<typeof type> = type.parse(value);
 
-    expect(inferredValue).toEqual(value);
-    expect(inferredValue).toEqual(otherValue);
+    expect(parsedValue).toEqual(value);
   });
 });
