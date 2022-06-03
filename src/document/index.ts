@@ -13,7 +13,7 @@ import type { DocumentDef } from "@sanity/base";
 import type { SanityDocument } from "@sanity/types";
 import type { ZodType } from "zod";
 
-interface DocumentType<
+export interface DocumentType<
   DocumentName extends string,
   FieldNames extends string,
   Fields extends {
@@ -58,6 +58,7 @@ interface DocumentType<
       [field in Name]: FieldOptions<field, Input, Output, Optional>;
     }
   >;
+  name: DocumentName;
 }
 
 const documentInternal = <
@@ -92,6 +93,7 @@ const documentInternal = <
   >;
 
   return {
+    name,
     zod,
     parse: zod.parse.bind(zod),
     schema: () => ({
