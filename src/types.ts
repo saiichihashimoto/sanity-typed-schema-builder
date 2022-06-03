@@ -10,11 +10,19 @@ export interface SanityType<
   zod: ZodType<Output, any, Input>;
 }
 
+export type InferDefinition<T extends SanityType<any, any, any>> =
+  T extends SanityType<infer Definition, any, any> ? Definition : never;
+
 export type InferInput<T extends SanityType<any, any, any>> =
   T extends SanityType<any, infer Input, any> ? Input : never;
 
 export type InferOutput<T extends SanityType<any, any, any>> =
   T extends SanityType<any, any, infer Output> ? Output : never;
+
+export type InferZod<T extends SanityType<any, any, any>> =
+  T extends SanityType<any, infer Input, infer Output>
+    ? ZodType<Output, any, Input>
+    : never;
 
 type Resolve<T> = T extends (...args: any[]) => any
   ? T

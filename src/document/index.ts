@@ -11,7 +11,6 @@ import type {
 } from "../types";
 import type { DocumentDef } from "@sanity/base";
 import type { SanityDocument } from "@sanity/types";
-import type { ZodType } from "zod";
 
 export interface DocumentType<
   DocumentName extends string,
@@ -86,7 +85,7 @@ const documentInternal = <
       _type: z.literal(name),
       _updatedAt: z.string().transform((v) => new Date(v)),
     })
-  ) as unknown as ZodType<
+  ) as unknown as z.ZodType<
     InferOutput<DocumentType<DocumentName, FieldNames, Fields>>,
     any,
     InferInput<DocumentType<DocumentName, FieldNames, Fields>>
