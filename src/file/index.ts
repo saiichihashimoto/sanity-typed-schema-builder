@@ -1,23 +1,36 @@
+import { z } from "zod";
+
 import { fieldsSchema, fieldsZod } from "../fields";
 
 import type { FieldOptions, InferOptional, InferType } from "../fields";
 import type { InferZod, SanityType } from "../types";
-import type { z } from "zod";
 
-interface ObjectType<
+interface FileType<
   FieldNames extends string,
   Fields extends {
     [field in FieldNames]: FieldOptions<field, any, any>;
   }
 > extends SanityType<
-    ObjectFieldDef<never, never, FieldNames, never, never>,
-    z.ZodObject<
-      {
-        [field in FieldNames]: InferOptional<Fields[field]> extends true
-          ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
-          : InferZod<InferType<Fields[field]>>;
-      },
-      "strip"
+    FileFieldDef<never, never, FieldNames>,
+    z.ZodIntersection<
+      z.ZodObject<
+        {
+          [field in FieldNames]: InferOptional<Fields[field]> extends true
+            ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
+            : InferZod<InferType<Fields[field]>>;
+        },
+        "strip"
+      >,
+      z.ZodObject<
+        {
+          _type: z.ZodLiteral<"file">;
+          asset: z.ZodObject<{
+            _ref: z.ZodString;
+            _type: z.ZodLiteral<"reference">;
+          }>;
+        },
+        "strip"
+      >
     >
   > {
   field: <
@@ -27,7 +40,7 @@ interface ObjectType<
     Optional extends boolean = false
   >(
     options: FieldOptions<Name, Zod, Optional>
-  ) => ObjectType<
+  ) => FileType<
     NewFieldNames,
     // @ts-expect-error -- Not sure how to solve this
     Fields & {
@@ -36,27 +49,36 @@ interface ObjectType<
   >;
 }
 
-const objectInternal = <
+const fileInternal = <
   FieldNames extends string,
   Fields extends {
     [field in FieldNames]: FieldOptions<field, any, any>;
   }
 >(
   def: Omit<
-    ObjectFieldDef<never, never, FieldNames, never, never>,
+    FileFieldDef<never, never, FieldNames>,
     "description" | "fields" | "preview" | "type"
   >,
   fields: Array<Fields[FieldNames]>
-): ObjectType<FieldNames, Fields> => {
-  const zod = fieldsZod(fields);
+): FileType<FieldNames, Fields> => {
+  const zod = z.intersection(
+    fieldsZod(fields),
+    z.object({
+      _type: z.literal("file"),
+      asset: z.object({
+        _ref: z.string(),
+        _type: z.literal("reference"),
+      }),
+    })
+  );
 
   return {
     zod,
     parse: zod.parse.bind(zod),
     schema: () => ({
       ...def,
-      type: "object",
-      fields: fieldsSchema(fields),
+      type: "file",
+      fields: !fields.length ? undefined : fieldsSchema(fields),
     }),
     field: <
       Name extends string,
@@ -66,7 +88,7 @@ const objectInternal = <
     >(
       options: FieldOptions<Name, Zod, Optional>
     ) =>
-      objectInternal<
+      fileInternal<
         NewFieldNames,
         // @ts-expect-error -- Not sure how to solve this
         Fields & {
@@ -76,9 +98,9 @@ const objectInternal = <
   };
 };
 
-export const object = (
+export const file = (
   def: Omit<
-    ObjectFieldDef<never, never, never, never, never>,
+    FileFieldDef<never, never, never>,
     "description" | "fields" | "preview" | "type"
   > = {}
-) => objectInternal<never, Record<never, never>>(def, []);
+) => fileInternal<never, Record<never, never>>(def, []);

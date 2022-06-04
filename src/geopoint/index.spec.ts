@@ -5,7 +5,7 @@ import { geopoint } from ".";
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
 
-interface Geopoint {
+interface SanityGeopoint {
   _type: "geopoint";
   alt: number;
   lat: number;
@@ -27,7 +27,7 @@ describe("geopoint", () => {
   it("parses into a geopoint", () => {
     const type = geopoint();
 
-    const value: ValidateShape<InferInput<typeof type>, Geopoint> = {
+    const value: ValidateShape<InferInput<typeof type>, SanityGeopoint> = {
       _type: "geopoint",
       lat: 58.63169011423141,
       lng: 9.089101352587932,
@@ -35,7 +35,7 @@ describe("geopoint", () => {
     };
     const parsedValue: ValidateShape<
       InferOutput<typeof type>,
-      Geopoint
+      SanityGeopoint
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
