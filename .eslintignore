@@ -1,5 +1,4 @@
 .next/**
-.stryker-tmp/**
 .vercel/**
 dist/**
 node_modules/**

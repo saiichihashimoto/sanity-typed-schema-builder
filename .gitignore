@@ -1,11 +1,9 @@
-# stryker temp files
 **/.DS_Store
 *.tsbuildinfo
 .env.*.local
 .env.local
 .idea
 .next
-.stryker-tmp
 .vercel
 Brewfile.lock.json
 dist
