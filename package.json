@@ -17,9 +17,10 @@
     "prepare": "is-ci || run-p --continue-on-error prepare:*",
     "prepare:brew": "brew bundle",
     "prepare:husky": "husky install",
-    "test": "stryker run"
+    "test": "jest"
   },
   "dependencies": {
+    "@faker-js/faker": "7.1.0",
     "lodash": "4.17.21",
     "zod": "3.17.3"
   },
@@ -28,9 +29,6 @@
     "@jest/types": "27.5.1",
     "@portabletext/types": "1.0.3",
     "@sanity/types": "2.29.5",
-    "@stryker-mutator/core": "5.6.1",
-    "@stryker-mutator/jest-runner": "5.6.1",
-    "@stryker-mutator/typescript-checker": "5.6.1",
     "@types/jest": "27.4.1",
     "@types/lodash": "4.14.182",
     "@typescript-eslint/eslint-plugin": "5.27.0",

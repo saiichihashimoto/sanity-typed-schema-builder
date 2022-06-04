@@ -39,4 +39,18 @@ describe("url", () => {
       type.parse(value);
     }).toThrow(z.ZodError);
   });
+
+  it("mocks a url", () =>
+    expect(z.string().url().parse(url().mock())).toEqual(expect.any(String)));
+
+  it("allows defining the mocks", () =>
+    expect(["https://google.com", "https://facebook.com"]).toContainEqual(
+      url({
+        mock: (faker) =>
+          faker.helpers.arrayElement([
+            "https://google.com",
+            "https://facebook.com",
+          ]),
+      }).mock()
+    ));
 });

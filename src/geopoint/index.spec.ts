@@ -40,4 +40,46 @@ describe("geopoint", () => {
 
     expect(parsedValue).toEqual(value);
   });
+
+  it("mocks a geopoint", () =>
+    expect(geopoint().mock()).toEqual({
+      _type: "geopoint",
+      lat: expect.any(Number),
+      lng: expect.any(Number),
+      alt: expect.any(Number),
+    }));
+
+  it("allows defining the mocks", () =>
+    expect([
+      {
+        _type: "geopoint",
+        lat: 58.63169011423141,
+        lng: 9.089101352587932,
+        alt: 13.37,
+      },
+      {
+        _type: "geopoint",
+        lat: -58.63169011423141,
+        lng: -9.089101352587932,
+        alt: 12.37,
+      },
+    ]).toContainEqual(
+      geopoint({
+        mock: (faker) =>
+          faker.helpers.arrayElement([
+            {
+              _type: "geopoint",
+              lat: 58.63169011423141,
+              lng: 9.089101352587932,
+              alt: 13.37,
+            },
+            {
+              _type: "geopoint",
+              lat: -58.63169011423141,
+              lng: -9.089101352587932,
+              alt: 12.37,
+            },
+          ]),
+      }).mock()
+    ));
 });

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
-import { mockRule } from "../test-utils";
+import { fields } from "../fields";
+import { string } from "../string";
 
 import { file } from ".";
 
@@ -33,7 +34,7 @@ describe("file", () => {
       _type: "file",
       asset: {
         _type: "reference",
-        _ref: "somereference",
+        _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
     };
     const parsedValue: ValidateShape<
@@ -51,9 +52,17 @@ describe("file", () => {
   });
 
   it("adds fields", () => {
-    const type = file().field({
-      name: "foo",
-      type: boolean(),
+    const type = file({
+      fields: fields()
+        .field({
+          name: "foo",
+          type: boolean(),
+        })
+        .field({
+          name: "bar",
+          optional: true,
+          type: boolean(),
+        }),
     });
 
     const schema = type.schema();
@@ -64,16 +73,12 @@ describe("file", () => {
         type: "boolean",
         validation: expect.any(Function),
       },
+      {
+        name: "bar",
+        type: "boolean",
+        validation: expect.any(Function),
+      },
     ]);
-
-    const required = mockRule();
-
-    const rule = {
-      ...mockRule(),
-      required: () => required,
-    };
-
-    expect(schema.fields?.[0]?.validation?.(rule)).toEqual(required);
 
     const value: ValidateShape<
       InferInput<typeof type>,
@@ -83,6 +88,7 @@ describe("file", () => {
           _ref: string;
           _type: "reference";
         };
+        bar?: boolean;
         foo: boolean;
       }
     > = {
@@ -90,7 +96,7 @@ describe("file", () => {
       _type: "file",
       asset: {
         _type: "reference",
-        _ref: "somereference",
+        _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
     };
     const parsedValue: ValidateShape<
@@ -101,6 +107,7 @@ describe("file", () => {
           _ref: string;
           _type: "reference";
         };
+        bar?: boolean;
         foo: boolean;
       }
     > = type.parse(value);
@@ -108,61 +115,81 @@ describe("file", () => {
     expect(parsedValue).toEqual(value);
   });
 
-  it("allows optional fields", () => {
-    const type = file().field({
-      name: "foo",
-      optional: true,
-      type: boolean(),
-    });
-
-    const schema = type.schema();
-
-    expect(schema).toHaveProperty("fields", [
-      {
-        name: "foo",
-        type: "boolean",
-        validation: expect.any(Function),
-      },
-    ]);
-
-    const required = mockRule();
-
-    const rule = {
-      ...mockRule(),
-      required: () => required,
-    };
-
-    expect(schema.fields?.[0]?.validation?.(rule)).not.toEqual(required);
-
-    const value: ValidateShape<
-      InferInput<typeof type>,
-      {
-        _type: "file";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        foo?: boolean;
-      }
-    > = {
+  it("mocks the field values", () =>
+    expect(
+      file({
+        fields: fields()
+          .field({
+            name: "foo",
+            type: boolean(),
+          })
+          .field({
+            name: "bar",
+            type: string(),
+          }),
+      }).mock()
+    ).toEqual({
       _type: "file",
+      bar: expect.any(String),
+      foo: expect.any(Boolean),
       asset: {
         _type: "reference",
-        _ref: "somereference",
+        _ref: expect.any(String),
       },
-    };
-    const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      {
-        _type: "file";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        foo?: boolean;
-      }
-    > = type.parse(value);
+    }));
 
-    expect(parsedValue).toEqual(value);
-  });
+  it("allows defining the mocks", () =>
+    expect([
+      {
+        _type: "file",
+        asset: {
+          _type: "reference",
+          _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+        },
+        foo: true,
+        bar: "foo",
+      },
+      {
+        _type: "file",
+        asset: {
+          _type: "reference",
+          _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+        },
+        foo: false,
+        bar: "bar",
+      },
+    ] as const).toContainEqual(
+      file({
+        fields: fields()
+          .field({
+            name: "foo",
+            type: boolean(),
+          })
+          .field({
+            name: "bar",
+            type: string(),
+          }),
+        mock: (faker) =>
+          faker.helpers.arrayElement([
+            {
+              _type: "file",
+              asset: {
+                _type: "reference",
+                _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+              },
+              foo: true,
+              bar: "foo",
+            },
+            {
+              _type: "file",
+              asset: {
+                _type: "reference",
+                _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+              },
+              foo: false,
+              bar: "bar",
+            },
+          ] as const),
+      }).mock()
+    ));
 });

@@ -225,4 +225,14 @@ describe("number", () => {
 
     expect(parsedValue).toEqual(0.01);
   });
+
+  it("mocks a number", () =>
+    expect(number().mock()).toEqual(expect.any(Number)));
+
+  it("allows defining the mocks", () =>
+    expect([3, 4]).toContainEqual(
+      number({
+        mock: (faker) => faker.helpers.arrayElement([3, 4]),
+      }).mock()
+    ));
 });

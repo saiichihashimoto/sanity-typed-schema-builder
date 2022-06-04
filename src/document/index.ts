@@ -1,117 +1,105 @@
+import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
-import { fieldsSchema, fieldsZod } from "../fields";
-
-import type { FieldOptions, InferOptional, InferType } from "../fields";
-import type { InferZod, SanityType } from "../types";
+import type { FieldsType, InferFieldNames, InferFieldsZod } from "../fields";
+import type { SanityType } from "../types";
+import type { Faker } from "@faker-js/faker";
 import type { DocumentDef } from "@sanity/base";
+
+type ZodDocument<
+  DocumentName extends string,
+  Fields extends FieldsType<any, any>
+> = z.ZodIntersection<
+  InferFieldsZod<Fields>,
+  z.ZodObject<
+    {
+      _createdAt: z.ZodType<Date, any, string>;
+      _id: z.ZodString;
+      _rev: z.ZodString;
+      _type: z.ZodLiteral<DocumentName>;
+      _updatedAt: z.ZodType<Date, any, string>;
+    },
+    "strip"
+  >
+>;
 
 export interface DocumentType<
   DocumentName extends string,
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  }
+  Fields extends FieldsType<any, any>
 > extends SanityType<
-    DocumentDef<DocumentName, never, FieldNames, never, never, never>,
-    z.ZodIntersection<
-      z.ZodObject<
-        {
-          [field in FieldNames]: InferOptional<Fields[field]> extends true
-            ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
-            : InferZod<InferType<Fields[field]>>;
-        },
-        "strip"
-      >,
-      z.ZodObject<
-        {
-          _createdAt: z.ZodType<Date, any, string>;
-          _id: z.ZodString;
-          _rev: z.ZodString;
-          _type: z.ZodLiteral<DocumentName>;
-          _updatedAt: z.ZodType<Date, any, string>;
-        },
-        "strip"
-      >
-    >
+    DocumentDef<
+      DocumentName,
+      never,
+      InferFieldNames<Fields>,
+      never,
+      never,
+      never
+    >,
+    ZodDocument<DocumentName, Fields>
   > {
-  field: <
-    Name extends string,
-    Zod extends z.ZodType<any, any, any>,
-    NewFieldNames extends FieldNames | Name,
-    Optional extends boolean = false
-  >(
-    options: FieldOptions<Name, Zod, Optional>
-  ) => DocumentType<
-    DocumentName,
-    NewFieldNames,
-    // @ts-expect-error -- Not sure how to solve this
-    Fields & {
-      [field in Name]: FieldOptions<Name, Zod, Optional>;
-    }
-  >;
   name: DocumentName;
 }
 
-const documentInternal = <
+export const document = <
   DocumentName extends string,
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  }
+  Fields extends FieldsType<any, any>
 >(
-  {
-    name,
-    ...def
-  }: Omit<
-    DocumentDef<DocumentName, never, FieldNames, never, never, never>,
+  def: Omit<
+    DocumentDef<
+      DocumentName,
+      never,
+      InferFieldNames<Fields>,
+      never,
+      never,
+      never
+    >,
     "description" | "fields" | "preview" | "type"
-  >,
-  fields: Array<Fields[FieldNames]>
-): DocumentType<DocumentName, FieldNames, Fields> => {
+  > & {
+    fields: Fields;
+    mock?: (faker: Faker) => z.input<ZodDocument<DocumentName, Fields>>;
+  }
+): DocumentType<DocumentName, Fields> => {
+  const {
+    name,
+    fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
+    mock = () => {
+      const createdAt = faker.date
+        .between("2021-06-03T03:24:55.395Z", "2022-06-04T18:50:36.539Z")
+        .toISOString();
+
+      return {
+        ...(fieldsMock() as z.input<InferFieldsZod<Fields>>),
+        _id: faker.datatype.uuid(),
+        _createdAt: createdAt,
+        _rev: faker.datatype.string(23),
+        _type: name,
+        _updatedAt: faker.date
+          .between(createdAt, "2022-06-05T18:50:36.539Z")
+          .toISOString(),
+      };
+    },
+  } = def;
+
   const zod = z.intersection(
-    fieldsZod(fields),
+    fieldsZod as InferFieldsZod<Fields>,
     z.object({
       _createdAt: z.string().transform((v) => new Date(v)),
-      _id: z.string(),
+      _id: z.string().uuid(),
       _rev: z.string(),
       _type: z.literal(name),
       _updatedAt: z.string().transform((v) => new Date(v)),
     })
-  );
+  ) as unknown as ZodDocument<DocumentName, Fields>;
 
   return {
     name,
     zod,
     parse: zod.parse.bind(zod),
+    mock: () => mock(faker),
     schema: () => ({
       ...def,
-      name,
       type: "document",
-      fields: fieldsSchema(fields),
+      fields: fieldsSchema(),
     }),
-    field: <
-      Name extends string,
-      Zod extends z.ZodType<any, any, any>,
-      NewFieldNames extends FieldNames | Name,
-      Optional extends boolean = false
-    >(
-      options: FieldOptions<Name, Zod, Optional>
-    ) =>
-      documentInternal<
-        DocumentName,
-        NewFieldNames,
-        // @ts-expect-error -- Not sure how to solve this
-        Fields & {
-          [field in Name]: FieldOptions<Name, Zod, Optional>;
-        }
-      >({ name, ...def }, [...fields, options]),
   };
 };
-
-export const document = <DocumentName extends string>(
-  def: Omit<
-    DocumentDef<DocumentName, never, never, never, never, never>,
-    "description" | "fields" | "preview" | "type"
-  >
-) => documentInternal<DocumentName, never, Record<never, never>>(def, []);

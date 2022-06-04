@@ -1,7 +1,9 @@
+import { faker } from "@faker-js/faker";
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
 import type { SanityType } from "../types";
+import type { Faker } from "@faker-js/faker";
 
 interface NumberType
   extends SanityType<
@@ -15,6 +17,7 @@ type NumberDef = Omit<NumberFieldDef, "description" | "type"> & {
   lessThan?: number;
   max?: number;
   min?: number;
+  mock?: (faker: Faker) => number;
   negative?: boolean;
   positive?: boolean;
   precision?: number;
@@ -31,6 +34,12 @@ export const number = (def: NumberDef = {}): NumberType => {
     positive,
     precision,
     validation,
+    mock = (faker) =>
+      faker.datatype.number({
+        max,
+        min,
+        precision: 1 / 10 ** (precision ?? 0),
+      }),
   } = def;
 
   const zod = flow(
@@ -54,6 +63,7 @@ export const number = (def: NumberDef = {}): NumberType => {
   return {
     zod,
     parse: zod.parse.bind(zod),
+    mock: () => mock(faker),
     schema: () => ({
       ...def,
       type: "number",

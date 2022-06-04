@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
-import { mockRule } from "../test-utils";
+import { fields } from "../fields";
+import { string } from "../string";
 
 import { image } from ".";
 
@@ -33,7 +34,7 @@ describe("image", () => {
       _type: "image",
       asset: {
         _type: "reference",
-        _ref: "somereference",
+        _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
     };
     const parsedValue: ValidateShape<
@@ -78,7 +79,7 @@ describe("image", () => {
       _type: "image",
       asset: {
         _type: "reference",
-        _ref: "somereference",
+        _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
       crop: {
         top: 0.028131868131868132,
@@ -120,9 +121,17 @@ describe("image", () => {
   });
 
   it("adds fields", () => {
-    const type = image().field({
-      name: "foo",
-      type: boolean(),
+    const type = image({
+      fields: fields()
+        .field({
+          name: "foo",
+          type: boolean(),
+        })
+        .field({
+          name: "bar",
+          optional: true,
+          type: boolean(),
+        }),
     });
 
     const schema = type.schema();
@@ -133,16 +142,12 @@ describe("image", () => {
         type: "boolean",
         validation: expect.any(Function),
       },
+      {
+        name: "bar",
+        type: "boolean",
+        validation: expect.any(Function),
+      },
     ]);
-
-    const required = mockRule();
-
-    const rule = {
-      ...mockRule(),
-      required: () => required,
-    };
-
-    expect(schema.fields?.[0]?.validation?.(rule)).toEqual(required);
 
     const value: ValidateShape<
       InferInput<typeof type>,
@@ -152,6 +157,7 @@ describe("image", () => {
           _ref: string;
           _type: "reference";
         };
+        bar?: boolean;
         foo: boolean;
       }
     > = {
@@ -159,7 +165,7 @@ describe("image", () => {
       _type: "image",
       asset: {
         _type: "reference",
-        _ref: "somereference",
+        _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
     };
     const parsedValue: ValidateShape<
@@ -170,6 +176,7 @@ describe("image", () => {
           _ref: string;
           _type: "reference";
         };
+        bar?: boolean;
         foo: boolean;
       }
     > = type.parse(value);
@@ -177,61 +184,81 @@ describe("image", () => {
     expect(parsedValue).toEqual(value);
   });
 
-  it("allows optional fields", () => {
-    const type = image().field({
-      name: "foo",
-      optional: true,
-      type: boolean(),
-    });
-
-    const schema = type.schema();
-
-    expect(schema).toHaveProperty("fields", [
-      {
-        name: "foo",
-        type: "boolean",
-        validation: expect.any(Function),
-      },
-    ]);
-
-    const required = mockRule();
-
-    const rule = {
-      ...mockRule(),
-      required: () => required,
-    };
-
-    expect(schema.fields?.[0]?.validation?.(rule)).not.toEqual(required);
-
-    const value: ValidateShape<
-      InferInput<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        foo?: boolean;
-      }
-    > = {
+  it("mocks the field values", () =>
+    expect(
+      image({
+        fields: fields()
+          .field({
+            name: "foo",
+            type: boolean(),
+          })
+          .field({
+            name: "bar",
+            type: string(),
+          }),
+      }).mock()
+    ).toEqual({
       _type: "image",
+      bar: expect.any(String),
+      foo: expect.any(Boolean),
       asset: {
         _type: "reference",
-        _ref: "somereference",
+        _ref: expect.any(String),
       },
-    };
-    const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        foo?: boolean;
-      }
-    > = type.parse(value);
+    }));
 
-    expect(parsedValue).toEqual(value);
-  });
+  it("allows defining the mocks", () =>
+    expect([
+      {
+        _type: "image",
+        asset: {
+          _type: "reference",
+          _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+        },
+        foo: true,
+        bar: "foo",
+      },
+      {
+        _type: "image",
+        asset: {
+          _type: "reference",
+          _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+        },
+        foo: false,
+        bar: "bar",
+      },
+    ] as const).toContainEqual(
+      image({
+        fields: fields()
+          .field({
+            name: "foo",
+            type: boolean(),
+          })
+          .field({
+            name: "bar",
+            type: string(),
+          }),
+        mock: (faker) =>
+          faker.helpers.arrayElement([
+            {
+              _type: "image",
+              asset: {
+                _type: "reference",
+                _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+              },
+              foo: true,
+              bar: "foo",
+            },
+            {
+              _type: "image",
+              asset: {
+                _type: "reference",
+                _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+              },
+              foo: false,
+              bar: "bar",
+            },
+          ] as const),
+      }).mock()
+    ));
 });

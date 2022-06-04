@@ -127,4 +127,25 @@ describe("datetime", () => {
 
     expect(parsedValue).toEqual(new Date(value));
   });
+
+  it("mocks a string", () => {
+    const value = datetime().mock();
+
+    expect(value).toEqual(expect.any(String));
+    expect(new Date(value).toString()).not.toEqual("Invalid Date");
+  });
+
+  it("allows defining the mocks", () =>
+    expect([
+      "2022-06-03T03:24:55.390Z",
+      "2022-06-03T03:24:55.399Z",
+    ]).toContainEqual(
+      datetime({
+        mock: (faker) =>
+          faker.helpers.arrayElement([
+            "2022-06-03T03:24:55.390Z",
+            "2022-06-03T03:24:55.399Z",
+          ]),
+      }).mock()
+    ));
 });
