@@ -26,9 +26,9 @@ interface LengthRule<ExtendingRule> {
   length: (exactLength: number) => ExtendingRule;
 }
 
-interface MinMaxRule<ExtendingRule> {
-  max: (maxValue: number) => ExtendingRule;
-  min: (minLength: number) => ExtendingRule;
+interface MinMaxRule<ExtendingRule, Value> {
+  max: (maxValue: Value) => ExtendingRule;
+  min: (minLength: Value) => ExtendingRule;
 }
 
 interface StringContentRule<ExtendingRule> {
@@ -150,7 +150,7 @@ interface DateFieldDef extends FieldDef<DateRule, string> {
 /** @link https://www.sanity.io/docs/datetime-type#validation */
 interface DatetimeRule
   extends Rule<string, DatetimeRule>,
-    MinMaxRule<DatetimeRule> {}
+    MinMaxRule<DatetimeRule, string> {}
 
 /** @link https://www.sanity.io/docs/datetime-type */
 interface DatetimeFieldDef extends FieldDef<DatetimeRule, string> {
@@ -195,7 +195,9 @@ interface MuxVideoAssetFieldDef extends FieldDef<MuxVideoAssetRule, string> {
 }
 
 /** @link https://www.sanity.io/docs/number-type#validation */
-interface NumberRule extends Rule<number, NumberRule>, MinMaxRule<NumberRule> {
+interface NumberRule
+  extends Rule<number, NumberRule>,
+    MinMaxRule<NumberRule, number> {
   greaterThan: (limit: number) => NumberRule;
   integer: () => NumberRule;
   lessThan: (limit: number) => NumberRule;
@@ -265,7 +267,7 @@ interface SlugDef<FieldNames extends string>
 interface StringRule
   extends Rule<string, StringRule>,
     LengthRule<StringRule>,
-    MinMaxRule<StringRule>,
+    MinMaxRule<StringRule, number>,
     StringContentRule<StringRule> {}
 
 /** @link https://www.sanity.io/docs/string-type */
@@ -278,7 +280,7 @@ interface StringFieldDef extends FieldDef<StringRule, string> {
 interface TextRule
   extends Rule<string, TextRule>,
     LengthRule<TextRule>,
-    MinMaxRule<TextRule>,
+    MinMaxRule<TextRule, number>,
     StringContentRule<TextRule> {}
 
 /** @link https://www.sanity.io/docs/text-type */
@@ -337,7 +339,7 @@ type OfType<DocumentNames extends string, ObjectNames extends string> =
 interface ArrayRule
   extends Rule<unknown[], ArrayRule>,
     LengthRule<ArrayRule>,
-    MinMaxRule<ArrayRule> {
+    MinMaxRule<ArrayRule, number> {
   unique: () => ArrayRule;
 }
 
