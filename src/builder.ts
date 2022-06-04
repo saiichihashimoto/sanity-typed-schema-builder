@@ -1,5 +1,6 @@
 export { array } from "./array";
 export { boolean } from "./boolean";
+export { datetime } from "./datetime";
 export { document } from "./document";
 export { object } from "./object";
 export { reference } from "./reference";
