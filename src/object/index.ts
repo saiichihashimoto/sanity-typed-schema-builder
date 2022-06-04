@@ -14,7 +14,7 @@ interface ObjectType<Fields extends FieldsType<any, any>>
 export const object = <Fields extends FieldsType<any, any>>(
   def: Omit<
     ObjectFieldDef<never, never, InferFieldNames<Fields>, never, never>,
-    "description" | "fields" | "preview" | "type"
+    "description" | "fields" | "type"
   > & {
     fields: Fields;
     mock?: (faker: Faker) => z.input<InferFieldsZod<Fields>>;
