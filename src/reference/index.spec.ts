@@ -4,13 +4,14 @@ import { document } from "../document";
 
 import { reference } from ".";
 
-import type { ValidateShape } from "../test-types";
+import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
-import type { Reference } from "@sanity/types";
 
-type SanityReference = Pick<Reference, "_ref" | "_weak"> & {
+interface SanityReference {
+  _ref: string;
   _type: "reference";
-};
+  _weak?: boolean | undefined;
+}
 
 describe("reference", () => {
   it("builds a sanity config", () =>

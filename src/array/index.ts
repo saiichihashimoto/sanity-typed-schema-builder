@@ -1,3 +1,4 @@
+import { flow } from "lodash/fp";
 import { z } from "zod";
 
 import type { InferZod, SanityType } from "../types";
@@ -25,21 +26,23 @@ interface ArrayType<
   Positions extends string,
   Fields extends {
     [field in Positions]: SanityType<any, any>;
-  }
+  },
+  NonEmpty extends boolean
 > extends SanityType<
     ArrayFieldDef<never, never>,
-    "00" extends Positions
-      ? z.ZodArray<
-          z.ZodUnion<
+    z.ZodArray<
+      "00" extends Positions
+        ? z.ZodUnion<
             readonly [
               InferZod<Fields[keyof Fields]>,
               ...Array<InferZod<Fields[keyof Fields]>>
             ]
           >
-        >
-      : "0" extends Positions
-      ? z.ZodArray<InferZod<Fields[keyof Fields]>>
-      : z.ZodTuple<[]>
+        : "0" extends Positions
+        ? InferZod<Fields[keyof Fields]>
+        : z.ZodNever,
+      NonEmpty extends true ? "atleastone" : "many"
+    >
   > {
   of: <
     Input extends InputFromMode<Mode>,
@@ -53,40 +56,64 @@ interface ArrayType<
     // @ts-expect-error -- Not sure how to solve this
     Fields & {
       [field in NewPosition]: SanityType<any, Zod>;
-    }
+    },
+    NonEmpty
   >;
 }
+
+type ArrayDef<NonEmpty extends boolean> = Omit<
+  ArrayFieldDef<never, never>,
+  "description" | "of" | "type"
+> & {
+  length?: number;
+  max?: number;
+  min?: number;
+  nonempty?: NonEmpty;
+};
 
 const arrayInternal = <
   Mode extends Modes,
   Positions extends string,
   Fields extends {
     [field in Positions]: SanityType<any, any>;
-  }
+  },
+  NonEmpty extends boolean
 >(
-  def: Omit<ArrayFieldDef<never, never>, "description" | "of" | "type">,
+  def: ArrayDef<NonEmpty>,
   ofs: Array<Fields[keyof Fields]>
-): ArrayType<Mode, Positions, Fields> => {
-  type ZodArrayType = "00" extends Positions
-    ? z.ZodArray<
-        z.ZodUnion<
-          readonly [
-            InferZod<Fields[keyof Fields]>,
-            ...Array<InferZod<Fields[keyof Fields]>>
-          ]
-        >
+): ArrayType<Mode, Positions, Fields, NonEmpty> => {
+  const { length, max, min, nonempty, validation } = def;
+
+  type ZodArrayElement = "00" extends Positions
+    ? z.ZodUnion<
+        readonly [
+          InferZod<Fields[keyof Fields]>,
+          ...Array<InferZod<Fields[keyof Fields]>>
+        ]
       >
     : "0" extends Positions
-    ? z.ZodArray<InferZod<Fields[keyof Fields]>>
-    : z.ZodTuple<[]>;
+    ? InferZod<Fields[keyof Fields]>
+    : z.ZodNever;
 
-  const zod = (
-    ofs.length === 0
-      ? z.tuple([])
-      : ofs.length === 1
-      ? z.array(ofs[0]!.zod)
-      : z.array(
-          z.union([
+  type ZodArrayTypeMany = z.ZodArray<ZodArrayElement, "many">;
+
+  type ZodArrayType = z.ZodArray<
+    ZodArrayElement,
+    NonEmpty extends true ? "atleastone" : "many"
+  >;
+
+  const zod = flow(
+    (zod: ZodArrayTypeMany) => (!nonempty ? zod : zod.nonempty()),
+    (zod: ZodArrayType) => (!min ? zod : zod.min(min)),
+    (zod: ZodArrayType) => (!max ? zod : zod.max(max)),
+    (zod: ZodArrayType) => (length === undefined ? zod : zod.length(length))
+  )(
+    z.array(
+      ofs.length === 0
+        ? z.never()
+        : ofs.length === 1
+        ? ofs[0]!.zod
+        : z.union([
             ofs[0]!.zod,
             ofs[1]!.zod,
             ...(ofs
@@ -100,7 +127,7 @@ const arrayInternal = <
               ...Array<InferZod<Fields[keyof Fields]>>
             ]),
           ])
-        )
+    ) as ZodArrayTypeMany
   ) as ZodArrayType;
 
   return {
@@ -112,11 +139,19 @@ const arrayInternal = <
       of: ofs.map(<Definition>({ schema }: SanityType<Definition, any>) =>
         schema()
       ),
+      validation: flow(
+        (rule) => (!nonempty ? rule : rule.min(1)),
+        (rule) => (!min ? rule : rule.min(min)),
+        (rule) => (!max ? rule : rule.max(max)),
+        (rule) => (length === undefined ? rule : rule.length(length)),
+        (rule) => validation?.(rule) ?? rule
+      ),
     }),
     of: <
       Input extends InputFromMode<Mode>,
       Zod extends z.ZodType<any, any, Input>,
-      NewPosition extends Exclude<`${Positions}0`, Positions>
+      NewPosition extends Exclude<`${Positions}0`, Positions>,
+      NonEmpty extends boolean
     >(
       type: SanityType<any, Zod>
     ) =>
@@ -126,11 +161,12 @@ const arrayInternal = <
         // @ts-expect-error -- Not sure how to solve this
         Fields & {
           [field in NewPosition]: SanityType<any, Zod>;
-        }
+        },
+        NonEmpty
       >(def, [...ofs, type]),
   };
 };
 
-export const array = (
-  def: Omit<ArrayFieldDef<never, never>, "description" | "of" | "type"> = {}
-) => arrayInternal<Modes.Undecided, "", Record<"", never>>(def, []);
+export const array = <NonEmpty extends boolean = false>(
+  def: ArrayDef<NonEmpty> = {}
+) => arrayInternal<Modes.Undecided, "", Record<"", never>, NonEmpty>(def, []);

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
-import { ZodError } from "zod";
+import { z } from "zod";
 
 import { url } from ".";
 
-import type { ValidateShape } from "../test-types";
+import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
 
 describe("url", () => {
@@ -37,6 +37,6 @@ describe("url", () => {
 
     expect(() => {
       type.parse(value);
-    }).toThrow(ZodError);
+    }).toThrow(z.ZodError);
   });
 });
