@@ -15,6 +15,7 @@ interface FieldOptions<
   description?: string;
   name: Name;
   optional?: Optional;
+  title?: string;
   type: SanityType<FieldTypeFields<never, never, Name>, Zod>;
 }
 
