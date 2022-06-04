@@ -1,5 +1,4 @@
 import { describe, expect, it } from "@jest/globals";
-import { z } from "zod";
 
 import { mockRule } from "../test-utils";
 
@@ -43,7 +42,7 @@ describe("datetime", () => {
 
     expect(() => {
       type.parse(value);
-    }).toThrow(z.ZodError);
+    }).toThrow("Invalid Date");
   });
 
   it("sets min", () => {
@@ -65,7 +64,7 @@ describe("datetime", () => {
 
     expect(() => {
       type.parse(value);
-    }).toThrow(z.ZodError);
+    }).toThrow("Greater than 2022-06-03T03:24:55.395Z");
   });
 
   it("sets max", () => {
@@ -87,6 +86,33 @@ describe("datetime", () => {
 
     expect(() => {
       type.parse(value);
-    }).toThrow(z.ZodError);
+    }).toThrow("Less than 2022-06-03T03:24:55.395Z");
+  });
+
+  it("min & max are inclusive", () => {
+    const type = datetime({
+      max: "2022-06-03T03:24:55.395Z",
+      min: "2022-06-03T03:24:55.395Z",
+    });
+
+    const min = mockRule();
+
+    const rule = {
+      ...mockRule(),
+      min: () => min,
+    };
+
+    expect(type.schema().validation?.(rule)).toEqual(min);
+
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      string
+    > = "2022-06-03T03:24:55.395Z";
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      Date
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(new Date(value));
   });
 });
