@@ -6,6 +6,7 @@ export { document } from "./document";
 export { file } from "./file";
 export { geopoint } from "./geopoint";
 export { image } from "./image";
+export { number } from "./number";
 export { object } from "./object";
 export { reference } from "./reference";
 export { url } from "./url";
