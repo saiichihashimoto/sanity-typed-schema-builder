@@ -62,10 +62,7 @@ export const fieldsSchema = <
         name: name as Name,
         validation: flow(
           (rule: Rule): Rule => (optional ? rule : rule.required()),
-          (rule): Rule =>
-            (validation?.(
-              rule 
-            ) ?? rule) as Rule
+          (rule): Rule => (validation?.(rule) ?? rule) as Rule
         ),
       };
     }
