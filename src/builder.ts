@@ -10,6 +10,7 @@ export { number } from "./number";
 export { object } from "./object";
 export { reference } from "./reference";
 export { slug } from "./slug";
+export { string } from "./string";
 export { url } from "./url";
 
 export type {
