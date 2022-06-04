@@ -9,7 +9,8 @@ interface ImageType<
   FieldNames extends string,
   Fields extends {
     [field in FieldNames]: FieldOptions<field, any, any>;
-  }
+  },
+  Hotspot extends boolean
 > extends SanityType<
     ImageFieldDef<never, never, FieldNames>,
     z.ZodIntersection<
@@ -22,13 +23,33 @@ interface ImageType<
         "strip"
       >,
       z.ZodObject<
-        {
-          _type: z.ZodLiteral<"image">;
-          asset: z.ZodObject<{
-            _ref: z.ZodString;
-            _type: z.ZodLiteral<"reference">;
-          }>;
-        },
+        Hotspot extends false
+          ? {
+              _type: z.ZodLiteral<"image">;
+              asset: z.ZodObject<{
+                _ref: z.ZodString;
+                _type: z.ZodLiteral<"reference">;
+              }>;
+            }
+          : {
+              _type: z.ZodLiteral<"image">;
+              asset: z.ZodObject<{
+                _ref: z.ZodString;
+                _type: z.ZodLiteral<"reference">;
+              }>;
+              crop: z.ZodObject<{
+                bottom: z.ZodNumber;
+                left: z.ZodNumber;
+                right: z.ZodNumber;
+                top: z.ZodNumber;
+              }>;
+              hotspot: z.ZodObject<{
+                height: z.ZodNumber;
+                width: z.ZodNumber;
+                x: z.ZodNumber;
+                y: z.ZodNumber;
+              }>;
+            },
         "strip"
       >
     >
@@ -45,31 +66,90 @@ interface ImageType<
     // @ts-expect-error -- Not sure how to solve this
     Fields & {
       [field in Name]: FieldOptions<Name, Zod, Optional>;
-    }
+    },
+    Hotspot
   >;
 }
+
+type ImageDef<FieldNames extends string, Hotspot extends boolean> = Omit<
+  ImageFieldDef<never, never, FieldNames>,
+  "description" | "fields" | "preview" | "type"
+> & {
+  hotspot?: Hotspot;
+};
 
 const imageInternal = <
   FieldNames extends string,
   Fields extends {
     [field in FieldNames]: FieldOptions<field, any, any>;
-  }
+  },
+  Hotspot extends boolean
 >(
-  def: Omit<
-    ImageFieldDef<never, never, FieldNames>,
-    "description" | "fields" | "preview" | "type"
-  >,
+  def: ImageDef<FieldNames, Hotspot>,
   fields: Array<Fields[FieldNames]>
-): ImageType<FieldNames, Fields> => {
+): ImageType<FieldNames, Fields, Hotspot> => {
+  const { hotspot } = def;
+
   const zod = z.intersection(
     fieldsZod(fields),
-    z.object({
-      _type: z.literal("image"),
-      asset: z.object({
-        _ref: z.string(),
-        _type: z.literal("reference"),
-      }),
-    })
+    z.object(
+      !hotspot
+        ? {
+            _type: z.literal("image"),
+            asset: z.object({
+              _ref: z.string(),
+              _type: z.literal("reference"),
+            }),
+          }
+        : {
+            _type: z.literal("image"),
+            asset: z.object({
+              _ref: z.string(),
+              _type: z.literal("reference"),
+            }),
+            crop: z.object({
+              bottom: z.number(),
+              left: z.number(),
+              right: z.number(),
+              top: z.number(),
+            }),
+            hotspot: z.object({
+              height: z.number(),
+              width: z.number(),
+              x: z.number(),
+              y: z.number(),
+            }),
+          }
+    ) as z.ZodObject<
+      Hotspot extends false
+        ? {
+            _type: z.ZodLiteral<"image">;
+            asset: z.ZodObject<{
+              _ref: z.ZodString;
+              _type: z.ZodLiteral<"reference">;
+            }>;
+          }
+        : {
+            _type: z.ZodLiteral<"image">;
+            asset: z.ZodObject<{
+              _ref: z.ZodString;
+              _type: z.ZodLiteral<"reference">;
+            }>;
+            crop: z.ZodObject<{
+              bottom: z.ZodNumber;
+              left: z.ZodNumber;
+              right: z.ZodNumber;
+              top: z.ZodNumber;
+            }>;
+            hotspot: z.ZodObject<{
+              height: z.ZodNumber;
+              width: z.ZodNumber;
+              x: z.ZodNumber;
+              y: z.ZodNumber;
+            }>;
+          },
+      "strip"
+    >
   );
 
   return {
@@ -93,14 +173,12 @@ const imageInternal = <
         // @ts-expect-error -- Not sure how to solve this
         Fields & {
           [field in Name]: FieldOptions<Name, Zod, Optional>;
-        }
+        },
+        Hotspot
       >(def, [...fields, options]),
   };
 };
 
-export const image = (
-  def: Omit<
-    ImageFieldDef<never, never, never>,
-    "description" | "fields" | "preview" | "type"
-  > = {}
-) => imageInternal<never, Record<never, never>>(def, []);
+export const image = <Hotspot extends boolean = false>(
+  def: ImageDef<never, Hotspot> = {}
+) => imageInternal<never, Record<never, never>, Hotspot>(def, []);
