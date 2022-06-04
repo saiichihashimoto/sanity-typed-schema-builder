@@ -40,7 +40,7 @@ export const file = <
     fields: {
       schema: fieldsSchema = () => undefined,
       mock: fieldsMock = () =>
-        ({} as unknown as z.input<InferFieldsZod<Fields>>),
+        undefined as unknown as z.input<InferFieldsZod<Fields>>,
       zod: fieldsZod = z.object({}),
     } = {},
     mock = () => ({

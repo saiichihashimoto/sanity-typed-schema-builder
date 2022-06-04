@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
+import { z } from "zod";
 
 import { date } from ".";
 
@@ -26,7 +27,15 @@ describe("date", () => {
     expect(parsedValue).toEqual(value);
   });
 
-  it("mocks a string", () => expect(date().mock()).toEqual(expect.any(String)));
+  it("mocks a string", () => {
+    const value = date().mock();
+
+    expect(value).toEqual(expect.any(String));
+
+    z.string()
+      .regex(/^\d\d\d\d-\d\d-\d\d$/)
+      .parse(value);
+  });
 
   it("allows defining the mocks", () =>
     expect(["2010-05-06", "2011-04-27"]).toContainEqual(
