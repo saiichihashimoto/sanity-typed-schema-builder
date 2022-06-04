@@ -175,10 +175,12 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(precision);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = 0.001;
+    const value: ValidateShape<InferInput<typeof type>, number> = 0.011;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
 
-    expect(() => {
-      type.parse(value);
-    }).toThrow(z.ZodError);
+    expect(parsedValue).toEqual(0.01);
   });
 });
