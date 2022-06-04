@@ -244,7 +244,7 @@ interface ReferenceFieldDef<DocumentNames extends string>
 interface SlugRule extends Rule<string, SlugRule> {}
 
 /** @link https://www.sanity.io/docs/slug-typen */
-interface SlugDef<FieldNames extends string>
+interface SlugFieldDef<FieldNames extends string>
   extends FieldDef<SlugRule, string> {
   options?: {
     isUnique?: (value: string, options: unknown) => MaybePromise<boolean>;
@@ -326,7 +326,7 @@ type NonPrimitiveFieldDef<
   | GeopointFieldDef
   | MuxVideoAssetFieldDef
   | ReferenceFieldDef<DocumentNames>
-  | SlugDef<FieldNames>;
+  | SlugFieldDef<FieldNames>;
 
 type OfType<DocumentNames extends string, ObjectNames extends string> =
   | NonPrimitiveFieldDef<DocumentNames, ObjectNames, string>

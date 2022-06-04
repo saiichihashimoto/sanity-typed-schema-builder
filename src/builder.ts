@@ -9,6 +9,7 @@ export { image } from "./image";
 export { number } from "./number";
 export { object } from "./object";
 export { reference } from "./reference";
+export { slug } from "./slug";
 export { url } from "./url";
 
 export type {
