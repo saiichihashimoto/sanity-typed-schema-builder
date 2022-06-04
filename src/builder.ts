@@ -2,6 +2,7 @@ export { array } from "./array";
 export { boolean } from "./boolean";
 export { datetime } from "./datetime";
 export { document } from "./document";
+export { geopoint } from "./geopoint";
 export { object } from "./object";
 export { reference } from "./reference";
 export { url } from "./url";
