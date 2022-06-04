@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from ".";
 
-import type { ValidateShape } from "../test-types";
+import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
 
 describe("boolean", () => {

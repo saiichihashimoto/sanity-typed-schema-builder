@@ -1,7 +1,11 @@
-import { fromPairs, identity } from "lodash/fp";
+import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
 import type { InferZod, SanityType } from "./types";
+
+type FieldRule<FieldNames extends string> = Parameters<
+  NonNullable<FieldTypeFields<any, any, FieldNames>["validation"]>
+>[0];
 
 export interface FieldOptions<
   Name extends string,
@@ -36,20 +40,33 @@ export const fieldsSchema = <
 >(
   fields: Array<Fields[FieldNames]>
 ) =>
-  fields.map(({ name, type, optional, ...props }) => {
-    const schema = type.schema();
+  fields.map(
+    <Name extends FieldNames>({
+      name,
+      type,
+      optional,
+      ...props
+    }: Fields[Name]) => {
+      const schema = type.schema();
 
-    return {
-      ...schema,
-      ...props,
-      name: name as FieldNames,
-      validation: optional
-        ? schema.validation
-        : (rule: Parameters<NonNullable<typeof schema.validation>>[0]) =>
-            // @ts-expect-error -- FIXME Fix this now
-            (schema.validation ?? identity)(rule.required()),
-    };
-  });
+      type Rule = FieldRule<Name>;
+
+      const { validation: validationUntyped } = schema;
+      const validation = validationUntyped as
+        | ((rule: Rule) => Rule)
+        | undefined;
+
+      return {
+        ...schema,
+        ...props,
+        name: name as Name,
+        validation: flow(
+          (rule: Rule): Rule => (optional ? rule : rule.required()),
+          (rule): Rule => (validation?.(rule) ?? rule) as Rule
+        ),
+      };
+    }
+  );
 
 export const fieldsZod = <
   FieldNames extends string,

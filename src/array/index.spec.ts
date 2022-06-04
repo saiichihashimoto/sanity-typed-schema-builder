@@ -1,11 +1,13 @@
 import { describe, expect, it } from "@jest/globals";
+import { z } from "zod";
 
 import { boolean } from "../boolean";
 import { object } from "../object";
+import { mockRule } from "../test-utils";
 
 import { array } from ".";
 
-import type { ValidateShape } from "../test-types";
+import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
 
 describe("array", () => {
@@ -13,6 +15,7 @@ describe("array", () => {
     expect(array().schema()).toEqual({
       type: "array",
       of: [],
+      validation: expect.any(Function),
     }));
 
   it("passes through schema values", () =>
@@ -21,10 +24,11 @@ describe("array", () => {
   it("parses into an array", () => {
     const type = array();
 
-    const value: ValidateShape<InferInput<typeof type>, []> = [];
-    const parsedValue: ValidateShape<InferOutput<typeof type>, []> = type.parse(
-      value
-    );
+    const value: ValidateShape<InferInput<typeof type>, never[]> = [];
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      never[]
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
@@ -137,5 +141,102 @@ describe("array", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("sets min", () => {
+    const type = array({ min: 1 }).of(boolean());
+
+    const min = mockRule();
+
+    const rule = {
+      ...mockRule(),
+      min: () => min,
+    };
+
+    expect(type.schema().validation?.(rule)).toEqual(min);
+
+    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [];
+
+    expect(() => {
+      type.parse(value);
+    }).toThrow(z.ZodError);
+  });
+
+  it("sets max", () => {
+    const type = array({ max: 1 }).of(boolean());
+
+    const max = mockRule();
+
+    const rule = {
+      ...mockRule(),
+      max: () => max,
+    };
+
+    expect(type.schema().validation?.(rule)).toEqual(max);
+
+    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [
+      true,
+      false,
+    ];
+
+    expect(() => {
+      type.parse(value);
+    }).toThrow(z.ZodError);
+  });
+
+  it("sets length", () => {
+    const type = array({ length: 1 }).of(boolean());
+
+    const length = mockRule();
+
+    const rule = {
+      ...mockRule(),
+      length: () => length,
+    };
+
+    expect(type.schema().validation?.(rule)).toEqual(length);
+
+    const value0: ValidateShape<InferInput<typeof type>, boolean[]> = [];
+
+    expect(() => {
+      type.parse(value0);
+    }).toThrow(z.ZodError);
+
+    const value2: ValidateShape<InferInput<typeof type>, boolean[]> = [
+      true,
+      false,
+    ];
+
+    expect(() => {
+      type.parse(value2);
+    }).toThrow(z.ZodError);
+  });
+
+  it("sets nonempty", () => {
+    const type = array({ nonempty: true }).of(boolean());
+
+    const min = mockRule();
+
+    const rule = {
+      ...mockRule(),
+      min: () => min,
+    };
+
+    expect(type.schema().validation?.(rule)).toEqual(min);
+
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      [boolean, ...boolean[]]
+    > = [true];
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      [boolean, ...boolean[]]
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+
+    expect(() => {
+      type.parse([]);
+    }).toThrow(z.ZodError);
   });
 });
