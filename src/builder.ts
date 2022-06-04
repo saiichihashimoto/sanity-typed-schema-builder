@@ -1,4 +1,5 @@
 export { array } from "./array";
+export { block } from "./block";
 export { boolean } from "./boolean";
 export { date } from "./date";
 export { datetime } from "./datetime";
