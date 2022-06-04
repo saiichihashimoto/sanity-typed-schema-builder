@@ -155,10 +155,16 @@ describe("array", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(min);
 
-    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [];
+    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [true];
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      boolean[]
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse([]);
     }).toThrow(z.ZodError);
   });
 
@@ -174,13 +180,16 @@ describe("array", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(max);
 
-    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [
-      true,
-      false,
-    ];
+    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [true];
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      boolean[]
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse([true, false]);
     }).toThrow(z.ZodError);
   });
 
