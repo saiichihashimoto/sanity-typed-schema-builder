@@ -53,7 +53,7 @@ export const document = <
       never,
       never
     >,
-    "description" | "fields" | "preview" | "type"
+    "fields" | "type"
   > & {
     fields: Fields;
     mock?: (faker: Faker) => z.input<ZodDocument<DocumentName, Fields>>;
