@@ -1,68 +1,60 @@
+import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
-import { fieldsSchema, fieldsZod } from "../fields";
+import type { FieldsType, InferFieldNames, InferFieldsZod } from "../fields";
+import type { SanityType } from "../types";
+import type { Faker } from "@faker-js/faker";
 
-import type { FieldOptions, InferOptional, InferType } from "../fields";
-import type { InferZod, SanityType } from "../types";
+type ZodFile<Fields extends FieldsType<any, any>> = z.ZodIntersection<
+  InferFieldsZod<Fields>,
+  z.ZodObject<
+    {
+      _type: z.ZodLiteral<"file">;
+      asset: z.ZodObject<{
+        _ref: z.ZodString;
+        _type: z.ZodLiteral<"reference">;
+      }>;
+    },
+    "strip"
+  >
+>;
 
-interface FileType<
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  }
-> extends SanityType<
-    FileFieldDef<never, never, FieldNames>,
-    z.ZodIntersection<
-      z.ZodObject<
-        {
-          [field in FieldNames]: InferOptional<Fields[field]> extends true
-            ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
-            : InferZod<InferType<Fields[field]>>;
-        },
-        "strip"
-      >,
-      z.ZodObject<
-        {
-          _type: z.ZodLiteral<"file">;
-          asset: z.ZodObject<{
-            _ref: z.ZodString;
-            _type: z.ZodLiteral<"reference">;
-          }>;
-        },
-        "strip"
-      >
-    >
-  > {
-  field: <
-    Name extends string,
-    Zod extends z.ZodType<any, any, any>,
-    NewFieldNames extends FieldNames | Name,
-    Optional extends boolean = false
-  >(
-    options: FieldOptions<Name, Zod, Optional>
-  ) => FileType<
-    NewFieldNames,
-    // @ts-expect-error -- Not sure how to solve this
-    Fields & {
-      [field in Name]: FieldOptions<Name, Zod, Optional>;
-    }
-  >;
-}
+interface FileType<Fields extends FieldsType<any, any>>
+  extends SanityType<
+    FileFieldDef<never, never, InferFieldNames<Fields>>,
+    ZodFile<Fields>
+  > {}
 
-const fileInternal = <
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  }
+export const file = <
+  Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
 >(
   def: Omit<
-    FileFieldDef<never, never, FieldNames>,
+    FileFieldDef<never, never, InferFieldNames<Fields>>,
     "description" | "fields" | "preview" | "type"
-  >,
-  fields: Array<Fields[FieldNames]>
-): FileType<FieldNames, Fields> => {
+  > & {
+    fields?: Fields;
+    mock?: (faker: Faker) => z.input<ZodFile<Fields>>;
+  } = {}
+): FileType<Fields> => {
+  const {
+    fields: {
+      schema: fieldsSchema = () => undefined,
+      mock: fieldsMock = () =>
+        ({} as unknown as z.input<InferFieldsZod<Fields>>),
+      zod: fieldsZod = z.object({}),
+    } = {},
+    mock = () => ({
+      ...fieldsMock(),
+      _type: "file",
+      asset: {
+        _type: "reference",
+        _ref: faker.datatype.uuid(),
+      },
+    }),
+  } = def;
+
   const zod = z.intersection(
-    fieldsZod(fields),
+    fieldsZod as InferFieldsZod<Fields>,
     z.object({
       _type: z.literal("file"),
       asset: z.object({
@@ -70,37 +62,16 @@ const fileInternal = <
         _type: z.literal("reference"),
       }),
     })
-  );
+  ) as unknown as ZodFile<Fields>;
 
   return {
     zod,
     parse: zod.parse.bind(zod),
+    mock: () => mock(faker),
     schema: () => ({
       ...def,
       type: "file",
-      fields: !fields.length ? undefined : fieldsSchema(fields),
+      fields: fieldsSchema(),
     }),
-    field: <
-      Name extends string,
-      Zod extends z.ZodType<any, any, any>,
-      NewFieldNames extends FieldNames | Name,
-      Optional extends boolean = false
-    >(
-      options: FieldOptions<Name, Zod, Optional>
-    ) =>
-      fileInternal<
-        NewFieldNames,
-        // @ts-expect-error -- Not sure how to solve this
-        Fields & {
-          [field in Name]: FieldOptions<Name, Zod, Optional>;
-        }
-      >(def, [...fields, options]),
   };
 };
-
-export const file = (
-  def: Omit<
-    FileFieldDef<never, never, never>,
-    "description" | "fields" | "preview" | "type"
-  > = {}
-) => fileInternal<never, Record<never, never>>(def, []);

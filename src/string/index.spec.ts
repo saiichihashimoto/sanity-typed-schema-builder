@@ -129,4 +129,13 @@ describe("string", () => {
       type.parse("bar");
     }).toThrow(z.ZodError);
   });
+
+  it("mocks a word", () => expect(string().mock()).toEqual(expect.any(String)));
+
+  it("allows defining the mocks", () =>
+    expect(["Option 1", "Option 2"]).toContainEqual(
+      string({
+        mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
+      }).mock()
+    ));
 });

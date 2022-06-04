@@ -133,6 +133,8 @@ const arrayInternal = <
   return {
     zod,
     parse: zod.parse.bind(zod),
+    // FIXME Mock the array element types. Not sure how to allow an override, since the function has to be defined before we know the element types.
+    mock: () => [] as unknown as z.infer<ZodArrayType>,
     schema: () => ({
       ...def,
       type: "array",

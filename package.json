@@ -20,6 +20,7 @@
     "test": "stryker run"
   },
   "dependencies": {
+    "@faker-js/faker": "7.1.0",
     "lodash": "4.17.21",
     "zod": "3.17.3"
   },

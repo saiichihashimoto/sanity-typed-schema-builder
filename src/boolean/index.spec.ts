@@ -28,4 +28,14 @@ describe("boolean", () => {
 
     expect(parsedValue).toEqual(value);
   });
+
+  it("mocks a boolean", () =>
+    expect(boolean().mock()).toEqual(expect.any(Boolean)));
+
+  it("allows defining the mocks", () =>
+    expect([true]).toContainEqual(
+      boolean({
+        mock: (faker) => faker.helpers.arrayElement([true]),
+      }).mock()
+    ));
 });

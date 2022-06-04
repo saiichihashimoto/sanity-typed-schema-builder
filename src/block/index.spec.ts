@@ -35,4 +35,96 @@ describe("block", () => {
 
     expect(parsedValue).toEqual(value);
   });
+
+  it("mocks block content", () =>
+    expect(block().mock()).toEqual({
+      style: "normal",
+      _type: "block",
+      markDefs: [],
+      children: [
+        {
+          _type: "span",
+          text: expect.any(String),
+          marks: [],
+        },
+      ],
+    }));
+
+  it("allows defining the mocks", () =>
+    expect([
+      {
+        style: "normal",
+        _type: "block",
+        markDefs: [],
+        children: [
+          {
+            _type: "span",
+            text: "That was ",
+            marks: [],
+          },
+          {
+            _type: "span",
+            text: "bold",
+            marks: ["strong"],
+          },
+          {
+            _type: "span",
+            text: " of you.",
+            marks: [],
+          },
+        ],
+      },
+      {
+        style: "normal",
+        _type: "block",
+        markDefs: [],
+        children: [
+          {
+            _type: "span",
+            text: "Amazing, actually.",
+            marks: [],
+          },
+        ],
+      },
+    ]).toContainEqual(
+      block({
+        mock: (faker) =>
+          faker.helpers.arrayElement([
+            {
+              style: "normal",
+              _type: "block",
+              markDefs: [],
+              children: [
+                {
+                  _type: "span",
+                  text: "That was ",
+                  marks: [],
+                },
+                {
+                  _type: "span",
+                  text: "bold",
+                  marks: ["strong"],
+                },
+                {
+                  _type: "span",
+                  text: " of you.",
+                  marks: [],
+                },
+              ],
+            },
+            {
+              style: "normal",
+              _type: "block",
+              markDefs: [],
+              children: [
+                {
+                  _type: "span",
+                  text: "Amazing, actually.",
+                  marks: [],
+                },
+              ],
+            },
+          ]),
+      }).mock()
+    ));
 });

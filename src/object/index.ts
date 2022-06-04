@@ -1,84 +1,39 @@
-import { fieldsSchema, fieldsZod } from "../fields";
+import { faker } from "@faker-js/faker";
 
-import type { FieldOptions, InferOptional, InferType } from "../fields";
-import type { InferZod, SanityType } from "../types";
+import type { FieldsType, InferFieldNames, InferFieldsZod } from "../fields";
+import type { SanityType } from "../types";
+import type { Faker } from "@faker-js/faker";
 import type { z } from "zod";
 
-interface ObjectType<
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  }
-> extends SanityType<
-    ObjectFieldDef<never, never, FieldNames, never, never>,
-    z.ZodObject<
-      {
-        [field in FieldNames]: InferOptional<Fields[field]> extends true
-          ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
-          : InferZod<InferType<Fields[field]>>;
-      },
-      "strip"
-    >
-  > {
-  field: <
-    Name extends string,
-    Zod extends z.ZodType<any, any, any>,
-    NewFieldNames extends FieldNames | Name,
-    Optional extends boolean = false
-  >(
-    options: FieldOptions<Name, Zod, Optional>
-  ) => ObjectType<
-    NewFieldNames,
-    // @ts-expect-error -- Not sure how to solve this
-    Fields & {
-      [field in Name]: FieldOptions<Name, Zod, Optional>;
-    }
-  >;
-}
+interface ObjectType<Fields extends FieldsType<any, any>>
+  extends SanityType<
+    ObjectFieldDef<never, never, InferFieldNames<Fields>, never, never>,
+    InferFieldsZod<Fields>
+  > {}
 
-const objectInternal = <
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  }
->(
+export const object = <Fields extends FieldsType<any, any>>(
   def: Omit<
-    ObjectFieldDef<never, never, FieldNames, never, never>,
+    ObjectFieldDef<never, never, InferFieldNames<Fields>, never, never>,
     "description" | "fields" | "preview" | "type"
-  >,
-  fields: Array<Fields[FieldNames]>
-): ObjectType<FieldNames, Fields> => {
-  const zod = fieldsZod(fields);
+  > & {
+    fields: Fields;
+    mock?: (faker: Faker) => z.input<InferFieldsZod<Fields>>;
+  }
+): ObjectType<Fields> => {
+  const {
+    fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
+    mock = fieldsMock,
+  } = def;
+  const zod = fieldsZod as InferFieldsZod<Fields>;
 
   return {
     zod,
     parse: zod.parse.bind(zod),
+    mock: () => mock(faker),
     schema: () => ({
       ...def,
       type: "object",
-      fields: fieldsSchema(fields),
+      fields: fieldsSchema(),
     }),
-    field: <
-      Name extends string,
-      Zod extends z.ZodType<any, any, any>,
-      NewFieldNames extends FieldNames | Name,
-      Optional extends boolean = false
-    >(
-      options: FieldOptions<Name, Zod, Optional>
-    ) =>
-      objectInternal<
-        NewFieldNames,
-        // @ts-expect-error -- Not sure how to solve this
-        Fields & {
-          [field in Name]: FieldOptions<Name, Zod, Optional>;
-        }
-      >(def, [...fields, options]),
   };
 };
-
-export const object = (
-  def: Omit<
-    ObjectFieldDef<never, never, never, never, never>,
-    "description" | "fields" | "preview" | "type"
-  > = {}
-) => objectInternal<never, Record<never, never>>(def, []);

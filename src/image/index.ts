@@ -1,97 +1,137 @@
+import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
-import { fieldsSchema, fieldsZod } from "../fields";
+import type { FieldsType, InferFieldNames, InferFieldsZod } from "../fields";
+import type { SanityType } from "../types";
+import type { Faker } from "@faker-js/faker";
 
-import type { FieldOptions, InferOptional, InferType } from "../fields";
-import type { InferZod, SanityType } from "../types";
+type ZodImage<
+  Hotspot extends boolean,
+  Fields extends FieldsType<any, any>
+> = z.ZodIntersection<
+  InferFieldsZod<Fields>,
+  z.ZodObject<
+    Hotspot extends false
+      ? {
+          _type: z.ZodLiteral<"image">;
+          asset: z.ZodObject<{
+            _ref: z.ZodString;
+            _type: z.ZodLiteral<"reference">;
+          }>;
+        }
+      : {
+          _type: z.ZodLiteral<"image">;
+          asset: z.ZodObject<{
+            _ref: z.ZodString;
+            _type: z.ZodLiteral<"reference">;
+          }>;
+          crop: z.ZodObject<{
+            bottom: z.ZodNumber;
+            left: z.ZodNumber;
+            right: z.ZodNumber;
+            top: z.ZodNumber;
+          }>;
+          hotspot: z.ZodObject<{
+            height: z.ZodNumber;
+            width: z.ZodNumber;
+            x: z.ZodNumber;
+            y: z.ZodNumber;
+          }>;
+        },
+    "strip"
+  >
+>;
 
 interface ImageType<
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  },
-  Hotspot extends boolean
+  Hotspot extends boolean,
+  Fields extends FieldsType<any, any>
 > extends SanityType<
-    ImageFieldDef<never, never, FieldNames>,
-    z.ZodIntersection<
-      z.ZodObject<
-        {
-          [field in FieldNames]: InferOptional<Fields[field]> extends true
-            ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
-            : InferZod<InferType<Fields[field]>>;
-        },
-        "strip"
-      >,
-      z.ZodObject<
-        Hotspot extends false
-          ? {
-              _type: z.ZodLiteral<"image">;
-              asset: z.ZodObject<{
-                _ref: z.ZodString;
-                _type: z.ZodLiteral<"reference">;
-              }>;
-            }
-          : {
-              _type: z.ZodLiteral<"image">;
-              asset: z.ZodObject<{
-                _ref: z.ZodString;
-                _type: z.ZodLiteral<"reference">;
-              }>;
-              crop: z.ZodObject<{
-                bottom: z.ZodNumber;
-                left: z.ZodNumber;
-                right: z.ZodNumber;
-                top: z.ZodNumber;
-              }>;
-              hotspot: z.ZodObject<{
-                height: z.ZodNumber;
-                width: z.ZodNumber;
-                x: z.ZodNumber;
-                y: z.ZodNumber;
-              }>;
-            },
-        "strip"
-      >
-    >
-  > {
-  field: <
-    Name extends string,
-    Zod extends z.ZodType<any, any, any>,
-    NewFieldNames extends FieldNames | Name,
-    Optional extends boolean = false
-  >(
-    options: FieldOptions<Name, Zod, Optional>
-  ) => ImageType<
-    NewFieldNames,
-    // @ts-expect-error -- Not sure how to solve this
-    Fields & {
-      [field in Name]: FieldOptions<Name, Zod, Optional>;
-    },
-    Hotspot
-  >;
-}
+    ImageFieldDef<never, never, InferFieldNames<Fields>>,
+    ZodImage<Hotspot, Fields>
+  > {}
 
-type ImageDef<FieldNames extends string, Hotspot extends boolean> = Omit<
-  ImageFieldDef<never, never, FieldNames>,
-  "description" | "fields" | "preview" | "type"
-> & {
-  hotspot?: Hotspot;
-};
-
-const imageInternal = <
-  FieldNames extends string,
-  Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any>;
-  },
-  Hotspot extends boolean
+export const image = <
+  Hotspot extends boolean = false,
+  Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
 >(
-  def: ImageDef<FieldNames, Hotspot>,
-  fields: Array<Fields[FieldNames]>
-): ImageType<FieldNames, Fields, Hotspot> => {
-  const { hotspot } = def;
+  def: Omit<
+    ImageFieldDef<never, never, InferFieldNames<Fields>>,
+    "description" | "fields" | "preview" | "type"
+  > & {
+    fields?: Fields;
+    hotspot?: Hotspot;
+    mock?: (faker: Faker) => z.input<ZodImage<Hotspot, Fields>>;
+  } = {}
+): ImageType<Hotspot, Fields> => {
+  const {
+    hotspot,
+    fields: {
+      schema: fieldsSchema = () => undefined,
+      mock: fieldsMock = () =>
+        ({} as unknown as z.input<InferFieldsZod<Fields>>),
+      zod: fieldsZod = z.object({}),
+    } = {},
+    mock = () =>
+      ({
+        ...fieldsMock(),
+        _type: "image",
+        asset: {
+          _type: "reference",
+          _ref: faker.datatype.uuid(),
+        },
+        ...(!hotspot
+          ? {}
+          : {
+              crop: {
+                top: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+                bottom: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+                left: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+                right: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+              },
+              hotspot: {
+                x: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+                y: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+                height: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+                width: faker.datatype.number({
+                  min: 0,
+                  max: 1,
+                  precision: 1 / 10 ** 15,
+                }),
+              },
+            }),
+      } as unknown as z.input<ZodImage<Hotspot, Fields>>),
+  } = def;
 
   const zod = z.intersection(
-    fieldsZod(fields),
+    fieldsZod as InferFieldsZod<Fields>,
     z.object(
       !hotspot
         ? {
@@ -120,65 +160,17 @@ const imageInternal = <
               y: z.number(),
             }),
           }
-    ) as z.ZodObject<
-      Hotspot extends false
-        ? {
-            _type: z.ZodLiteral<"image">;
-            asset: z.ZodObject<{
-              _ref: z.ZodString;
-              _type: z.ZodLiteral<"reference">;
-            }>;
-          }
-        : {
-            _type: z.ZodLiteral<"image">;
-            asset: z.ZodObject<{
-              _ref: z.ZodString;
-              _type: z.ZodLiteral<"reference">;
-            }>;
-            crop: z.ZodObject<{
-              bottom: z.ZodNumber;
-              left: z.ZodNumber;
-              right: z.ZodNumber;
-              top: z.ZodNumber;
-            }>;
-            hotspot: z.ZodObject<{
-              height: z.ZodNumber;
-              width: z.ZodNumber;
-              x: z.ZodNumber;
-              y: z.ZodNumber;
-            }>;
-          },
-      "strip"
-    >
-  );
+    )
+  ) as unknown as ZodImage<Hotspot, Fields>;
 
   return {
     zod,
     parse: zod.parse.bind(zod),
+    mock: () => mock(faker),
     schema: () => ({
       ...def,
       type: "image",
-      fields: !fields.length ? undefined : fieldsSchema(fields),
+      fields: fieldsSchema(),
     }),
-    field: <
-      Name extends string,
-      Zod extends z.ZodType<any, any, any>,
-      NewFieldNames extends FieldNames | Name,
-      Optional extends boolean = false
-    >(
-      options: FieldOptions<Name, Zod, Optional>
-    ) =>
-      imageInternal<
-        NewFieldNames,
-        // @ts-expect-error -- Not sure how to solve this
-        Fields & {
-          [field in Name]: FieldOptions<Name, Zod, Optional>;
-        },
-        Hotspot
-      >(def, [...fields, options]),
   };
 };
-
-export const image = <Hotspot extends boolean = false>(
-  def: ImageDef<never, Hotspot> = {}
-) => imageInternal<never, Record<never, never>, Hotspot>(def, []);

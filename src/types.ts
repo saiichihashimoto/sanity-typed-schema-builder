@@ -1,9 +1,13 @@
 import type { z } from "zod";
 
 export interface SanityType<
-  Definition extends FieldDef<any, any>,
+  // TODO Does this need to be strongly typed like this? Can it just be not typed?
+  Definition extends
+    | FieldDef<any, any>
+    | ObjectFieldDef<never, never, string, never, never>["fields"],
   Zod extends z.ZodType<any, any, any>
 > {
+  mock: () => z.input<Zod>;
   parse: (data: unknown) => z.infer<Zod>;
   schema: () => Definition;
   zod: Zod;

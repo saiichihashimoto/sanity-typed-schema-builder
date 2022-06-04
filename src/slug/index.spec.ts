@@ -34,4 +34,24 @@ describe("slug", () => {
 
     expect(parsedValue).toEqual("foo");
   });
+
+  it("mocks a slug", () =>
+    expect(slug().mock()).toEqual({
+      _type: "slug",
+      current: expect.any(String),
+    }));
+
+  it("allows defining the mocks", () =>
+    expect([
+      { _type: "slug", current: "a-slug" },
+      { _type: "slug", current: "b-slug" },
+    ]).toContainEqual(
+      slug({
+        mock: (faker) =>
+          faker.helpers.arrayElement([
+            { _type: "slug", current: "a-slug" },
+            { _type: "slug", current: "b-slug" },
+          ]),
+      }).mock()
+    ));
 });

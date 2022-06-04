@@ -2,6 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
 import { boolean } from "../boolean";
+import { fields } from "../fields";
 import { object } from "../object";
 import { mockRule } from "../test-utils";
 
@@ -58,9 +59,11 @@ describe("array", () => {
 
   it("adds nonprimitive types", () => {
     const type = array().of(
-      object().field({
-        name: "foo",
-        type: boolean(),
+      object({
+        fields: fields().field({
+          name: "foo",
+          type: boolean(),
+        }),
       })
     );
 
@@ -94,15 +97,19 @@ describe("array", () => {
   it("creates union with multiple types", () => {
     const type = array()
       .of(
-        object().field({
-          name: "foo",
-          type: boolean(),
+        object({
+          fields: fields().field({
+            name: "foo",
+            type: boolean(),
+          }),
         })
       )
       .of(
-        object().field({
-          name: "bar",
-          type: boolean(),
+        object({
+          fields: fields().field({
+            name: "bar",
+            type: boolean(),
+          }),
         })
       );
 
