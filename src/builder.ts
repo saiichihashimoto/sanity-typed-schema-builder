@@ -4,6 +4,7 @@ export { boolean } from "./boolean";
 export { date } from "./date";
 export { datetime } from "./datetime";
 export { document } from "./document";
+export { fields } from "./fields";
 export { file } from "./file";
 export { geopoint } from "./geopoint";
 export { image } from "./image";
