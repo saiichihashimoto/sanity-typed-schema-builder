@@ -11,6 +11,7 @@ export { object } from "./object";
 export { reference } from "./reference";
 export { slug } from "./slug";
 export { string } from "./string";
+export { text } from "./text";
 export { url } from "./url";
 
 export type {
