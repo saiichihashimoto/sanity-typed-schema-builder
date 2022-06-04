@@ -42,15 +42,21 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(min);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = 0;
+    const value: ValidateShape<InferInput<typeof type>, number> = 5;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse(0);
     }).toThrow(z.ZodError);
   });
 
   it("sets max", () => {
-    const type = number({ max: 1 });
+    const type = number({ max: 6 });
 
     const max = mockRule();
 
@@ -61,10 +67,16 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(max);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = 2;
+    const value: ValidateShape<InferInput<typeof type>, number> = 5;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse(9);
     }).toThrow(z.ZodError);
   });
 
@@ -80,15 +92,21 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(greaterThan);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = 0;
+    const value: ValidateShape<InferInput<typeof type>, number> = 5;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse(0);
     }).toThrow(z.ZodError);
   });
 
   it("sets lessThan", () => {
-    const type = number({ lessThan: 1 });
+    const type = number({ lessThan: 6 });
 
     const lessThan = mockRule();
 
@@ -99,10 +117,16 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(lessThan);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = 2;
+    const value: ValidateShape<InferInput<typeof type>, number> = 5;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse(9);
     }).toThrow(z.ZodError);
   });
 
@@ -118,10 +142,16 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(integer);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = 1.5;
+    const value: ValidateShape<InferInput<typeof type>, number> = 5;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse(5.5);
     }).toThrow(z.ZodError);
   });
 
@@ -137,10 +167,16 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(positive);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = -1;
+    const value: ValidateShape<InferInput<typeof type>, number> = 5;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse(-5);
     }).toThrow(z.ZodError);
   });
 
@@ -156,10 +192,16 @@ describe("number", () => {
 
     expect(type.schema().validation?.(rule)).toEqual(negative);
 
-    const value: ValidateShape<InferInput<typeof type>, number> = 1;
+    const value: ValidateShape<InferInput<typeof type>, number> = -5;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse(value);
+      type.parse(5);
     }).toThrow(z.ZodError);
   });
 

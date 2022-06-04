@@ -46,7 +46,7 @@ describe("datetime", () => {
   });
 
   it("sets min", () => {
-    const type = datetime({ min: "2022-06-03T03:24:55.395Z" });
+    const type = datetime({ min: "2022-06-03T03:24:55.394Z" });
 
     const min = mockRule();
 
@@ -60,15 +60,21 @@ describe("datetime", () => {
     const value: ValidateShape<
       InferInput<typeof type>,
       string
-    > = "2022-06-03T03:24:55.390Z";
+    > = "2022-06-03T03:24:55.395Z";
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      Date
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(new Date(value));
 
     expect(() => {
-      type.parse(value);
-    }).toThrow("Greater than 2022-06-03T03:24:55.395Z");
+      type.parse("2022-06-03T03:24:55.390Z");
+    }).toThrow("Greater than 2022-06-03T03:24:55.394Z");
   });
 
   it("sets max", () => {
-    const type = datetime({ max: "2022-06-03T03:24:55.395Z" });
+    const type = datetime({ max: "2022-06-03T03:24:55.396Z" });
 
     const max = mockRule();
 
@@ -82,11 +88,17 @@ describe("datetime", () => {
     const value: ValidateShape<
       InferInput<typeof type>,
       string
-    > = "2022-06-03T03:24:55.399Z";
+    > = "2022-06-03T03:24:55.395Z";
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      Date
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(new Date(value));
 
     expect(() => {
-      type.parse(value);
-    }).toThrow("Less than 2022-06-03T03:24:55.395Z");
+      type.parse("2022-06-03T03:24:55.399Z");
+    }).toThrow("Less than 2022-06-03T03:24:55.396Z");
   });
 
   it("min & max are inclusive", () => {
