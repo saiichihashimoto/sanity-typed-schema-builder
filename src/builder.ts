@@ -1,3 +1,4 @@
+export { array } from "./array";
 export { boolean } from "./boolean";
 export { document } from "./document";
 export { object } from "./object";

@@ -4,7 +4,13 @@ import { document } from "../document";
 
 import { reference } from ".";
 
+import type { ValidateShape } from "../test-types";
 import type { InferInput, InferOutput } from "../types";
+import type { Reference } from "@sanity/types";
+
+type SanityReference = Pick<Reference, "_ref" | "_weak"> & {
+  _type: "reference";
+};
 
 describe("reference", () => {
   it("builds a sanity config", () =>
@@ -22,11 +28,14 @@ describe("reference", () => {
   it("parses into a reference", () => {
     const type = reference();
 
-    const value: InferInput<typeof type> = {
+    const value: ValidateShape<InferInput<typeof type>, SanityReference> = {
       _type: "reference",
       _ref: "somereference",
     };
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      SanityReference
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
@@ -38,11 +47,14 @@ describe("reference", () => {
 
     expect(schema).toHaveProperty("to", [{ type: "foo" }]);
 
-    const value: InferInput<typeof type> = {
+    const value: ValidateShape<InferInput<typeof type>, SanityReference> = {
       _type: "reference",
       _ref: "somereference",
     };
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      SanityReference
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });

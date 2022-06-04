@@ -2,60 +2,52 @@ import { z } from "zod";
 
 import { fieldsSchema, fieldsZod } from "../fields";
 
-import type { FieldOptions, InferOptional } from "../fields";
-import type {
-  InferInput,
-  InferOutput,
-  SanityType,
-  UndefinedAsOptional,
-} from "../types";
+import type { FieldOptions, InferOptional, InferType } from "../fields";
+import type { InferZod, SanityType } from "../types";
 import type { DocumentDef } from "@sanity/base";
-import type { SanityDocument } from "@sanity/types";
-import type { ZodType } from "zod";
 
 export interface DocumentType<
   DocumentName extends string,
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any, any>;
+    [field in FieldNames]: FieldOptions<field, any, any>;
   }
 > extends SanityType<
     DocumentDef<DocumentName, never, FieldNames, never, never, never>,
-    UndefinedAsOptional<
-      {
-        [field in keyof Fields]: InferOptional<Fields[field]> extends true
-          ? InferInput<Fields[field]["type"]> | undefined
-          : InferInput<Fields[field]["type"]>;
-      } & Pick<SanityDocument, "_createdAt" | "_id" | "_rev" | "_updatedAt"> & {
-          _type: DocumentName;
-        }
-    >,
-    UndefinedAsOptional<
-      {
-        [field in keyof Fields]: InferOptional<Fields[field]> extends true
-          ? InferOutput<Fields[field]["type"]> | undefined
-          : InferOutput<Fields[field]["type"]>;
-      } & Pick<SanityDocument, "_id" | "_rev"> & {
-          _createdAt: Date;
-          _type: DocumentName;
-          _updatedAt: Date;
-        }
+    z.ZodIntersection<
+      z.ZodObject<
+        {
+          [field in FieldNames]: InferOptional<Fields[field]> extends true
+            ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
+            : InferZod<InferType<Fields[field]>>;
+        },
+        "strip"
+      >,
+      z.ZodObject<
+        {
+          _createdAt: z.ZodType<Date, any, string>;
+          _id: z.ZodString;
+          _rev: z.ZodString;
+          _type: z.ZodLiteral<DocumentName>;
+          _updatedAt: z.ZodType<Date, any, string>;
+        },
+        "strip"
+      >
     >
   > {
   field: <
     Name extends string,
-    Input,
-    Output,
+    Zod extends z.ZodType<any, any, any>,
     NewFieldNames extends FieldNames | Name,
     Optional extends boolean = false
   >(
-    options: FieldOptions<Name, Input, Output, Optional>
+    options: FieldOptions<Name, Zod, Optional>
   ) => DocumentType<
     DocumentName,
     NewFieldNames,
     // @ts-expect-error -- Not sure how to solve this
     Fields & {
-      [field in Name]: FieldOptions<field, Input, Output, Optional>;
+      [field in Name]: FieldOptions<Name, Zod, Optional>;
     }
   >;
   name: DocumentName;
@@ -65,7 +57,7 @@ const documentInternal = <
   DocumentName extends string,
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any, any>;
+    [field in FieldNames]: FieldOptions<field, any, any>;
   }
 >(
   {
@@ -86,11 +78,7 @@ const documentInternal = <
       _type: z.literal(name),
       _updatedAt: z.string().transform((v) => new Date(v)),
     })
-  ) as unknown as ZodType<
-    InferOutput<DocumentType<DocumentName, FieldNames, Fields>>,
-    any,
-    InferInput<DocumentType<DocumentName, FieldNames, Fields>>
-  >;
+  );
 
   return {
     name,
@@ -104,19 +92,18 @@ const documentInternal = <
     }),
     field: <
       Name extends string,
-      Input,
-      Output,
+      Zod extends z.ZodType<any, any, any>,
       NewFieldNames extends FieldNames | Name,
       Optional extends boolean = false
     >(
-      options: FieldOptions<Name, Input, Output, Optional>
+      options: FieldOptions<Name, Zod, Optional>
     ) =>
       documentInternal<
         DocumentName,
         NewFieldNames,
         // @ts-expect-error -- Not sure how to solve this
         Fields & {
-          [field in Name]: FieldOptions<field, Input, Output, Optional>;
+          [field in Name]: FieldOptions<Name, Zod, Optional>;
         }
       >({ name, ...def }, [...fields, options]),
   };

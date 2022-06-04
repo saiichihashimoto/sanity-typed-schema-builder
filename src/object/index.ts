@@ -1,44 +1,37 @@
 import { fieldsSchema, fieldsZod } from "../fields";
 
-import type { FieldOptions, InferOptional } from "../fields";
-import type {
-  InferInput,
-  InferOutput,
-  SanityType,
-  UndefinedAsOptional,
-} from "../types";
+import type { FieldOptions, InferOptional, InferType } from "../fields";
+import type { InferZod, SanityType } from "../types";
+import type { z } from "zod";
 
 interface ObjectType<
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any, any>;
+    [field in FieldNames]: FieldOptions<field, any, any>;
   }
 > extends SanityType<
     ObjectFieldDef<never, never, FieldNames, never, never>,
-    UndefinedAsOptional<{
-      [field in keyof Fields]: InferOptional<Fields[field]> extends true
-        ? InferInput<Fields[field]["type"]> | undefined
-        : InferInput<Fields[field]["type"]>;
-    }>,
-    UndefinedAsOptional<{
-      [field in keyof Fields]: InferOptional<Fields[field]> extends true
-        ? InferOutput<Fields[field]["type"]> | undefined
-        : InferOutput<Fields[field]["type"]>;
-    }>
+    z.ZodObject<
+      {
+        [field in FieldNames]: InferOptional<Fields[field]> extends true
+          ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
+          : InferZod<InferType<Fields[field]>>;
+      },
+      "strip"
+    >
   > {
   field: <
     Name extends string,
-    Input,
-    Output,
+    Zod extends z.ZodType<any, any, any>,
     NewFieldNames extends FieldNames | Name,
     Optional extends boolean = false
   >(
-    options: FieldOptions<Name, Input, Output, Optional>
+    options: FieldOptions<Name, Zod, Optional>
   ) => ObjectType<
     NewFieldNames,
     // @ts-expect-error -- Not sure how to solve this
     Fields & {
-      [field in Name]: FieldOptions<field, Input, Output, Optional>;
+      [field in Name]: FieldOptions<Name, Zod, Optional>;
     }
   >;
 }
@@ -46,7 +39,7 @@ interface ObjectType<
 const objectInternal = <
   FieldNames extends string,
   Fields extends {
-    [field in FieldNames]: FieldOptions<field, any, any, any>;
+    [field in FieldNames]: FieldOptions<field, any, any>;
   }
 >(
   def: Omit<
@@ -67,18 +60,17 @@ const objectInternal = <
     }),
     field: <
       Name extends string,
-      Input,
-      Output,
+      Zod extends z.ZodType<any, any, any>,
       NewFieldNames extends FieldNames | Name,
       Optional extends boolean = false
     >(
-      options: FieldOptions<Name, Input, Output, Optional>
+      options: FieldOptions<Name, Zod, Optional>
     ) =>
       objectInternal<
         NewFieldNames,
         // @ts-expect-error -- Not sure how to solve this
         Fields & {
-          [field in Name]: FieldOptions<field, Input, Output, Optional>;
+          [field in Name]: FieldOptions<Name, Zod, Optional>;
         }
       >(def, [...fields, options]),
   };

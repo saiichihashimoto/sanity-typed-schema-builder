@@ -1,35 +1,37 @@
-import type { ZodType } from "zod";
+import type { z } from "zod";
 
 export interface SanityType<
   Definition extends FieldDef<any, any>,
-  Input,
-  Output = Input
+  Zod extends z.ZodType<any, any, any>
 > {
-  parse: (data: unknown) => Output;
+  parse: (data: unknown) => z.infer<Zod>;
   schema: () => Definition;
-  zod: ZodType<Output, any, Input>;
+  zod: Zod;
 }
 
-export type InferInput<T extends SanityType<any, any, any>> =
-  T extends SanityType<any, infer Input, any> ? Input : never;
+export type InferZod<T extends SanityType<any, any>> = T extends SanityType<
+  any,
+  infer Zod
+>
+  ? Zod
+  : never;
 
-export type InferOutput<T extends SanityType<any, any, any>> =
-  T extends SanityType<any, any, infer Output> ? Output : never;
-
-type Resolve<T> = T extends (...args: any[]) => any
+export type Resolve<T> = T extends (...args: any[]) => any
   ? T
   : T extends abstract new (...args: any[]) => any
   ? T
   : { [K in keyof T]: T[K] };
 
-type OptionalKeys<T extends object> = {
-  [k in keyof T]: undefined extends T[k] ? k : never;
-}[keyof T];
+export type InferInput<T extends SanityType<any, any>> = T extends SanityType<
+  any,
+  infer Zod
+>
+  ? Resolve<z.input<Zod>>
+  : never;
 
-type RequiredKeys<T extends object> = {
-  [k in keyof T]: undefined extends T[k] ? never : k;
-}[keyof T];
-
-export type UndefinedAsOptional<T extends object> = Resolve<
-  Partial<Pick<T, OptionalKeys<T>>> & Pick<T, RequiredKeys<T>>
->;
+export type InferOutput<T extends SanityType<any, any>> = T extends SanityType<
+  any,
+  infer Zod
+>
+  ? Resolve<z.output<Zod>>
+  : never;

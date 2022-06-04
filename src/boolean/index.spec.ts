@@ -2,6 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from ".";
 
+import type { ValidateShape } from "../test-types";
 import type { InferInput, InferOutput } from "../types";
 
 describe("boolean", () => {
@@ -19,8 +20,11 @@ describe("boolean", () => {
   it("parses into a boolean", () => {
     const type = boolean();
 
-    const value: InferInput<typeof type> = true;
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const value: ValidateShape<InferInput<typeof type>, boolean> = true;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      boolean
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
