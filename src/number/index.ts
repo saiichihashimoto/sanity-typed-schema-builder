@@ -3,7 +3,11 @@ import { z } from "zod";
 
 import type { SanityType } from "../types";
 
-interface NumberType extends SanityType<NumberFieldDef, z.ZodNumber> {}
+interface NumberType
+  extends SanityType<
+    NumberFieldDef,
+    z.ZodType<number, z.ZodNumberDef | z.ZodEffectsDef<z.ZodNumber>>
+  > {}
 
 type NumberDef = Omit<NumberFieldDef, "description" | "type"> & {
   greaterThan?: number;
@@ -39,7 +43,12 @@ export const number = (def: NumberDef = {}): NumberType => {
       (zod) => (!positive ? zod : zod.nonnegative()),
       (zod) => (!negative ? zod : zod.negative())
     ),
-    (zod) => (!precision ? zod : zod.multipleOf(1 / 10 ** precision))
+    (zod) =>
+      !precision
+        ? zod
+        : zod.transform(
+            (value) => Math.round(value * 10 ** precision) / 10 ** precision
+          )
   )(z.number());
 
   return {
