@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { SanityType } from "../types";
 
-interface BooleanType extends SanityType<BooleanFieldDef, boolean> {}
+interface BooleanType extends SanityType<BooleanFieldDef, z.ZodBoolean> {}
 
 export const boolean = (
   def: Omit<BooleanFieldDef, "description" | "type"> = {}

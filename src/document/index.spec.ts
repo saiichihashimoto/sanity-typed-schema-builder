@@ -4,6 +4,7 @@ import { boolean } from "../boolean";
 
 import { document } from ".";
 
+import type { ValidateShape } from "../test-types";
 import type { InferInput, InferOutput } from "../types";
 
 const mockRule = () => {
@@ -49,14 +50,32 @@ describe("document", () => {
   it("parses into an document", () => {
     const type = document({ name: "foo" });
 
-    const value: InferInput<typeof type> = {
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        _createdAt: string;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: string;
+      }
+    > = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
     };
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      {
+        _createdAt: Date;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: Date;
+      }
+    > = type.parse(value);
 
     expect(parsedValue).toEqual({
       ...value,
@@ -89,7 +108,17 @@ describe("document", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).toEqual(required);
 
-    const value: InferInput<typeof type> = {
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        _createdAt: string;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: string;
+        foo: boolean;
+      }
+    > = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
@@ -97,7 +126,17 @@ describe("document", () => {
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
     };
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      {
+        _createdAt: Date;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: Date;
+        foo: boolean;
+      }
+    > = type.parse(value);
 
     expect(parsedValue).toEqual({
       ...value,
@@ -131,14 +170,34 @@ describe("document", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).not.toEqual(required);
 
-    const value: InferInput<typeof type> = {
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        _createdAt: string;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: string;
+        foo?: boolean;
+      }
+    > = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
     };
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      {
+        _createdAt: Date;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: Date;
+        foo?: boolean;
+      }
+    > = type.parse(value);
 
     expect(parsedValue).toEqual({
       ...value,

@@ -2,10 +2,19 @@ import { z } from "zod";
 
 import type { DocumentType } from "../document";
 import type { SanityType } from "../types";
-import type { Reference } from "@sanity/types";
 
 interface ReferenceType<DocumentName extends string>
-  extends SanityType<ReferenceFieldDef<DocumentName>, Reference> {
+  extends SanityType<
+    ReferenceFieldDef<DocumentName>,
+    z.ZodObject<
+      {
+        _ref: z.ZodString;
+        _type: z.ZodLiteral<"reference">;
+        _weak: z.ZodOptional<z.ZodBoolean>;
+      },
+      "strip"
+    >
+  > {
   to: <Name extends string>(
     document: DocumentType<Name, any, any>
   ) => ReferenceType<DocumentName | Name>;
@@ -18,7 +27,7 @@ const referenceInternal = <DocumentName extends string>(
   const zod = z.object({
     _ref: z.string(),
     _type: z.literal("reference"),
-    weak: z.boolean().optional(),
+    _weak: z.boolean().optional(),
   });
 
   return {
@@ -30,6 +39,7 @@ const referenceInternal = <DocumentName extends string>(
       to: documents.map(({ name }) => ({ type: name })),
     }),
     to: <Name extends string>(document: DocumentType<Name, any, any>) =>
+      // @ts-expect-error -- Not sure how to solve this
       referenceInternal<DocumentName | Name>(def, [...documents, document]),
   };
 };

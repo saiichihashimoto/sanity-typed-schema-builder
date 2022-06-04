@@ -4,6 +4,7 @@ import { boolean } from "../boolean";
 
 import { object } from ".";
 
+import type { ValidateShape } from "../test-types";
 import type { InferInput, InferOutput } from "../types";
 
 const mockRule = () => {
@@ -45,8 +46,14 @@ describe("object", () => {
   it("parses into an object", () => {
     const type = object();
 
-    const value: InferInput<typeof type> = {};
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      Record<never, never>
+    > = {};
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      Record<never, never>
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
@@ -76,8 +83,13 @@ describe("object", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).toEqual(required);
 
-    const value: InferInput<typeof type> = { foo: true };
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const value: ValidateShape<InferInput<typeof type>, { foo: boolean }> = {
+      foo: true,
+    };
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      { foo: boolean }
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
@@ -107,8 +119,11 @@ describe("object", () => {
 
     expect(schema.fields[0]?.validation?.(rule)).not.toEqual(required);
 
-    const value: InferInput<typeof type> = {};
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const value: ValidateShape<InferInput<typeof type>, { foo?: boolean }> = {};
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      { foo?: boolean }
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });

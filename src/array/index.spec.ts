@@ -5,6 +5,7 @@ import { object } from "../object";
 
 import { array } from ".";
 
+import type { ValidateShape } from "../test-types";
 import type { InferInput, InferOutput } from "../types";
 
 describe("array", () => {
@@ -20,8 +21,10 @@ describe("array", () => {
   it("parses into an array", () => {
     const type = array();
 
-    const value: InferInput<typeof type> = [];
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const value: ValidateShape<InferInput<typeof type>, []> = [];
+    const parsedValue: ValidateShape<InferOutput<typeof type>, []> = type.parse(
+      value
+    );
 
     expect(parsedValue).toEqual(value);
   });
@@ -37,26 +40,101 @@ describe("array", () => {
       },
     ]);
 
-    const value: InferInput<typeof type> = [true, false];
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [
+      true,
+      false,
+    ];
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      boolean[]
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
 
   it("adds nonprimitive types", () => {
-    const type = array().of(object());
+    const type = array().of(
+      object().field({
+        name: "foo",
+        type: boolean(),
+      })
+    );
 
     const schema = type.schema();
 
     expect(schema).toHaveProperty("of", [
       {
         type: "object",
-        fields: [],
+        fields: [
+          {
+            name: "foo",
+            type: "boolean",
+            validation: expect.any(Function),
+          },
+        ],
       },
     ]);
 
-    const value: InferInput<typeof type> = [{}];
-    const parsedValue: InferOutput<typeof type> = type.parse(value);
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      Array<{ foo: boolean }>
+    > = [{ foo: true }, { foo: false }];
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      Array<{ foo: boolean }>
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+  });
+
+  it("creates union with multiple types", () => {
+    const type = array()
+      .of(
+        object().field({
+          name: "foo",
+          type: boolean(),
+        })
+      )
+      .of(
+        object().field({
+          name: "bar",
+          type: boolean(),
+        })
+      );
+
+    const schema = type.schema();
+
+    expect(schema).toHaveProperty("of", [
+      {
+        type: "object",
+        fields: [
+          {
+            name: "foo",
+            type: "boolean",
+            validation: expect.any(Function),
+          },
+        ],
+      },
+      {
+        type: "object",
+        fields: [
+          {
+            name: "bar",
+            type: "boolean",
+            validation: expect.any(Function),
+          },
+        ],
+      },
+    ]);
+
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      Array<{ foo: boolean } | { bar: boolean }>
+    > = [{ foo: true }, { bar: true }];
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      Array<{ foo: boolean } | { bar: boolean }>
+    > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
