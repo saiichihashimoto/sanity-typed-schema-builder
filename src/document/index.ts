@@ -1,7 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
-import type { FieldsType, InferFieldNames, InferFieldsZod } from "../fields";
+import { preview } from "../fields";
+
+import type {
+  FieldsType,
+  InferFieldNames,
+  InferFieldsZod,
+  Preview,
+} from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { DocumentDef } from "@sanity/base";
@@ -27,14 +34,7 @@ export interface DocumentType<
   DocumentName extends string,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    DocumentDef<
-      DocumentName,
-      never,
-      InferFieldNames<Fields>,
-      never,
-      never,
-      never
-    >,
+    DocumentDef<DocumentName, never, InferFieldNames<Fields>, never, never>,
     ZodDocument<DocumentName, Fields>
   > {
   name: DocumentName;
@@ -45,22 +45,17 @@ export const document = <
   Fields extends FieldsType<any, any>
 >(
   def: Omit<
-    DocumentDef<
-      DocumentName,
-      never,
-      InferFieldNames<Fields>,
-      never,
-      never,
-      never
-    >,
-    "fields" | "type"
+    DocumentDef<DocumentName, never, InferFieldNames<Fields>, never, never>,
+    "fields" | "preview" | "type"
   > & {
     fields: Fields;
     mock?: (faker: Faker) => z.input<ZodDocument<DocumentName, Fields>>;
+    preview?: Preview<z.input<ZodDocument<DocumentName, Fields>>>;
   }
 ): DocumentType<DocumentName, Fields> => {
   const {
     name,
+    preview: previewDef,
     fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
     mock = () => {
       const createdAt = faker.date
@@ -96,10 +91,15 @@ export const document = <
     zod,
     parse: zod.parse.bind(zod),
     mock: () => mock(faker),
-    schema: () => ({
-      ...def,
-      type: "document",
-      fields: fieldsSchema(),
-    }),
+    schema: () => {
+      const schemaForFields = fieldsSchema();
+
+      return {
+        ...def,
+        type: "document",
+        fields: schemaForFields,
+        preview: preview(previewDef, schemaForFields),
+      };
+    },
   };
 };

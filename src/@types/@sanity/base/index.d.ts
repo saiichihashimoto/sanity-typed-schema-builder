@@ -320,7 +320,7 @@ type NonPrimitiveFieldDef<
   | FileFieldDef<DocumentNames, ObjectNames, FieldNames>
   | ImageFieldDef<DocumentNames, ObjectNames, FieldNames>
   | (Partial<NamedDef<string>> &
-      ObjectFieldDef<DocumentNames, ObjectNames, FieldNames, string, string>)
+      ObjectFieldDef<DocumentNames, ObjectNames, FieldNames, string>)
   | BlockFieldDef<DocumentNames, ObjectNames>
   /* eslint-enable no-use-before-define */
   | GeopointFieldDef
@@ -534,8 +534,8 @@ interface ObjectLikeDef<
   ObjectNames extends string,
   FieldNames extends string,
   FieldSetNames extends string,
-  SelectionNames extends string,
-  GroupNames extends string
+  GroupNames extends string,
+  SelectionNames extends string = string
 > {
   fields: Array<
     FieldType<DocumentNames, ObjectNames, FieldNames, string> & {
@@ -560,9 +560,9 @@ interface ObjectLikeDef<
   preview?:
     | {
         select: {
-          media?: FieldNames | ReactElement;
-          subtitle?: FieldNames;
-          title?: FieldNames;
+          media?: string | ReactElement;
+          subtitle?: string;
+          title?: string;
         };
       }
     | {
@@ -575,12 +575,12 @@ interface ObjectLikeDef<
             ordering?: Ordering<FieldNames>;
           }
         ) => {
-          media?: FieldNames | ReactElement;
-          subtitle?: FieldNames;
-          title?: FieldNames;
+          media?: string | ReactElement;
+          subtitle?: string;
+          title?: string;
         };
         select: {
-          [name in SelectionNames]: FieldNames;
+          [name in SelectionNames]: string;
         };
       };
 }
@@ -590,15 +590,13 @@ interface ObjectFieldDef<
   DocumentNames extends string,
   ObjectNames extends string,
   FieldNames extends string,
-  FieldSetNames extends string,
-  SelectionNames extends string
+  FieldSetNames extends string
 > extends FieldDef<ObjectRule, { [Field in FieldNames]?: unknown }>,
     ObjectLikeDef<
       DocumentNames,
       ObjectNames,
       FieldNames,
       FieldSetNames,
-      SelectionNames,
       never
     > {
   type: "object";
@@ -609,16 +607,9 @@ type ObjectDefInternal<
   ObjectNames extends string,
   DocumentNames extends string,
   FieldNames extends string,
-  FieldSetNames extends string,
-  SelectionNames extends string
+  FieldSetNames extends string
 > = NamedDef<ObjectNames> &
-  ObjectFieldDef<
-    DocumentNames,
-    ObjectNames,
-    FieldNames,
-    FieldSetNames,
-    SelectionNames
-  >;
+  ObjectFieldDef<DocumentNames, ObjectNames, FieldNames, FieldSetNames>;
 
 /** @link https://www.sanity.io/docs/document-type */
 interface DocumentDefInternal<
@@ -626,7 +617,6 @@ interface DocumentDefInternal<
   ObjectNames extends string,
   FieldNames extends string,
   FieldSetNames extends string,
-  SelectionNames extends string,
   GroupNames extends string
 > extends NamedDef<DocumentNames>,
     WithInitialValue<{ [Field in FieldNames]?: unknown }>,
@@ -635,7 +625,6 @@ interface DocumentDefInternal<
       ObjectNames,
       FieldNames,
       FieldSetNames,
-      SelectionNames,
       GroupNames
     > {
   /** @link https://www.sanity.io/docs/ui-affordances-for-actions */
@@ -666,7 +655,6 @@ type SchemaTypeInternal<
   ObjectNames extends string,
   FieldNames extends string,
   FieldSetNames extends string,
-  SelectionNames extends string,
   GroupNames extends string
 > =
   | DocumentDefInternal<
@@ -674,45 +662,29 @@ type SchemaTypeInternal<
       ObjectNames,
       FieldNames,
       FieldSetNames,
-      SelectionNames,
       GroupNames
     >
-  | ObjectDefInternal<
-      ObjectNames,
-      DocumentNames,
-      FieldNames,
-      FieldSetNames,
-      SelectionNames
-    >;
+  | ObjectDefInternal<ObjectNames, DocumentNames, FieldNames, FieldSetNames>;
 
 declare module "@sanity/base" {
   type ObjectDef<
     ObjectNames extends string,
     DocumentNames extends string = never,
     FieldNames extends string = string,
-    FieldSetNames extends string = string,
-    SelectionNames extends string = string
-  > = ObjectDefInternal<
-    ObjectNames,
-    DocumentNames,
-    FieldNames,
-    FieldSetNames,
-    SelectionNames
-  >;
+    FieldSetNames extends string = string
+  > = ObjectDefInternal<ObjectNames, DocumentNames, FieldNames, FieldSetNames>;
 
   type DocumentDef<
     DocumentNames extends string,
     ObjectNames extends string = never,
     FieldNames extends string = string,
     FieldSetNames extends string = string,
-    SelectionNames extends string = string,
     GroupNames extends string = string
   > = DocumentDefInternal<
     DocumentNames,
     ObjectNames,
     FieldNames,
     FieldSetNames,
-    SelectionNames,
     GroupNames
   >;
 
@@ -721,14 +693,12 @@ declare module "@sanity/base" {
     ObjectNames extends string = any,
     FieldNames extends string = string,
     FieldSetNames extends string = string,
-    SelectionNames extends string = string,
     GroupNames extends string = string
   > = SchemaTypeInternal<
     DocumentNames,
     ObjectNames,
     FieldNames,
     FieldSetNames,
-    SelectionNames,
     GroupNames
   >;
 }
@@ -738,29 +708,20 @@ declare module "part:@sanity/base/schema-creator" {
     ObjectNames extends string,
     DocumentNames extends string = string,
     FieldNames extends string = string,
-    FieldSetNames extends string = string,
-    SelectionNames extends string = string
-  > = ObjectDefInternal<
-    ObjectNames,
-    DocumentNames,
-    FieldNames,
-    FieldSetNames,
-    SelectionNames
-  >;
+    FieldSetNames extends string = string
+  > = ObjectDefInternal<ObjectNames, DocumentNames, FieldNames, FieldSetNames>;
 
   type DocumentDef<
     DocumentNames extends string,
     ObjectNames extends string = never,
     FieldNames extends string = string,
     FieldSetNames extends string = string,
-    SelectionNames extends string = string,
     GroupNames extends string = string
   > = DocumentDefInternal<
     DocumentNames,
     ObjectNames,
     FieldNames,
     FieldSetNames,
-    SelectionNames,
     GroupNames
   >;
 
@@ -769,14 +730,12 @@ declare module "part:@sanity/base/schema-creator" {
     ObjectNames extends string = any,
     FieldNames extends string = string,
     FieldSetNames extends string = string,
-    SelectionNames extends string = string,
     GroupNames extends string = string
   > = SchemaTypeInternal<
     DocumentNames,
     ObjectNames,
     FieldNames,
     FieldSetNames,
-    SelectionNames,
     GroupNames
   >;
 
@@ -797,14 +756,12 @@ declare module "all:part:@sanity/base/schema-type" {
     ObjectNames extends string = any,
     FieldNames extends string = string,
     FieldSetNames extends string = string,
-    SelectionNames extends string = string,
     GroupNames extends string = string
   > = SchemaTypeInternal<
     DocumentNames,
     ObjectNames,
     FieldNames,
     FieldSetNames,
-    SelectionNames,
     GroupNames
   >;
 
