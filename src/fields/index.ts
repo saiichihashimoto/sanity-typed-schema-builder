@@ -1,4 +1,4 @@
-import { flow, fromPairs } from "lodash/fp";
+import { flow, fromPairs, isFunction } from "lodash/fp";
 import { z } from "zod";
 
 import type { InferZod, Resolve, SanityType } from "../types";
@@ -44,7 +44,7 @@ export interface FieldsType<
     [field in FieldNames]: FieldOptions<field, any, any>;
   }
 > extends SanityType<
-    ObjectFieldDef<never, never, FieldNames, never, never>["fields"],
+    ObjectFieldDef<never, never, FieldNames, never>["fields"],
     z.ZodObject<
       {
         [field in FieldNames]: InferOptional<Fields[field]> extends true
@@ -185,3 +185,24 @@ const fieldsInternal = <
 };
 
 export const fields = () => fieldsInternal<never, Record<never, never>>([]);
+
+interface Selection {
+  media?: string | ReactElement;
+  subtitle?: string;
+  title?: string;
+}
+
+export type Preview<Value> = ((object: Value) => Selection) | Selection;
+
+export const preview = <Value, FieldNames extends string>(
+  preview: Preview<Value> | undefined,
+  fields: ObjectFieldDef<never, never, FieldNames, never>["fields"]
+) =>
+  !preview
+    ? undefined
+    : !isFunction(preview)
+    ? { select: preview }
+    : {
+        prepare: preview,
+        select: fromPairs(fields.map(({ name }) => [name, name])),
+      };

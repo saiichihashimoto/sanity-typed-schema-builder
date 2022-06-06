@@ -215,4 +215,69 @@ describe("document", () => {
           ] as const),
       }).mock()
     ));
+
+  it("allows selection values", () =>
+    expect(
+      document({
+        name: "foo",
+        fields: fields(),
+        preview: {
+          title: "someTitle",
+          media: "someMedia",
+        },
+      }).schema()
+    ).toHaveProperty("preview.select", {
+      title: "someTitle",
+      media: "someMedia",
+    }));
+
+  it("allows a function selection value", () => {
+    const type = document({
+      name: "foo",
+      fields: fields()
+        .field({
+          name: "foo",
+          type: string(),
+        })
+        .field({
+          name: "bar",
+          optional: true,
+          type: string(),
+        }),
+      preview: ({ foo, bar }) => ({
+        title: foo,
+        subtitle: bar,
+      }),
+    });
+
+    const preview = type.schema().preview!;
+
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        _createdAt: string;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: string;
+        bar?: string;
+        foo: string;
+      }
+    > = {
+      _createdAt: "2022-06-03T03:24:55.395Z",
+      _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
+      _rev: "somerevstring",
+      _type: "foo",
+      _updatedAt: "2022-06-03T03:24:55.395Z",
+      bar: "someBar",
+      foo: "someFoo",
+    };
+
+    expect(
+      ("prepare" in preview ? preview : undefined)!.prepare(value)
+    ).toEqual({
+      title: "someFoo",
+      subtitle: "someBar",
+    });
+  });
 });

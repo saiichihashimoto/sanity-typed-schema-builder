@@ -126,4 +126,57 @@ describe("object", () => {
           ]),
       }).mock()
     ));
+
+  it("allows selection values", () =>
+    expect(
+      object({
+        fields: fields(),
+        preview: {
+          title: "someTitle",
+          media: "someMedia",
+        },
+      }).schema()
+    ).toHaveProperty("preview.select", {
+      title: "someTitle",
+      media: "someMedia",
+    }));
+
+  it("allows a function selection value", () => {
+    const type = object({
+      fields: fields()
+        .field({
+          name: "foo",
+          type: string(),
+        })
+        .field({
+          name: "bar",
+          optional: true,
+          type: string(),
+        }),
+      preview: ({ foo, bar }) => ({
+        title: foo,
+        subtitle: bar,
+      }),
+    });
+
+    const preview = type.schema().preview!;
+
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        bar?: string;
+        foo: string;
+      }
+    > = {
+      bar: "someBar",
+      foo: "someFoo",
+    };
+
+    expect(
+      ("prepare" in preview ? preview : undefined)!.prepare(value)
+    ).toEqual({
+      title: "someFoo",
+      subtitle: "someBar",
+    });
+  });
 });
