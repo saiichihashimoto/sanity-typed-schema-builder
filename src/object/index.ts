@@ -14,13 +14,13 @@ import type { z } from "zod";
 
 interface ObjectType<Fields extends FieldsType<any, any>>
   extends SanityType<
-    ObjectFieldDef<never, never, InferFieldNames<Fields>, never>,
+    ObjectFieldDef<any, any, InferFieldNames<Fields>, any>,
     InferFieldsZod<Fields>
   > {}
 
 export const object = <Fields extends FieldsType<any, any>>(
   def: Omit<
-    ObjectFieldDef<never, never, InferFieldNames<Fields>, never>,
+    ObjectFieldDef<any, any, InferFieldNames<Fields>, any>,
     "description" | "fields" | "preview" | "type"
   > & {
     fields: Fields;

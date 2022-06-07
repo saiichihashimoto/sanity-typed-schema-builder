@@ -10,6 +10,7 @@ export { geopoint } from "./geopoint";
 export { image } from "./image";
 export { number } from "./number";
 export { object } from "./object";
+export { objectNamed } from "./objectNamed";
 export { reference } from "./reference";
 export { slug } from "./slug";
 export { string } from "./string";

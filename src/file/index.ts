@@ -21,7 +21,7 @@ type ZodFile<Fields extends FieldsType<any, any>> = z.ZodIntersection<
 
 interface FileType<Fields extends FieldsType<any, any>>
   extends SanityType<
-    FileFieldDef<never, never, InferFieldNames<Fields>>,
+    FileFieldDef<any, any, InferFieldNames<Fields>>,
     ZodFile<Fields>
   > {}
 
@@ -29,7 +29,7 @@ export const file = <
   Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
 >(
   def: Omit<
-    FileFieldDef<never, never, InferFieldNames<Fields>>,
+    FileFieldDef<any, any, InferFieldNames<Fields>>,
     "description" | "fields" | "preview" | "type"
   > & {
     fields?: Fields;

@@ -34,7 +34,7 @@ export interface DocumentType<
   DocumentName extends string,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    DocumentDef<DocumentName, never, InferFieldNames<Fields>, never, never>,
+    DocumentDef<DocumentName, any, InferFieldNames<Fields>, any, any>,
     ZodDocument<DocumentName, Fields>
   > {
   name: DocumentName;
@@ -45,7 +45,7 @@ export const document = <
   Fields extends FieldsType<any, any>
 >(
   def: Omit<
-    DocumentDef<DocumentName, never, InferFieldNames<Fields>, never, never>,
+    DocumentDef<DocumentName, any, InferFieldNames<Fields>, any, any>,
     "fields" | "preview" | "type"
   > & {
     fields: Fields;
