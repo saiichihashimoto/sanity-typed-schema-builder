@@ -2,12 +2,18 @@ import { faker } from "@faker-js/faker";
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
+import type { FieldOptionKeys } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 
-interface StringType extends SanityType<StringFieldDef, z.ZodString> {}
+interface StringType
+  extends SanityType<
+    Omit<Schema.StringDefinition, FieldOptionKeys>,
+    z.ZodString
+  > {}
 
-type StringDef = Omit<StringFieldDef, "description" | "type"> & {
+type StringDef = Omit<Schema.StringDefinition, FieldOptionKeys | "type"> & {
   length?: number;
   max?: number;
   min?: number;

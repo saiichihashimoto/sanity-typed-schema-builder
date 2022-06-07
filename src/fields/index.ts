@@ -2,10 +2,15 @@ import { flow, fromPairs, isFunction } from "lodash/fp";
 import { z } from "zod";
 
 import type { InferZod, Resolve, SanityType } from "../types";
+import type {
+  PrepareViewOptions,
+  PreviewConfig,
+  PreviewValue,
+  Rule,
+  Schema,
+} from "@sanity/types";
 
-type FieldRule<FieldNames extends string> = Parameters<
-  NonNullable<FieldTypeFields<any, any, FieldNames>["validation"]>
->[0];
+export type FieldOptionKeys = "description" | "name" | "title";
 
 interface FieldOptions<
   Name extends string,
@@ -16,7 +21,13 @@ interface FieldOptions<
   name: Name;
   optional?: Optional;
   title?: string;
-  type: SanityType<FieldTypeFields<any, any, Name>, Zod>;
+  type: SanityType<
+    Omit<
+      Schema.FieldDefinition<any> & { validation?: (rule: Rule) => Rule },
+      FieldOptionKeys
+    >,
+    Zod
+  >;
 }
 
 type InferName<T extends FieldOptions<any, any, any>> = T extends FieldOptions<
@@ -44,7 +55,7 @@ export interface FieldsType<
     [field in FieldNames]: FieldOptions<field, any, any>;
   }
 > extends SanityType<
-    ObjectFieldDef<any, any, FieldNames, any>["fields"],
+    Array<Schema.FieldDefinition<any> & { validation?: (rule: Rule) => Rule }>,
     z.ZodObject<
       {
         [field in FieldNames]: InferOptional<Fields[field]> extends true
@@ -71,9 +82,6 @@ export interface FieldsType<
     >
   >;
 }
-
-export type InferFieldNames<T extends FieldsType<any, any>> =
-  T extends FieldsType<infer FieldNames, any> ? FieldNames : never;
 
 export type InferFieldsZod<T extends FieldsType<any, any>> =
   T extends FieldsType<infer FieldNames, infer Fields>
@@ -146,20 +154,15 @@ const fieldsInternal = <
         }: Fields[Name]) => {
           const schema = type.schema();
 
-          type Rule = FieldRule<Name>;
-
-          const { validation: validationUntyped } = schema;
-          const validation = validationUntyped as
-            | ((rule: Rule) => Rule)
-            | undefined;
+          const { validation } = schema;
 
           return {
             ...schema,
             ...props,
             name: name as Name,
             validation: flow(
-              (rule: Rule): Rule => (optional ? rule : rule.required()),
-              (rule): Rule => (validation?.(rule) ?? rule) as Rule
+              (rule: Rule) => (optional ? rule : rule.required()),
+              (rule) => validation?.(rule) ?? rule
             ),
           };
         }
@@ -186,23 +189,21 @@ const fieldsInternal = <
 
 export const fields = () => fieldsInternal<never, Record<never, never>>([]);
 
-interface Selection {
-  media?: string | ReactElement;
-  subtitle?: string;
-  title?: string;
-}
+export type Preview<Value extends Record<string, unknown>> =
+  | ((object: Value, viewOptions?: PrepareViewOptions) => PreviewValue)
+  | NonNullable<PreviewConfig["select"]>;
 
-export type Preview<Value> = ((object: Value) => Selection) | Selection;
-
-export const preview = <Value, FieldNames extends string>(
+export const preview = <Value extends Record<string, unknown>>(
   preview: Preview<Value> | undefined,
-  fields: ObjectFieldDef<any, any, FieldNames, any>["fields"]
-) =>
+  fields: Array<
+    Schema.FieldDefinition<any> & { validation?: (rule: Rule) => Rule }
+  >
+): PreviewConfig | undefined =>
   !preview
     ? undefined
     : !isFunction(preview)
     ? { select: preview }
     : {
-        prepare: preview,
+        prepare: preview as NonNullable<PreviewConfig["prepare"]>,
         select: fromPairs(fields.map(({ name }) => [name, name])),
       };

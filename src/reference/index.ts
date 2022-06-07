@@ -2,8 +2,10 @@ import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { DocumentType } from "../document";
+import type { FieldOptionKeys } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 
 type ZodReference = z.ZodObject<
   {
@@ -17,15 +19,18 @@ type ZodReference = z.ZodObject<
 type SanityReference = z.input<ZodReference>;
 
 interface ReferenceType<DocumentName extends string>
-  extends SanityType<ReferenceFieldDef<DocumentName>, ZodReference> {
+  extends SanityType<
+    Omit<Schema.ReferenceDefinition, FieldOptionKeys>,
+    ZodReference
+  > {
   to: <Name extends string>(
     document: DocumentType<Name, any>
   ) => ReferenceType<DocumentName | Name>;
 }
 
 type ReferenceDef = Omit<
-  ReferenceFieldDef<string>,
-  "description" | "to" | "type"
+  Schema.ReferenceDefinition,
+  FieldOptionKeys | "to" | "type"
 > & {
   mock?: (faker: Faker) => SanityReference;
 };

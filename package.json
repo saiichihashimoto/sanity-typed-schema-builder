@@ -28,7 +28,7 @@
     "@jest/globals": "28.1.0",
     "@jest/types": "27.5.1",
     "@portabletext/types": "1.0.3",
-    "@sanity/types": "2.29.5",
+    "@sanity/types": "2.29.5-purple-unicorn.856",
     "@types/jest": "27.4.1",
     "@types/lodash": "4.14.182",
     "@typescript-eslint/eslint-plugin": "5.27.1",
