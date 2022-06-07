@@ -33,14 +33,11 @@ describe("string", () => {
   it("sets min", () => {
     const type = string({ min: 3 });
 
-    const min = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      min: () => min,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(min);
+    expect(rule.min).toHaveBeenCalledWith(3);
 
     const value: ValidateShape<InferInput<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
@@ -58,14 +55,11 @@ describe("string", () => {
   it("sets max", () => {
     const type = string({ max: 4 });
 
-    const max = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      max: () => max,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(max);
+    expect(rule.max).toHaveBeenCalledWith(4);
 
     const value: ValidateShape<InferInput<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
@@ -83,14 +77,11 @@ describe("string", () => {
   it("sets length", () => {
     const type = string({ length: 3 });
 
-    const length = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      length: () => length,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(length);
+    expect(rule.length).toHaveBeenCalledWith(3);
 
     const value: ValidateShape<InferInput<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
@@ -108,14 +99,11 @@ describe("string", () => {
   it("sets regex", () => {
     const type = string({ regex: /^foo$/ });
 
-    const regex = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      regex: () => regex,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(regex);
+    expect(rule.regex).toHaveBeenCalledWith(/^foo$/);
 
     const value: ValidateShape<InferInput<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
