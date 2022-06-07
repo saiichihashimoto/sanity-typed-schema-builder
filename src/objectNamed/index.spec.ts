@@ -36,6 +36,29 @@ describe("object", () => {
     expect(parsedValue).toEqual(value);
   });
 
+  it("makes a reference", () => {
+    const type = objectNamed({ name: "foo", fields: fields() });
+
+    const type2 = objectNamed({
+      name: "bar",
+      fields: fields().field({ name: "foo", type: type.ref() }),
+    });
+
+    const value: ValidateShape<
+      InferInput<typeof type2>,
+      { _type: "bar"; foo: { _type: "foo" } }
+    > = {
+      _type: "bar",
+      foo: { _type: "foo" },
+    };
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type2>,
+      { _type: "bar"; foo: { _type: "foo" } }
+    > = type2.parse(value);
+
+    expect(parsedValue).toEqual(value);
+  });
+
   it("adds fields", () => {
     const type = objectNamed({
       name: "foo",

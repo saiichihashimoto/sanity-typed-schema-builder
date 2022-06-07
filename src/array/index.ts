@@ -29,7 +29,7 @@ interface ArrayType<
   },
   NonEmpty extends boolean
 > extends SanityType<
-    ArrayFieldDef<never, never>,
+    ArrayFieldDef<any, any>,
     z.ZodArray<
       "00" extends Positions
         ? z.ZodUnion<
@@ -62,7 +62,7 @@ interface ArrayType<
 }
 
 type ArrayDef<NonEmpty extends boolean> = Omit<
-  ArrayFieldDef<never, never>,
+  ArrayFieldDef<any, any>,
   "description" | "of" | "type"
 > & {
   length?: number;

@@ -27,16 +27,21 @@ interface ObjectNamedType<
   ObjectNames extends string,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    ObjectDef<ObjectNames, never, InferFieldNames<Fields>, never>,
+    ObjectDef<ObjectNames, any, InferFieldNames<Fields>, any>,
     ZodObjectNamed<ObjectNames, Fields>
-  > {}
+  > {
+  ref: () => SanityType<
+    FieldDef<any, any> & { type: ObjectNames },
+    z.ZodObject<{ _type: z.ZodLiteral<ObjectNames> }>
+  >;
+}
 
 export const objectNamed = <
   ObjectNames extends string,
   Fields extends FieldsType<any, any>
 >(
   def: Omit<
-    ObjectDef<ObjectNames, never, InferFieldNames<Fields>, never>,
+    ObjectDef<ObjectNames, any, InferFieldNames<Fields>, any>,
     "description" | "fields" | "preview" | "type"
   > & {
     fields: Fields;
@@ -73,6 +78,16 @@ export const objectNamed = <
         type: "object",
         fields: schemaForFields,
         preview: preview(previewDef, schemaForFields),
+      };
+    },
+    ref: () => {
+      const zod = z.object({ _type: z.literal(name) });
+
+      return {
+        zod,
+        parse: zod.parse.bind(zod),
+        mock: () => ({ _type: name }),
+        schema: () => ({ type: name }),
       };
     },
   };

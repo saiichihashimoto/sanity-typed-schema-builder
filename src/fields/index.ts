@@ -16,7 +16,7 @@ interface FieldOptions<
   name: Name;
   optional?: Optional;
   title?: string;
-  type: SanityType<FieldTypeFields<never, never, Name>, Zod>;
+  type: SanityType<FieldTypeFields<any, any, Name>, Zod>;
 }
 
 type InferName<T extends FieldOptions<any, any, any>> = T extends FieldOptions<
@@ -44,7 +44,7 @@ export interface FieldsType<
     [field in FieldNames]: FieldOptions<field, any, any>;
   }
 > extends SanityType<
-    ObjectFieldDef<never, never, FieldNames, never>["fields"],
+    ObjectFieldDef<any, any, FieldNames, any>["fields"],
     z.ZodObject<
       {
         [field in FieldNames]: InferOptional<Fields[field]> extends true
@@ -196,7 +196,7 @@ export type Preview<Value> = ((object: Value) => Selection) | Selection;
 
 export const preview = <Value, FieldNames extends string>(
   preview: Preview<Value> | undefined,
-  fields: ObjectFieldDef<never, never, FieldNames, never>["fields"]
+  fields: ObjectFieldDef<any, any, FieldNames, any>["fields"]
 ) =>
   !preview
     ? undefined

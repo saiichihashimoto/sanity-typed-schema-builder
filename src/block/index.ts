@@ -6,12 +6,9 @@ import type { Faker } from "@faker-js/faker";
 import type { PortableTextBlock } from "@portabletext/types";
 
 interface BlockType
-  extends SanityType<
-    BlockFieldDef<never, never>,
-    z.ZodType<PortableTextBlock>
-  > {}
+  extends SanityType<BlockFieldDef<any, any>, z.ZodType<PortableTextBlock>> {}
 
-type BlockDef = Omit<BlockFieldDef<never, never>, "description" | "type">;
+type BlockDef = Omit<BlockFieldDef<any, any>, "description" | "type">;
 
 export const block = (
   def: BlockDef & {

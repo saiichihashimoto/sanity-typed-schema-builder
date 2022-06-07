@@ -46,7 +46,7 @@ interface ImageType<
   Hotspot extends boolean,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    ImageFieldDef<never, never, InferFieldNames<Fields>>,
+    ImageFieldDef<any, any, InferFieldNames<Fields>>,
     ZodImage<Hotspot, Fields>
   > {}
 
@@ -55,7 +55,7 @@ export const image = <
   Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
 >(
   def: Omit<
-    ImageFieldDef<never, never, InferFieldNames<Fields>>,
+    ImageFieldDef<any, any, InferFieldNames<Fields>>,
     "description" | "fields" | "preview" | "type"
   > & {
     fields?: Fields;
