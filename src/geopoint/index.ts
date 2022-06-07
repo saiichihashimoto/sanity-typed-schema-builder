@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -17,12 +17,18 @@ type SanityGeopoint = z.input<ZodGeopoint>;
 
 interface GeopointType
   extends SanityType<
-    Omit<Schema.GeopointDefinition, FieldOptionKeys>,
+    Omit<
+      TypeValidation<Schema.GeopointDefinition, SanityGeopoint>,
+      FieldOptionKeys
+    >,
     ZodGeopoint
   > {}
 
 export const geopoint = (
-  def: Omit<Schema.GeopointDefinition, FieldOptionKeys | "type"> & {
+  def: Omit<
+    TypeValidation<Schema.GeopointDefinition, SanityGeopoint>,
+    FieldOptionKeys | "type"
+  > & {
     mock?: (faker: Faker) => SanityGeopoint;
   } = {}
 ): GeopointType => {

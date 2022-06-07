@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -13,12 +13,15 @@ interface SanitySlug {
 
 interface SlugType
   extends SanityType<
-    Omit<Schema.SlugDefinition, FieldOptionKeys>,
+    Omit<TypeValidation<Schema.SlugDefinition, SanitySlug>, FieldOptionKeys>,
     z.ZodType<string, any, SanitySlug>
   > {}
 
 export const slug = (
-  def: Omit<Schema.SlugDefinition, FieldOptionKeys | "type"> & {
+  def: Omit<
+    TypeValidation<Schema.SlugDefinition, SanitySlug>,
+    FieldOptionKeys | "type"
+  > & {
     mock?: (faker: Faker) => SanitySlug;
   } = {}
 ): SlugType => {

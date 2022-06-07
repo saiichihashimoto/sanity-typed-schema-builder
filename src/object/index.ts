@@ -8,20 +8,23 @@ import type {
   InferFieldsZod,
   Preview,
 } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 import type { z } from "zod";
 
 interface ObjectType<Fields extends FieldsType<any, any>>
   extends SanityType<
-    Omit<Schema.ObjectDefinition, FieldOptionKeys>,
+    Omit<
+      TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
+      FieldOptionKeys
+    >,
     InferFieldsZod<Fields>
   > {}
 
 export const object = <Fields extends FieldsType<any, any>>(
   def: Omit<
-    Schema.ObjectDefinition,
+    TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
     FieldOptionKeys | "fields" | "preview" | "type"
   > & {
     fields: Fields;

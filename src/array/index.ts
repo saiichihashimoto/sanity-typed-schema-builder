@@ -2,7 +2,7 @@ import { flow } from "lodash/fp";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
-import type { InferZod, SanityType } from "../types";
+import type { InferZod, SanityType, TypeValidation } from "../types";
 import type { Schema } from "@sanity/types";
 
 type UnArray<T> = T extends Array<infer U> ? U : never;
@@ -48,7 +48,10 @@ interface ArrayType<
   NonEmpty extends boolean
 > extends SanityType<
     Omit<
-      Schema.ArrayDefinition<z.infer<ZodArray<Positions, Fields, NonEmpty>>>,
+      TypeValidation<
+        Schema.ArrayDefinition<z.infer<ZodArray<Positions, Fields, NonEmpty>>>,
+        z.infer<ZodArray<Positions, Fields, NonEmpty>>
+      >,
       FieldOptionKeys
     >,
     ZodArray<Positions, Fields, NonEmpty>
@@ -75,7 +78,10 @@ type ArrayDef<
   },
   NonEmpty extends boolean
 > = Omit<
-  Schema.ArrayDefinition<z.infer<ZodArray<Positions, Fields, NonEmpty>>>,
+  TypeValidation<
+    Schema.ArrayDefinition<z.infer<ZodArray<Positions, Fields, NonEmpty>>>,
+    z.infer<ZodArray<Positions, Fields, NonEmpty>>
+  >,
   FieldOptionKeys | "of" | "type"
 > & {
   length?: number;

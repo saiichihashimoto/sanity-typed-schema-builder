@@ -9,7 +9,7 @@ import type {
   InferFieldsZod,
   Preview,
 } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -27,7 +27,10 @@ interface ObjectNamedType<
   ObjectNames extends string,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    Schema.ObjectDefinition & { name: ObjectNames },
+    TypeValidation<
+      Schema.ObjectDefinition,
+      z.input<ZodObjectNamed<ObjectNames, Fields>>
+    > & { name: ObjectNames },
     ZodObjectNamed<ObjectNames, Fields>
   > {
   ref: () => SanityType<
@@ -40,7 +43,13 @@ export const objectNamed = <
   ObjectNames extends string,
   Fields extends FieldsType<any, any>
 >(
-  def: Omit<Schema.ObjectDefinition, "fields" | "name" | "preview" | "type"> & {
+  def: Omit<
+    TypeValidation<
+      Schema.ObjectDefinition,
+      z.input<ZodObjectNamed<ObjectNames, Fields>>
+    >,
+    "fields" | "name" | "preview" | "type"
+  > & {
     fields: Fields;
     mock?: (faker: Faker) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
     name: ObjectNames;

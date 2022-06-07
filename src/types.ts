@@ -1,4 +1,10 @@
+import type {
+  CustomValidator,
+  Rule as RuleWithoutTypedCustom,
+} from "@sanity/types";
 import type { z } from "zod";
+
+// TODO Type Definition across the board
 
 export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
   mock: () => z.input<Zod>;
@@ -6,6 +12,17 @@ export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
   schema: () => Definition;
   zod: Zod;
 }
+
+type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
+  custom: (fn: CustomValidator<Value>) => Rule<Value>;
+};
+
+export type TypeValidation<Definition, Value> = Omit<
+  Definition,
+  "validation"
+> & {
+  validation?: (rule: Rule<Value>) => Rule<Value>;
+};
 
 export type InferZod<T extends SanityType<any, any>> = T extends SanityType<
   any,

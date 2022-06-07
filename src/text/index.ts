@@ -3,17 +3,20 @@ import { flow } from "lodash/fp";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
 interface TextType
   extends SanityType<
-    Omit<Schema.TextDefinition, FieldOptionKeys>,
+    Omit<TypeValidation<Schema.TextDefinition, string>, FieldOptionKeys>,
     z.ZodString
   > {}
 
-type TextDef = Omit<Schema.TextDefinition, FieldOptionKeys | "type"> & {
+type TextDef = Omit<
+  TypeValidation<Schema.TextDefinition, string>,
+  FieldOptionKeys | "type"
+> & {
   length?: number;
   max?: number;
   min?: number;
