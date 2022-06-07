@@ -2,18 +2,24 @@ import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { PortableTextBlock } from "@portabletext/types";
 import type { Schema } from "@sanity/types";
 
 interface BlockType
   extends SanityType<
-    Omit<Schema.BlockDefinition, FieldOptionKeys>,
+    Omit<
+      TypeValidation<Schema.BlockDefinition, PortableTextBlock>,
+      FieldOptionKeys
+    >,
     z.ZodType<PortableTextBlock>
   > {}
 
-type BlockDef = Omit<Schema.BlockDefinition, FieldOptionKeys | "type">;
+type BlockDef = Omit<
+  TypeValidation<Schema.BlockDefinition, PortableTextBlock>,
+  FieldOptionKeys | "type"
+>;
 
 export const block = (
   def: BlockDef & {

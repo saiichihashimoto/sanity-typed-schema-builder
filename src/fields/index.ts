@@ -1,7 +1,7 @@
 import { flow, fromPairs, isFunction } from "lodash/fp";
 import { z } from "zod";
 
-import type { InferZod, Resolve, SanityType } from "../types";
+import type { InferZod, Resolve, SanityType, TypeValidation } from "../types";
 import type {
   PrepareViewOptions,
   PreviewConfig,
@@ -23,7 +23,7 @@ interface FieldOptions<
   title?: string;
   type: SanityType<
     Omit<
-      Schema.FieldDefinition<any> & { validation?: (rule: Rule) => Rule },
+      TypeValidation<Schema.FieldDefinition<any>, z.input<Zod>>,
       FieldOptionKeys
     >,
     Zod
@@ -55,7 +55,21 @@ export interface FieldsType<
     [field in FieldNames]: FieldOptions<field, any, any>;
   }
 > extends SanityType<
-    Array<Schema.FieldDefinition<any> & { validation?: (rule: Rule) => Rule }>,
+    Array<
+      TypeValidation<
+        Schema.FieldDefinition<any>,
+        z.input<
+          z.ZodObject<
+            {
+              [field in FieldNames]: InferOptional<Fields[field]> extends true
+                ? z.ZodOptional<InferZod<InferType<Fields[field]>>>
+                : InferZod<InferType<Fields[field]>>;
+            },
+            "strip"
+          >
+        >
+      >
+    >,
     z.ZodObject<
       {
         [field in FieldNames]: InferOptional<Fields[field]> extends true
@@ -195,9 +209,7 @@ export type Preview<Value extends Record<string, unknown>> =
 
 export const preview = <Value extends Record<string, unknown>>(
   preview: Preview<Value> | undefined,
-  fields: Array<
-    Schema.FieldDefinition<any> & { validation?: (rule: Rule) => Rule }
-  >
+  fields: Array<TypeValidation<Schema.FieldDefinition<any>, any>>
 ): PreviewConfig | undefined =>
   !preview
     ? undefined

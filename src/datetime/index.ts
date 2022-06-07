@@ -3,18 +3,21 @@ import { flow } from "lodash/fp";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
 interface DatetimeType
   extends SanityType<
-    Omit<Schema.DatetimeDefinition, FieldOptionKeys>,
+    Omit<TypeValidation<Schema.DatetimeDefinition, string>, FieldOptionKeys>,
     z.ZodType<Date, any, string>
   > {}
 
 export const datetime = (
-  def: Omit<Schema.DatetimeDefinition, FieldOptionKeys | "type"> & {
+  def: Omit<
+    TypeValidation<Schema.DatetimeDefinition, string>,
+    FieldOptionKeys | "type"
+  > & {
     max?: string;
     min?: string;
     mock?: (faker: Faker) => string;

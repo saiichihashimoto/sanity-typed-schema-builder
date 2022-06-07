@@ -4,7 +4,7 @@ import { z } from "zod";
 import { preview } from "../fields";
 
 import type { FieldsType, InferFieldsZod, Preview } from "../fields";
-import type { SanityType } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -29,7 +29,10 @@ export interface DocumentType<
   DocumentNames extends string,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    Schema.DocumentDefinition & { name: DocumentNames },
+    TypeValidation<
+      Schema.DocumentDefinition,
+      z.input<ZodDocument<DocumentNames, Fields>>
+    > & { name: DocumentNames },
     ZodDocument<DocumentNames, Fields>
   > {
   name: DocumentNames;
@@ -40,7 +43,10 @@ export const document = <
   Fields extends FieldsType<any, any>
 >(
   def: Omit<
-    Schema.DocumentDefinition,
+    TypeValidation<
+      Schema.DocumentDefinition,
+      z.input<ZodDocument<DocumentNames, Fields>>
+    >,
     "fields" | "name" | "preview" | "type"
   > & {
     fields: Fields;
