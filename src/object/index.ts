@@ -3,25 +3,26 @@ import { faker } from "@faker-js/faker";
 import { preview } from "../fields";
 
 import type {
+  FieldOptionKeys,
   FieldsType,
-  InferFieldNames,
   InferFieldsZod,
   Preview,
 } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 import type { z } from "zod";
 
 interface ObjectType<Fields extends FieldsType<any, any>>
   extends SanityType<
-    ObjectFieldDef<any, any, InferFieldNames<Fields>, any>,
+    Omit<Schema.ObjectDefinition, FieldOptionKeys>,
     InferFieldsZod<Fields>
   > {}
 
 export const object = <Fields extends FieldsType<any, any>>(
   def: Omit<
-    ObjectFieldDef<any, any, InferFieldNames<Fields>, any>,
-    "description" | "fields" | "preview" | "type"
+    Schema.ObjectDefinition,
+    FieldOptionKeys | "fields" | "preview" | "type"
   > & {
     fields: Fields;
     mock?: (faker: Faker) => z.input<InferFieldsZod<Fields>>;

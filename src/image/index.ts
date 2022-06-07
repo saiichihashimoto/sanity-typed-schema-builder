@@ -1,9 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
-import type { FieldsType, InferFieldNames, InferFieldsZod } from "../fields";
+import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 
 type ZodImage<
   Hotspot extends boolean,
@@ -46,7 +47,7 @@ interface ImageType<
   Hotspot extends boolean,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    ImageFieldDef<any, any, InferFieldNames<Fields>>,
+    Omit<Schema.ImageDefinition, FieldOptionKeys>,
     ZodImage<Hotspot, Fields>
   > {}
 
@@ -55,8 +56,8 @@ export const image = <
   Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
 >(
   def: Omit<
-    ImageFieldDef<any, any, InferFieldNames<Fields>>,
-    "description" | "fields" | "preview" | "type"
+    Schema.ImageDefinition,
+    FieldOptionKeys | "fields" | "preview" | "type"
   > & {
     fields?: Fields;
     hotspot?: Hotspot;

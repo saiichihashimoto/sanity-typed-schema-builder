@@ -1,9 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
-import type { FieldsType, InferFieldNames, InferFieldsZod } from "../fields";
+import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 
 type ZodFile<Fields extends FieldsType<any, any>> = z.ZodIntersection<
   InferFieldsZod<Fields>,
@@ -21,7 +22,7 @@ type ZodFile<Fields extends FieldsType<any, any>> = z.ZodIntersection<
 
 interface FileType<Fields extends FieldsType<any, any>>
   extends SanityType<
-    FileFieldDef<any, any, InferFieldNames<Fields>>,
+    Omit<Schema.FileDefinition, FieldOptionKeys>,
     ZodFile<Fields>
   > {}
 
@@ -29,8 +30,8 @@ export const file = <
   Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
 >(
   def: Omit<
-    FileFieldDef<any, any, InferFieldNames<Fields>>,
-    "description" | "fields" | "preview" | "type"
+    Schema.FileDefinition,
+    FieldOptionKeys | "fields" | "preview" | "type"
   > & {
     fields?: Fields;
     mock?: (faker: Faker) => z.input<ZodFile<Fields>>;

@@ -2,16 +2,18 @@ import { faker } from "@faker-js/faker";
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
+import type { FieldOptionKeys } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 
 interface NumberType
   extends SanityType<
-    NumberFieldDef,
+    Omit<Schema.NumberDefinition, FieldOptionKeys>,
     z.ZodType<number, z.ZodNumberDef | z.ZodEffectsDef<z.ZodNumber>>
   > {}
 
-type NumberDef = Omit<NumberFieldDef, "description" | "type"> & {
+type NumberDef = Omit<Schema.NumberDefinition, FieldOptionKeys | "type"> & {
   greaterThan?: number;
   integer?: boolean;
   lessThan?: number;

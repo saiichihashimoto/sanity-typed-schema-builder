@@ -159,7 +159,7 @@ describe("object", () => {
       }),
     });
 
-    const preview = type.schema().preview!;
+    const schema = type.schema();
 
     const value: ValidateShape<
       InferInput<typeof type>,
@@ -172,9 +172,7 @@ describe("object", () => {
       foo: "someFoo",
     };
 
-    expect(
-      ("prepare" in preview ? preview : undefined)!.prepare(value)
-    ).toEqual({
+    expect(schema.preview?.prepare?.(value)).toEqual({
       title: "someFoo",
       subtitle: "someBar",
     });

@@ -3,18 +3,13 @@ import { z } from "zod";
 
 import { preview } from "../fields";
 
-import type {
-  FieldsType,
-  InferFieldNames,
-  InferFieldsZod,
-  Preview,
-} from "../fields";
+import type { FieldsType, InferFieldsZod, Preview } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
-import type { DocumentDef } from "@sanity/base";
+import type { Schema } from "@sanity/types";
 
 type ZodDocument<
-  DocumentName extends string,
+  DocumentNames extends string,
   Fields extends FieldsType<any, any>
 > = z.ZodIntersection<
   InferFieldsZod<Fields>,
@@ -23,7 +18,7 @@ type ZodDocument<
       _createdAt: z.ZodType<Date, any, string>;
       _id: z.ZodString;
       _rev: z.ZodString;
-      _type: z.ZodLiteral<DocumentName>;
+      _type: z.ZodLiteral<DocumentNames>;
       _updatedAt: z.ZodType<Date, any, string>;
     },
     "strip"
@@ -31,28 +26,29 @@ type ZodDocument<
 >;
 
 export interface DocumentType<
-  DocumentName extends string,
+  DocumentNames extends string,
   Fields extends FieldsType<any, any>
 > extends SanityType<
-    DocumentDef<DocumentName, any, InferFieldNames<Fields>, any, any>,
-    ZodDocument<DocumentName, Fields>
+    Schema.DocumentDefinition & { name: DocumentNames },
+    ZodDocument<DocumentNames, Fields>
   > {
-  name: DocumentName;
+  name: DocumentNames;
 }
 
 export const document = <
-  DocumentName extends string,
+  DocumentNames extends string,
   Fields extends FieldsType<any, any>
 >(
   def: Omit<
-    DocumentDef<DocumentName, any, InferFieldNames<Fields>, any, any>,
-    "fields" | "preview" | "type"
+    Schema.DocumentDefinition,
+    "fields" | "name" | "preview" | "type"
   > & {
     fields: Fields;
-    mock?: (faker: Faker) => z.input<ZodDocument<DocumentName, Fields>>;
-    preview?: Preview<z.input<ZodDocument<DocumentName, Fields>>>;
+    mock?: (faker: Faker) => z.input<ZodDocument<DocumentNames, Fields>>;
+    name: DocumentNames;
+    preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>>;
   }
-): DocumentType<DocumentName, Fields> => {
+): DocumentType<DocumentNames, Fields> => {
   const {
     name,
     preview: previewDef,
@@ -84,7 +80,7 @@ export const document = <
       _type: z.literal(name),
       _updatedAt: z.string().transform((v) => new Date(v)),
     })
-  ) as unknown as ZodDocument<DocumentName, Fields>;
+  ) as unknown as ZodDocument<DocumentNames, Fields>;
 
   return {
     name,

@@ -72,7 +72,7 @@ const config = {
     "import/no-unused-modules": [
       "error",
       {
-        ignoreExports: [...testFiles, "**/*.d.ts", "**/*.js", "src/index.ts"],
+        ignoreExports: [...testFiles, "**/*.js", "src/index.ts"],
         missingExports: true,
         unusedExports: true,
       },

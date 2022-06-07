@@ -1,8 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
+import type { FieldOptionKeys } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 
 type ZodGeopoint = z.ZodObject<{
   _type: z.ZodLiteral<"geopoint">;
@@ -13,10 +15,14 @@ type ZodGeopoint = z.ZodObject<{
 
 type SanityGeopoint = z.input<ZodGeopoint>;
 
-interface GeopointType extends SanityType<GeopointFieldDef, ZodGeopoint> {}
+interface GeopointType
+  extends SanityType<
+    Omit<Schema.GeopointDefinition, FieldOptionKeys>,
+    ZodGeopoint
+  > {}
 
 export const geopoint = (
-  def: Omit<GeopointFieldDef, "description" | "type"> & {
+  def: Omit<Schema.GeopointDefinition, FieldOptionKeys | "type"> & {
     mock?: (faker: Faker) => SanityGeopoint;
   } = {}
 ): GeopointType => {

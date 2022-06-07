@@ -1,13 +1,19 @@
 import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
+import type { FieldOptionKeys } from "../fields";
 import type { SanityType } from "../types";
 import type { Faker } from "@faker-js/faker";
+import type { Schema } from "@sanity/types";
 
-interface DateType extends SanityType<DateFieldDef, z.ZodString> {}
+interface DateType
+  extends SanityType<
+    Omit<Schema.DateDefinition, FieldOptionKeys>,
+    z.ZodString
+  > {}
 
 export const date = (
-  def: Omit<DateFieldDef, "description" | "type"> & {
+  def: Omit<Schema.DateDefinition, FieldOptionKeys | "type"> & {
     mock?: (faker: Faker) => string;
   } = {}
 ): DateType => {
