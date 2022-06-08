@@ -1,4 +1,4 @@
-import { flow, fromPairs, isFunction } from "lodash/fp";
+import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
 import type { InferZod, Resolve, SanityType, TypeValidation } from "../types";
@@ -204,19 +204,66 @@ const fieldsInternal = <
 
 export const fields = () => fieldsInternal<never, Record<never, never>>([]);
 
-export type Preview<Value extends Record<string, unknown>> =
-  | ((object: Value, viewOptions?: PrepareViewOptions) => PreviewValue)
-  | NonNullable<PreviewConfig["select"]>;
+export type Preview<
+  Value extends Record<string, unknown>,
+  Select extends NonNullable<PreviewConfig["select"]>
+> =
+  | {
+      select: PreviewValue;
+    }
+  | {
+      component?: React.ComponentType<
+        Resolve<
+          Omit<Value, keyof Select> & {
+            [field in keyof Select]: unknown;
+          }
+        >
+      >;
+      prepare: (
+        object: Resolve<
+          Omit<Value, keyof Select> & {
+            [field in keyof Select]: unknown;
+          }
+        >,
+        viewOptions?: PrepareViewOptions
+      ) => PreviewValue;
+      select: Select;
+    }
+  | {
+      component: React.ComponentType<
+        Resolve<
+          Omit<Value, keyof Select> & {
+            [field in keyof Select]: unknown;
+          }
+        >
+      >;
+      prepare?: (
+        object: Resolve<
+          Omit<Value, keyof Select> & {
+            [field in keyof Select]: unknown;
+          }
+        >,
+        viewOptions?: PrepareViewOptions
+      ) => PreviewValue;
+      select: Select;
+    };
 
-export const preview = <Value extends Record<string, unknown>>(
-  preview: Preview<Value> | undefined,
+export const preview = <
+  Value extends Record<string, unknown>,
+  Select extends NonNullable<PreviewConfig["select"]>
+>(
+  preview: Preview<Value, Select> | undefined,
   fields: Array<TypeValidation<Schema.FieldDefinition<any>, any>>
 ): PreviewConfig | undefined =>
   !preview
     ? undefined
-    : !isFunction(preview)
-    ? { select: preview }
+    : !("prepare" in preview) && !("component" in preview)
+    ? (preview as PreviewConfig)
     : {
-        prepare: preview as NonNullable<PreviewConfig["prepare"]>,
-        select: fromPairs(fields.map(({ name }) => [name, name])),
+        ...preview,
+        prepare: preview.prepare as PreviewConfig["prepare"],
+        select: {
+          ...fromPairs(fields.map(({ name }) => [name, name])),
+          ...preview.select,
+        } as unknown as PreviewConfig["select"],
       };

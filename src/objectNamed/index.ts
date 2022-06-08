@@ -41,7 +41,8 @@ interface ObjectNamedType<
 
 export const objectNamed = <
   ObjectNames extends string,
-  Fields extends FieldsType<any, any>
+  Fields extends FieldsType<any, any>,
+  Select extends Record<string, string> = Record<string, never>
 >(
   def: Omit<
     TypeValidation<
@@ -53,7 +54,7 @@ export const objectNamed = <
     fields: Fields;
     mock?: (faker: Faker) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
     name: ObjectNames;
-    preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>>;
+    preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>;
   }
 ): ObjectNamedType<ObjectNames, Fields> => {
   const {

@@ -22,14 +22,17 @@ interface ObjectType<Fields extends FieldsType<any, any>>
     InferFieldsZod<Fields>
   > {}
 
-export const object = <Fields extends FieldsType<any, any>>(
+export const object = <
+  Fields extends FieldsType<any, any>,
+  Select extends Record<string, string> = Record<string, never>
+>(
   def: Omit<
     TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
     FieldOptionKeys | "fields" | "preview" | "type"
   > & {
     fields: Fields;
     mock?: (faker: Faker) => z.input<InferFieldsZod<Fields>>;
-    preview?: Preview<z.input<InferFieldsZod<Fields>>>;
+    preview?: Preview<z.input<InferFieldsZod<Fields>>, Select>;
   }
 ): ObjectType<Fields> => {
   const {
