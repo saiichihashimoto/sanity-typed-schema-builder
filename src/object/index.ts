@@ -24,7 +24,8 @@ interface ObjectType<Fields extends FieldsType<any, any>>
 
 export const object = <
   Fields extends FieldsType<any, any>,
-  Select extends Record<string, string> = Record<string, never>
+  // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
+  Select extends Record<string, string> = {}
 >(
   def: Omit<
     TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
