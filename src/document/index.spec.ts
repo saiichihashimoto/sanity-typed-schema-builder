@@ -10,6 +10,7 @@ import { document } from ".";
 
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
+import type { PartialDeep } from "type-fest";
 
 describe("document", () => {
   it("builds a sanity config", () =>
@@ -299,7 +300,7 @@ describe("document", () => {
             foo,
           }: ValidateShape<
             typeof value,
-            {
+            PartialDeep<{
               _createdAt: string;
               _id: string;
               _rev: string;
@@ -307,9 +308,10 @@ describe("document", () => {
               _updatedAt: string;
               bar?: string;
               foo: boolean;
-            }
+            }>
           > = value;
 
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- Needs to be true or a string
           return foo || "Foo needs to be true";
         }),
     });

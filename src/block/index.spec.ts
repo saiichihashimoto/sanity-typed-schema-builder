@@ -7,6 +7,7 @@ import { block } from ".";
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
 import type { PortableTextBlock } from "@portabletext/types";
+import type { PartialDeep } from "type-fest";
 
 describe("block", () => {
   it("builds a sanity config", () =>
@@ -134,9 +135,12 @@ describe("block", () => {
     const type = block({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const block: ValidateShape<typeof value, PortableTextBlock> = value;
+          const block: ValidateShape<
+            typeof value,
+            PartialDeep<PortableTextBlock>
+          > = value;
 
-          return block.children.length > 0 || "Needs to have children";
+          return (block.children?.length ?? 0) > 0 || "Needs to have children";
         }),
     });
 

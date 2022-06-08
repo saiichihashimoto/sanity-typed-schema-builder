@@ -9,6 +9,7 @@ import { objectNamed } from ".";
 
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
+import type { PartialDeep } from "type-fest";
 
 describe("object", () => {
   it("builds a sanity config", () =>
@@ -231,13 +232,14 @@ describe("object", () => {
             foo,
           }: ValidateShape<
             typeof value,
-            {
+            PartialDeep<{
               _type: "foo";
               bar?: string;
               foo: boolean;
-            }
+            }>
           > = value;
 
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- Needs to be true or a string
           return foo || "Foo needs to be true";
         }),
     });
