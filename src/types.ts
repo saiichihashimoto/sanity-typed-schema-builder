@@ -2,6 +2,7 @@ import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
 } from "@sanity/types";
+import type { PartialDeep } from "type-fest";
 import type { z } from "zod";
 
 // TODO Type Definition across the board
@@ -21,7 +22,7 @@ export type TypeValidation<Definition, Value> = Omit<
   Definition,
   "validation"
 > & {
-  validation?: (rule: Rule<Value>) => Rule<Value>;
+  validation?: (rule: Rule<PartialDeep<Value>>) => Rule<PartialDeep<Value>>;
 };
 
 export type InferZod<T extends SanityType<any, any>> = T extends SanityType<

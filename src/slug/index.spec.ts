@@ -6,6 +6,7 @@ import { slug } from ".";
 
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
+import type { PartialDeep } from "type-fest";
 
 describe("slug", () => {
   it("builds a sanity config", () =>
@@ -65,13 +66,13 @@ describe("slug", () => {
             current: slug,
           }: ValidateShape<
             typeof value,
-            {
+            PartialDeep<{
               _type: "slug";
               current: string;
-            }
+            }>
           > = value;
 
-          return slug.length > 50 || "Needs to be 50 characters";
+          return (slug?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

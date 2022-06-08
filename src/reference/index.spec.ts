@@ -8,6 +8,7 @@ import { reference } from ".";
 
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
+import type { PartialDeep } from "type-fest";
 
 interface SanityReference {
   _ref: string;
@@ -100,9 +101,11 @@ describe("reference", () => {
     const type = reference({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const { _ref }: ValidateShape<typeof value, SanityReference> = value;
+          const {
+            _ref,
+          }: ValidateShape<typeof value, PartialDeep<SanityReference>> = value;
 
-          return _ref.length > 50 || "Needs to be 50 characters";
+          return (_ref?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

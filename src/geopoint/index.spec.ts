@@ -6,6 +6,7 @@ import { geopoint } from ".";
 
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
+import type { PartialDeep } from "type-fest";
 
 interface SanityGeopoint {
   _type: "geopoint";
@@ -89,9 +90,11 @@ describe("geopoint", () => {
     const type = geopoint({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const { lat }: ValidateShape<typeof value, SanityGeopoint> = value;
+          const {
+            lat,
+          }: ValidateShape<typeof value, PartialDeep<SanityGeopoint>> = value;
 
-          return lat > 50 || "Needs to be greater than 50";
+          return (lat ?? 0) > 50 || "Needs to be greater than 50";
         }),
     });
 
