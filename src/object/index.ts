@@ -34,7 +34,7 @@ export const object = <Fields extends FieldsType<any, any>>(
 ): ObjectType<Fields> => {
   const {
     preview: previewDef,
-    fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
+    fields: { mock: fieldsMock, schema: fieldsSchema, zod: fieldsZod },
     mock = fieldsMock,
   } = def;
   const zod = fieldsZod as InferFieldsZod<Fields>;
