@@ -40,7 +40,8 @@ export interface DocumentType<
 
 export const document = <
   DocumentNames extends string,
-  Fields extends FieldsType<any, any>
+  Fields extends FieldsType<any, any>,
+  Select extends Record<string, string> = Record<string, never>
 >(
   def: Omit<
     TypeValidation<
@@ -52,7 +53,7 @@ export const document = <
     fields: Fields;
     mock?: (faker: Faker) => z.input<ZodDocument<DocumentNames, Fields>>;
     name: DocumentNames;
-    preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>>;
+    preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>;
   }
 ): DocumentType<DocumentNames, Fields> => {
   const {

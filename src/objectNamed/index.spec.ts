@@ -184,19 +184,23 @@ describe("object", () => {
       }).mock()
     ));
 
-  it("allows selection values", () =>
+  it("sets preview.select", () =>
     expect(
       objectNamed({
         name: "foo",
         fields: fields(),
         preview: {
-          title: "someTitle",
-          media: "someMedia",
+          select: {
+            title: "someTitle",
+            media: "someMedia",
+          },
         },
       }).schema()
-    ).toHaveProperty("preview.select", {
-      title: "someTitle",
-      media: "someMedia",
+    ).toHaveProperty("preview", {
+      select: {
+        title: "someTitle",
+        media: "someMedia",
+      },
     }));
 
   it("allows a function selection value", () => {
@@ -212,10 +216,29 @@ describe("object", () => {
           optional: true,
           type: string(),
         }),
-      preview: ({ foo, bar }) => ({
-        title: foo,
-        subtitle: bar,
-      }),
+      preview: {
+        select: {
+          bleh: "foo",
+        },
+        prepare: (selection) => {
+          const value: ValidateShape<
+            typeof selection,
+            {
+              _type: "foo";
+              bar?: string;
+              bleh: unknown;
+              foo: string;
+            }
+          > = selection;
+
+          const { foo, bar } = value;
+
+          return {
+            title: foo,
+            subtitle: bar,
+          };
+        },
+      },
     });
 
     const schema = type.schema();
