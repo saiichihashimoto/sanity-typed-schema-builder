@@ -86,7 +86,10 @@ export const objectNamed = <
         ...def,
         type: "object",
         fields: schemaForFields,
-        preview: preview(previewDef, schemaForFields),
+        preview: preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>(
+          previewDef,
+          schemaForFields
+        ),
       };
     },
     ref: () => ({

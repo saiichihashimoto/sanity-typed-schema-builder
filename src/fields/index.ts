@@ -227,7 +227,7 @@ export type Preview<
         >,
         viewOptions?: PrepareViewOptions
       ) => PreviewValue;
-      select: Select;
+      select?: Select;
     }
   | {
       component: React.ComponentType<
@@ -245,7 +245,7 @@ export type Preview<
         >,
         viewOptions?: PrepareViewOptions
       ) => PreviewValue;
-      select: Select;
+      select?: Select;
     };
 
 export const preview = <
@@ -261,6 +261,7 @@ export const preview = <
     ? (preview as PreviewConfig)
     : {
         ...preview,
+        component: preview.component as PreviewConfig["component"],
         prepare: preview.prepare as PreviewConfig["prepare"],
         select: {
           ...fromPairs(fields.map(({ name }) => [name, name])),

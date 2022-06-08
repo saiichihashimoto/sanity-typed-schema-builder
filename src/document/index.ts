@@ -102,7 +102,10 @@ export const document = <
         ...def,
         type: "document",
         fields: schemaForFields,
-        preview: preview(previewDef, schemaForFields),
+        preview: preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>(
+          previewDef,
+          schemaForFields
+        ),
       };
     },
   };
