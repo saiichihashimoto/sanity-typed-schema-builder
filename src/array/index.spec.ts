@@ -6,24 +6,28 @@ import { fields } from "../fields";
 import { object } from "../object";
 import { mockRule } from "../test-utils";
 
-import { array } from ".";
+import { array, items } from ".";
 
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
+import type { PartialDeep } from "type-fest";
 
 describe("array", () => {
   it("builds a sanity config", () =>
-    expect(array().schema()).toEqual({
+    expect(array({ of: items() }).schema()).toEqual({
       type: "array",
       of: [],
       validation: expect.any(Function),
     }));
 
   it("passes through schema values", () =>
-    expect(array({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(array({ of: items(), hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
   it("parses into an array", () => {
-    const type = array();
+    const type = array({ of: items() });
 
     const value: ValidateShape<InferInput<typeof type>, never[]> = [];
     const parsedValue: ValidateShape<
@@ -35,7 +39,7 @@ describe("array", () => {
   });
 
   it("adds primitive types", () => {
-    const type = array().of(boolean());
+    const type = array({ of: items().item(boolean()) });
 
     const schema = type.schema();
 
@@ -58,14 +62,16 @@ describe("array", () => {
   });
 
   it("adds nonprimitive types", () => {
-    const type = array().of(
-      object({
-        fields: fields().field({
-          name: "foo",
-          type: boolean(),
-        }),
-      })
-    );
+    const type = array({
+      of: items().item(
+        object({
+          fields: fields().field({
+            name: "foo",
+            type: boolean(),
+          }),
+        })
+      ),
+    });
 
     const schema = type.schema();
 
@@ -95,23 +101,25 @@ describe("array", () => {
   });
 
   it("creates union with multiple types", () => {
-    const type = array()
-      .of(
-        object({
-          fields: fields().field({
-            name: "foo",
-            type: boolean(),
-          }),
-        })
-      )
-      .of(
-        object({
-          fields: fields().field({
-            name: "bar",
-            type: boolean(),
-          }),
-        })
-      );
+    const type = array({
+      of: items()
+        .item(
+          object({
+            fields: fields().field({
+              name: "foo",
+              type: boolean(),
+            }),
+          })
+        )
+        .item(
+          object({
+            fields: fields().field({
+              name: "bar",
+              type: boolean(),
+            }),
+          })
+        ),
+    });
 
     const schema = type.schema();
 
@@ -151,7 +159,7 @@ describe("array", () => {
   });
 
   it("sets min", () => {
-    const type = array({ min: 1 }).of(boolean());
+    const type = array({ min: 1, of: items().item(boolean()) });
 
     const rule = mockRule();
 
@@ -173,7 +181,7 @@ describe("array", () => {
   });
 
   it("sets max", () => {
-    const type = array({ max: 1 }).of(boolean());
+    const type = array({ max: 1, of: items().item(boolean()) });
 
     const rule = mockRule();
 
@@ -195,7 +203,7 @@ describe("array", () => {
   });
 
   it("sets length", () => {
-    const type = array({ length: 1 }).of(boolean());
+    const type = array({ length: 1, of: items().item(boolean()) });
 
     const rule = mockRule();
 
@@ -220,7 +228,7 @@ describe("array", () => {
   });
 
   it("sets nonempty", () => {
-    const type = array({ nonempty: true }).of(boolean());
+    const type = array({ nonempty: true, of: items().item(boolean()) });
 
     const rule = mockRule();
 
@@ -242,5 +250,42 @@ describe("array", () => {
     expect(() => {
       type.parse([]);
     }).toThrow(z.ZodError);
+  });
+
+  it("types custom validation", () => {
+    const type = array({
+      of: items()
+        .item(
+          object({
+            fields: fields().field({
+              name: "foo",
+              type: boolean(),
+            }),
+          })
+        )
+        .item(
+          object({
+            fields: fields().field({
+              name: "bar",
+              type: boolean(),
+            }),
+          })
+        ),
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const elements: ValidateShape<
+            typeof value,
+            PartialDeep<Array<{ foo: boolean } | { bar: boolean }>>
+          > = value;
+
+          return elements.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
 });
