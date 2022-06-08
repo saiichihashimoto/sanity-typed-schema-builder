@@ -127,4 +127,21 @@ describe("text", () => {
         mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = text({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const text: ValidateShape<typeof value, string> = value;
+
+          return text.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

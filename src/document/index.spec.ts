@@ -4,6 +4,7 @@ import { z } from "zod";
 import { boolean } from "../boolean";
 import { fields } from "../fields";
 import { string } from "../string";
+import { mockRule } from "../test-utils";
 
 import { document } from ".";
 
@@ -277,5 +278,46 @@ describe("document", () => {
       title: "someFoo",
       subtitle: "someBar",
     });
+  });
+
+  it("types custom validation", () => {
+    const type = document({
+      name: "foo",
+      fields: fields()
+        .field({
+          name: "foo",
+          type: boolean(),
+        })
+        .field({
+          name: "bar",
+          optional: true,
+          type: string(),
+        }),
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const {
+            foo,
+          }: ValidateShape<
+            typeof value,
+            {
+              _createdAt: string;
+              _id: string;
+              _rev: string;
+              _type: "foo";
+              _updatedAt: string;
+              bar?: string;
+              foo: boolean;
+            }
+          > = value;
+
+          return foo || "Foo needs to be true";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
 });

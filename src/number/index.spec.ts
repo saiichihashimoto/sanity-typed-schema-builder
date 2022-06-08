@@ -211,4 +211,21 @@ describe("number", () => {
         mock: (faker) => faker.helpers.arrayElement([3, 4]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = number({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const number: ValidateShape<typeof value, number> = value;
+
+          return number > 50 || "Needs to be more than 50";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

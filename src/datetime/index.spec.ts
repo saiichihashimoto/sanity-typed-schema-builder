@@ -140,4 +140,21 @@ describe("datetime", () => {
           ]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = datetime({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const datetime: ValidateShape<typeof value, string> = value;
+
+          return datetime.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

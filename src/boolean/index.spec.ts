@@ -1,5 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
+import { mockRule } from "../test-utils";
+
 import { boolean } from ".";
 
 import type { ValidateShape } from "../test-utils";
@@ -38,4 +40,21 @@ describe("boolean", () => {
         mock: (faker) => faker.helpers.arrayElement([true]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = boolean({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const boolean: ValidateShape<typeof value, boolean> = value;
+
+          return boolean || "Needs to be true";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

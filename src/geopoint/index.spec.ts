@@ -1,5 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
+import { mockRule } from "../test-utils";
+
 import { geopoint } from ".";
 
 import type { ValidateShape } from "../test-utils";
@@ -82,4 +84,21 @@ describe("geopoint", () => {
           ]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = geopoint({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const { lat }: ValidateShape<typeof value, SanityGeopoint> = value;
+
+          return lat > 50 || "Needs to be greater than 50";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

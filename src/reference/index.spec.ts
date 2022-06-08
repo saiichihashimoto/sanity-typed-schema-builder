@@ -2,6 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { document } from "../document";
 import { fields } from "../fields";
+import { mockRule } from "../test-utils";
 
 import { reference } from ".";
 
@@ -94,4 +95,21 @@ describe("reference", () => {
           ]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = reference({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const { _ref }: ValidateShape<typeof value, SanityReference> = value;
+
+          return _ref.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

@@ -6,9 +6,11 @@ type ValidateError<T, Shape> = Resolve<{
   received: Resolve<T>;
 }>;
 
-export type ValidateShape<Received, Expected> = (<T>() => T extends Received
-  ? 1
-  : 2) extends <T>() => T extends Expected ? 1 : 2
+export type ValidateShape<Received, Expected> = (<
+  T
+>() => T extends Resolve<Received> ? 1 : 2) extends <
+  T
+>() => T extends Resolve<Expected> ? 1 : 2
   ? Received
   : ValidateError<Received, Expected>;
 

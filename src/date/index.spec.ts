@@ -1,6 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
+import { mockRule } from "../test-utils";
+
 import { date } from ".";
 
 import type { ValidateShape } from "../test-utils";
@@ -44,4 +46,21 @@ describe("date", () => {
           faker.helpers.arrayElement(["2010-05-06", "2011-04-27"]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = date({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const date: ValidateShape<typeof value, string> = value;
+
+          return date.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

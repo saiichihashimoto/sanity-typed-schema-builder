@@ -126,4 +126,36 @@ describe("string", () => {
         mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = string({
+      validation: (Rule) =>
+        Rule.custom(
+          (string) => string.length > 50 || "Needs to be 50 characters"
+        ),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it("types custom validation", () => {
+    const type = string({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const string: ValidateShape<typeof value, string> = value;
+
+          return string.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });
