@@ -41,7 +41,8 @@ export interface DocumentType<
 export const document = <
   DocumentNames extends string,
   Fields extends FieldsType<any, any>,
-  Select extends Record<string, string> = Record<string, never>
+  // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
+  Select extends Record<string, string> = {}
 >(
   def: Omit<
     TypeValidation<
