@@ -16,11 +16,12 @@ interface FieldOptions<
   Name extends string,
   Zod extends z.ZodType<any, any, any>,
   Optional extends boolean
-> {
-  description?: string;
+> extends Pick<
+    Schema.FieldDefinition,
+    "description" | "fieldset" | "group" | "title"
+  > {
   name: Name;
   optional?: Optional;
-  title?: string;
   type: SanityType<
     Omit<
       TypeValidation<Schema.FieldDefinition<any>, z.input<Zod>>,
