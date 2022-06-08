@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
-import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../fields";
+import type { FieldsType, InferFieldsZod } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
@@ -52,7 +52,7 @@ interface ImageType<
         Schema.ImageDefinition,
         z.input<ZodImage<Hotspot, Fields>>
       >,
-      FieldOptionKeys
+      "name"
     >,
     ZodImage<Hotspot, Fields>
   > {}
@@ -63,7 +63,8 @@ export const image = <
 >(
   def: Omit<
     TypeValidation<Schema.ImageDefinition, z.input<ZodImage<Hotspot, Fields>>>,
-    FieldOptionKeys | "fields" | "preview" | "type"
+    // "title" and "description" actually show up in the UI
+    "fields" | "name" | "preview" | "type"
   > & {
     fields?: Fields;
     hotspot?: Hotspot;
