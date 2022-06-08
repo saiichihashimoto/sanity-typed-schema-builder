@@ -9,7 +9,7 @@ import type { z } from "zod";
 
 export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
   mock: () => z.input<Zod>;
-  parse: (data: unknown) => z.infer<Zod>;
+  parse: (data: unknown) => z.output<Zod>;
   schema: () => Definition;
   zod: Zod;
 }

@@ -91,7 +91,7 @@ const itemsInternal = <
     zod,
     parse: zod.parse.bind(zod),
     // FIXME Mock the array element types. Not sure how to allow an override, since the function has to be defined before we know the element types.
-    mock: () => [] as unknown as z.infer<ZodArray<Positions, Items, NonEmpty>>,
+    mock: () => [] as unknown as z.input<ZodArray<Positions, Items, NonEmpty>>,
     schema: () => items.map(({ schema }) => schema()),
     item: <
       Zod extends z.ZodType<any, any, any>,
@@ -124,8 +124,8 @@ interface ArrayType<
 > extends SanityType<
     Omit<
       TypeValidation<
-        Schema.ArrayDefinition<z.infer<ZodArray<Positions, Items, NonEmpty>>>,
-        z.infer<ZodArray<Positions, Items, NonEmpty>>
+        Schema.ArrayDefinition<z.input<ZodArray<Positions, Items, NonEmpty>>>,
+        z.input<ZodArray<Positions, Items, NonEmpty>>
       >,
       FieldOptionKeys
     >,
@@ -141,15 +141,15 @@ export const array = <
 >(
   def: Omit<
     TypeValidation<
-      Schema.ArrayDefinition<z.infer<ZodArray<Positions, Items, NonEmpty>>>,
-      z.infer<ZodArray<Positions, Items, NonEmpty>>
+      Schema.ArrayDefinition<z.input<ZodArray<Positions, Items, NonEmpty>>>,
+      z.input<ZodArray<Positions, Items, NonEmpty>>
     >,
     FieldOptionKeys | "of" | "type"
   > & {
     length?: number;
     max?: number;
     min?: number;
-    mock?: (faker: Faker) => z.infer<ZodArray<Positions, Items, NonEmpty>>;
+    mock?: (faker: Faker) => z.input<ZodArray<Positions, Items, NonEmpty>>;
     nonempty?: NonEmpty;
     of: ItemsType<Positions, Items>;
   }
@@ -162,7 +162,7 @@ export const array = <
     of: { schema: itemsSchema, mock: itemsMock, zod: itemsZod },
     mock = itemsMock as unknown as (
       faker: Faker
-    ) => z.infer<ZodArray<Positions, Items, NonEmpty>>,
+    ) => z.input<ZodArray<Positions, Items, NonEmpty>>,
     validation,
   } = def;
 
