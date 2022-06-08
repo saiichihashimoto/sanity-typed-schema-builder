@@ -269,17 +269,17 @@ describe("image", () => {
       fields: fields()
         .field({
           name: "foo",
+          optional: true,
           type: boolean(),
         })
         .field({
           name: "bar",
-          optional: true,
           type: string(),
         }),
       validation: (Rule) =>
         Rule.custom((value) => {
           const {
-            foo,
+            bar,
           }: ValidateShape<
             typeof value,
             PartialDeep<{
@@ -288,13 +288,12 @@ describe("image", () => {
                 _ref: string;
                 _type: "reference";
               };
-              bar?: string;
-              foo: boolean;
+              bar: string;
+              foo?: boolean;
             }>
           > = value;
 
-          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- Needs to be true or a string
-          return foo || "Foo needs to be true";
+          return !bar || "Needs an empty bar";
         }),
     });
 
