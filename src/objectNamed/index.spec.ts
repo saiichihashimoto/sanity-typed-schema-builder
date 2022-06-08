@@ -39,23 +39,49 @@ describe("object", () => {
   });
 
   it("makes a reference", () => {
-    const type = objectNamed({ name: "foo", fields: fields() });
+    const type = objectNamed({
+      name: "foo",
+      fields: fields().field({ name: "hello", type: string() }),
+    });
 
     const type2 = objectNamed({
       name: "bar",
       fields: fields().field({ name: "foo", type: type.ref() }),
     });
 
+    expect(type2.schema().fields[0]).toEqual({
+      name: "foo",
+      type: "foo",
+      validation: expect.any(Function),
+    });
+
     const value: ValidateShape<
       InferInput<typeof type2>,
-      { _type: "bar"; foo: { _type: "foo" } }
+      {
+        _type: "bar";
+        foo: {
+          _type: "foo";
+        } & {
+          hello: string;
+        };
+      }
     > = {
       _type: "bar",
-      foo: { _type: "foo" },
+      foo: {
+        _type: "foo",
+        hello: "world",
+      },
     };
     const parsedValue: ValidateShape<
       InferOutput<typeof type2>,
-      { _type: "bar"; foo: { _type: "foo" } }
+      {
+        _type: "bar";
+        foo: {
+          _type: "foo";
+        } & {
+          hello: string;
+        };
+      }
     > = type2.parse(value);
 
     expect(parsedValue).toEqual(value);

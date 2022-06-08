@@ -35,7 +35,7 @@ interface ObjectNamedType<
   > {
   ref: () => SanityType<
     Omit<Schema.TypeReference<any>, FieldOptionKeys> & { type: ObjectNames },
-    z.ZodObject<{ _type: z.ZodLiteral<ObjectNames> }>
+    ZodObjectNamed<ObjectNames, Fields>
   >;
 }
 
@@ -87,15 +87,11 @@ export const objectNamed = <
         preview: preview(previewDef, schemaForFields),
       };
     },
-    ref: () => {
-      const zod = z.object({ _type: z.literal(name) });
-
-      return {
-        zod,
-        parse: zod.parse.bind(zod),
-        mock: () => ({ _type: name }),
-        schema: () => ({ type: name }),
-      };
-    },
+    ref: () => ({
+      zod,
+      parse: zod.parse.bind(zod),
+      mock: () => mock(faker),
+      schema: () => ({ type: name }),
+    }),
   };
 };
