@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import { boolean } from "../boolean";
 import { fields } from "../fields";
 import { string } from "../string";
+import { mockRule } from "../test-utils";
 
 import { objectNamed } from ".";
 
@@ -209,5 +210,42 @@ describe("object", () => {
       title: "someFoo",
       subtitle: "someBar",
     });
+  });
+
+  it("types custom validation", () => {
+    const type = objectNamed({
+      name: "foo",
+      fields: fields()
+        .field({
+          name: "foo",
+          type: boolean(),
+        })
+        .field({
+          name: "bar",
+          optional: true,
+          type: string(),
+        }),
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const {
+            foo,
+          }: ValidateShape<
+            typeof value,
+            {
+              _type: "foo";
+              bar?: string;
+              foo: boolean;
+            }
+          > = value;
+
+          return foo || "Foo needs to be true";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
 });

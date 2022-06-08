@@ -33,14 +33,11 @@ describe("number", () => {
   it("sets min", () => {
     const type = number({ min: 1 });
 
-    const min = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      min: () => min,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(min);
+    expect(rule.min).toHaveBeenCalledWith(1);
 
     const value: ValidateShape<InferInput<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -58,14 +55,11 @@ describe("number", () => {
   it("sets max", () => {
     const type = number({ max: 6 });
 
-    const max = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      max: () => max,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(max);
+    expect(rule.max).toHaveBeenCalledWith(6);
 
     const value: ValidateShape<InferInput<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -83,14 +77,11 @@ describe("number", () => {
   it("sets greaterThan", () => {
     const type = number({ greaterThan: 1 });
 
-    const greaterThan = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      greaterThan: () => greaterThan,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(greaterThan);
+    expect(rule.greaterThan).toHaveBeenCalledWith(1);
 
     const value: ValidateShape<InferInput<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -108,14 +99,11 @@ describe("number", () => {
   it("sets lessThan", () => {
     const type = number({ lessThan: 6 });
 
-    const lessThan = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      lessThan: () => lessThan,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(lessThan);
+    expect(rule.lessThan).toHaveBeenCalledWith(6);
 
     const value: ValidateShape<InferInput<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -133,14 +121,11 @@ describe("number", () => {
   it("sets integer", () => {
     const type = number({ integer: true });
 
-    const integer = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      integer: () => integer,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(integer);
+    expect(rule.integer).toHaveBeenCalled();
 
     const value: ValidateShape<InferInput<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -158,14 +143,11 @@ describe("number", () => {
   it("sets positive", () => {
     const type = number({ positive: true });
 
-    const positive = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      positive: () => positive,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(positive);
+    expect(rule.positive).toHaveBeenCalled();
 
     const value: ValidateShape<InferInput<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -183,14 +165,11 @@ describe("number", () => {
   it("sets negative", () => {
     const type = number({ negative: true });
 
-    const negative = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      negative: () => negative,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(negative);
+    expect(rule.negative).toHaveBeenCalled();
 
     const value: ValidateShape<InferInput<typeof type>, number> = -5;
     const parsedValue: ValidateShape<
@@ -208,14 +187,11 @@ describe("number", () => {
   it("sets precision", () => {
     const type = number({ precision: 2 });
 
-    const precision = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      precision: () => precision,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(precision);
+    expect(rule.precision).toHaveBeenCalledWith(2);
 
     const value: ValidateShape<InferInput<typeof type>, number> = 0.011;
     const parsedValue: ValidateShape<
@@ -235,4 +211,21 @@ describe("number", () => {
         mock: (faker) => faker.helpers.arrayElement([3, 4]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = number({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const number: ValidateShape<typeof value, number> = value;
+
+          return number > 50 || "Needs to be more than 50";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

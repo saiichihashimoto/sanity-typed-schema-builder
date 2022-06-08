@@ -1,5 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
+import { mockRule } from "../test-utils";
+
 import { block } from ".";
 
 import type { ValidateShape } from "../test-utils";
@@ -127,4 +129,21 @@ describe("block", () => {
           ]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = block({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const block: ValidateShape<typeof value, PortableTextBlock> = value;
+
+          return block.children.length > 0 || "Needs to have children";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

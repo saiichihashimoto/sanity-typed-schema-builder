@@ -48,14 +48,11 @@ describe("datetime", () => {
   it("sets min", () => {
     const type = datetime({ min: "2022-06-03T03:24:55.394Z" });
 
-    const min = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      min: () => min,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(min);
+    expect(rule.min).toHaveBeenCalledWith("2022-06-03T03:24:55.394Z");
 
     const value: ValidateShape<
       InferInput<typeof type>,
@@ -76,14 +73,11 @@ describe("datetime", () => {
   it("sets max", () => {
     const type = datetime({ max: "2022-06-03T03:24:55.396Z" });
 
-    const max = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      max: () => max,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(max);
+    expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.396Z");
 
     const value: ValidateShape<
       InferInput<typeof type>,
@@ -107,14 +101,12 @@ describe("datetime", () => {
       min: "2022-06-03T03:24:55.395Z",
     });
 
-    const min = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      min: () => min,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(min);
+    expect(rule.min).toHaveBeenCalledWith("2022-06-03T03:24:55.395Z");
+    expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.395Z");
 
     const value: ValidateShape<
       InferInput<typeof type>,
@@ -148,4 +140,21 @@ describe("datetime", () => {
           ]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = datetime({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const datetime: ValidateShape<typeof value, string> = value;
+
+          return datetime.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

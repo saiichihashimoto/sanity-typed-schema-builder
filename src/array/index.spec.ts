@@ -153,14 +153,11 @@ describe("array", () => {
   it("sets min", () => {
     const type = array({ min: 1 }).of(boolean());
 
-    const min = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      min: () => min,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(min);
+    expect(rule.min).toHaveBeenCalledWith(1);
 
     const value: ValidateShape<InferInput<typeof type>, boolean[]> = [true];
     const parsedValue: ValidateShape<
@@ -178,14 +175,11 @@ describe("array", () => {
   it("sets max", () => {
     const type = array({ max: 1 }).of(boolean());
 
-    const max = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      max: () => max,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(max);
+    expect(rule.max).toHaveBeenCalledWith(1);
 
     const value: ValidateShape<InferInput<typeof type>, boolean[]> = [true];
     const parsedValue: ValidateShape<
@@ -203,14 +197,11 @@ describe("array", () => {
   it("sets length", () => {
     const type = array({ length: 1 }).of(boolean());
 
-    const length = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      length: () => length,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(length);
+    expect(rule.length).toHaveBeenCalledWith(1);
 
     const value0: ValidateShape<InferInput<typeof type>, boolean[]> = [];
 
@@ -231,14 +222,11 @@ describe("array", () => {
   it("sets nonempty", () => {
     const type = array({ nonempty: true }).of(boolean());
 
-    const min = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      min: () => min,
-    };
+    type.schema().validation?.(rule);
 
-    expect(type.schema().validation?.(rule)).toEqual(min);
+    expect(rule.min).toHaveBeenCalledWith(1);
 
     const value: ValidateShape<
       InferInput<typeof type>,

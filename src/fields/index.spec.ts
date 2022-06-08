@@ -43,14 +43,11 @@ describe("fields", () => {
       },
     ]);
 
-    const required = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      required: () => required,
-    };
+    schema[0]?.validation?.(rule);
 
-    expect(schema[0]?.validation?.(rule)).toEqual(required);
+    expect(rule.required).toHaveBeenCalled();
 
     const value: ValidateShape<InferInput<typeof type>, { foo: boolean }> = {
       foo: true,
@@ -80,14 +77,11 @@ describe("fields", () => {
       },
     ]);
 
-    const required = mockRule();
+    const rule = mockRule();
 
-    const rule = {
-      ...mockRule(),
-      required: () => required,
-    };
+    schema[0]?.validation?.(rule);
 
-    expect(schema[0]?.validation?.(rule)).not.toEqual(required);
+    expect(rule.required).not.toHaveBeenCalled();
 
     const value: ValidateShape<InferInput<typeof type>, { foo?: boolean }> = {};
     const parsedValue: ValidateShape<

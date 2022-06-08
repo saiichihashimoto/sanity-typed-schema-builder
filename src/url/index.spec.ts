@@ -1,6 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
+import { mockRule } from "../test-utils";
+
 import { url } from ".";
 
 import type { ValidateShape } from "../test-utils";
@@ -53,4 +55,21 @@ describe("url", () => {
           ]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = url({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const url: ValidateShape<typeof value, string> = value;
+
+          return url.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });

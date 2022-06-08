@@ -1,5 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 
+import { mockRule } from "../test-utils";
+
 import { slug } from ".";
 
 import type { ValidateShape } from "../test-utils";
@@ -54,4 +56,29 @@ describe("slug", () => {
           ]),
       }).mock()
     ));
+
+  it("types custom validation", () => {
+    const type = slug({
+      validation: (Rule) =>
+        Rule.custom((value) => {
+          const {
+            current: slug,
+          }: ValidateShape<
+            typeof value,
+            {
+              _type: "slug";
+              current: string;
+            }
+          > = value;
+
+          return slug.length > 50 || "Needs to be 50 characters";
+        }),
+    });
+
+    const rule = mockRule();
+
+    type.schema().validation?.(rule);
+
+    expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
+  });
 });
