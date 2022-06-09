@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
 import { boolean } from "../boolean";
-import { fields } from "../fields";
+import { field } from "../field";
 import { object } from "../object";
 import { mockRule } from "../test-utils";
 
@@ -65,7 +65,7 @@ describe("array", () => {
     const type = array({
       of: items().item(
         object({
-          fields: fields().field({
+          fields: field({
             name: "foo",
             type: boolean(),
           }),
@@ -114,7 +114,7 @@ describe("array", () => {
       of: items()
         .item(
           object({
-            fields: fields().field({
+            fields: field({
               name: "foo",
               type: boolean(),
             }),
@@ -122,7 +122,7 @@ describe("array", () => {
         )
         .item(
           object({
-            fields: fields().field({
+            fields: field({
               name: "bar",
               type: boolean(),
             }),
@@ -287,7 +287,7 @@ describe("array", () => {
       of: items()
         .item(
           object({
-            fields: fields().field({
+            fields: field({
               name: "foo",
               type: boolean(),
             }),
@@ -295,7 +295,7 @@ describe("array", () => {
         )
         .item(
           object({
-            fields: fields().field({
+            fields: field({
               name: "bar",
               type: boolean(),
             }),

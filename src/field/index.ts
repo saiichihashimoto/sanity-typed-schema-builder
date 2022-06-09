@@ -202,7 +202,20 @@ const fieldsInternal = <
   };
 };
 
-export const fields = () => fieldsInternal<never, Record<never, never>>([]);
+export const field = <
+  Name extends string,
+  Zod extends z.ZodType<any, any, any>,
+  Optional extends boolean = false
+>(
+  options: FieldOptions<Name, Zod, Optional>
+) =>
+  fieldsInternal<
+    Name,
+    // @ts-expect-error -- Not sure how to solve this
+    {
+      [field in Name]: FieldOptions<Name, Zod, Optional>;
+    }
+  >([options]);
 
 export type Preview<
   Value extends Record<string, unknown>,

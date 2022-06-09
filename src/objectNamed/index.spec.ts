@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
-import { fields } from "../fields";
+import { field } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
 
@@ -14,26 +14,57 @@ import type { PartialDeep } from "type-fest";
 
 describe("object", () => {
   it("builds a sanity config", () =>
-    expect(objectNamed({ name: "foo", fields: fields() }).schema()).toEqual({
+    expect(
+      objectNamed({
+        name: "foo",
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }),
+      }).schema()
+    ).toEqual({
       name: "foo",
       type: "object",
-      fields: [],
+      fields: [
+        {
+          name: "foo",
+          type: "boolean",
+          validation: expect.any(Function),
+        },
+      ],
     }));
 
   it("passes through schema values", () =>
     expect(
-      objectNamed({ name: "foo", fields: fields(), hidden: false }).schema()
+      objectNamed({
+        name: "foo",
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }),
+        hidden: false,
+      }).schema()
     ).toHaveProperty("hidden", false));
 
   it("parses into an object", () => {
-    const type = objectNamed({ name: "foo", fields: fields() });
+    const type = objectNamed({
+      name: "foo",
+      fields: field({
+        name: "foo",
+        type: boolean(),
+      }),
+    });
 
-    const value: ValidateShape<InferInput<typeof type>, { _type: "foo" }> = {
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      { _type: "foo"; foo: boolean }
+    > = {
       _type: "foo",
+      foo: true,
     };
     const parsedValue: ValidateShape<
       InferOutput<typeof type>,
-      { _type: "foo" }
+      { _type: "foo"; foo: boolean }
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -42,12 +73,12 @@ describe("object", () => {
   it("makes a reference", () => {
     const type = objectNamed({
       name: "foo",
-      fields: fields().field({ name: "hello", type: string() }),
+      fields: field({ name: "hello", type: string() }),
     });
 
     const type2 = objectNamed({
       name: "bar",
-      fields: fields().field({ name: "foo", type: type.ref() }),
+      fields: field({ name: "foo", type: type.ref() }),
     });
 
     expect(type2.schema().fields[0]).toEqual({
@@ -88,72 +119,17 @@ describe("object", () => {
     expect(parsedValue).toEqual(value);
   });
 
-  it("adds fields", () => {
-    const type = objectNamed({
-      name: "foo",
-      fields: fields()
-        .field({
-          name: "foo",
-          type: boolean(),
-        })
-        .field({
-          name: "bar",
-          optional: true,
-          type: boolean(),
-        }),
-    });
-
-    const schema = type.schema();
-
-    expect(schema).toHaveProperty("fields", [
-      {
-        name: "foo",
-        type: "boolean",
-        validation: expect.any(Function),
-      },
-      {
-        name: "bar",
-        type: "boolean",
-        validation: expect.any(Function),
-      },
-    ]);
-
-    const value: ValidateShape<
-      InferInput<typeof type>,
-      {
-        _type: "foo";
-        bar?: boolean;
-        foo: boolean;
-      }
-    > = {
-      _type: "foo",
-      foo: true,
-    };
-    const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      {
-        _type: "foo";
-        bar?: boolean;
-        foo: boolean;
-      }
-    > = type.parse(value);
-
-    expect(parsedValue).toEqual(value);
-  });
-
   it("mocks the field values", () =>
     expect(
       objectNamed({
         name: "foo",
-        fields: fields()
-          .field({
-            name: "foo",
-            type: boolean(),
-          })
-          .field({
-            name: "bar",
-            type: string(),
-          }),
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }).field({
+          name: "bar",
+          type: string(),
+        }),
       }).mock(faker)
     ).toEqual({
       _type: "foo",
@@ -168,15 +144,13 @@ describe("object", () => {
     ]).toContainEqual(
       objectNamed({
         name: "foo",
-        fields: fields()
-          .field({
-            name: "foo",
-            type: boolean(),
-          })
-          .field({
-            name: "bar",
-            type: string(),
-          }),
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }).field({
+          name: "bar",
+          type: string(),
+        }),
         mock: (faker) =>
           faker.helpers.arrayElement([
             { _type: "foo", foo: true, bar: "foo" },
@@ -189,7 +163,10 @@ describe("object", () => {
     expect(
       objectNamed({
         name: "foo",
-        fields: fields(),
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }),
         preview: {
           select: {
             title: "someTitle",
@@ -207,16 +184,14 @@ describe("object", () => {
   it("allows a function selection value", () => {
     const type = objectNamed({
       name: "foo",
-      fields: fields()
-        .field({
-          name: "foo",
-          type: string(),
-        })
-        .field({
-          name: "bar",
-          optional: true,
-          type: string(),
-        }),
+      fields: field({
+        name: "foo",
+        type: string(),
+      }).field({
+        name: "bar",
+        optional: true,
+        type: string(),
+      }),
       preview: {
         select: {
           bleh: "foo",
@@ -266,16 +241,14 @@ describe("object", () => {
   it("types custom validation", () => {
     const type = objectNamed({
       name: "foo",
-      fields: fields()
-        .field({
-          name: "foo",
-          optional: true,
-          type: boolean(),
-        })
-        .field({
-          name: "bar",
-          type: string(),
-        }),
+      fields: field({
+        name: "foo",
+        optional: true,
+        type: boolean(),
+      }).field({
+        name: "bar",
+        type: string(),
+      }),
       validation: (Rule) =>
         Rule.custom((value) => {
           const {

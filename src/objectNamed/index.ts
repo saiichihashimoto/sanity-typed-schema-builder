@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { preview } from "../fields";
+import { preview } from "../field";
 import { createType } from "../types";
 
 import type {
@@ -8,7 +8,7 @@ import type {
   FieldsType,
   InferFieldsZod,
   Preview,
-} from "../fields";
+} from "../field";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
