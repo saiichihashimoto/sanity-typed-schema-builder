@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../fields";
+import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../field";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";

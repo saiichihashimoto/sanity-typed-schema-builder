@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { preview } from "../fields";
+import { preview } from "../field";
 import { createType } from "../types";
 
-import type { FieldsType, InferFieldsZod, Preview } from "../fields";
+import type { FieldsType, InferFieldsZod, Preview } from "../field";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";

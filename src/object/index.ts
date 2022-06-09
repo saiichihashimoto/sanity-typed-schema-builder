@@ -1,11 +1,11 @@
-import { preview } from "../fields";
+import { preview } from "../field";
 
 import type {
   FieldOptionKeys,
   FieldsType,
   InferFieldsZod,
   Preview,
-} from "../fields";
+} from "../field";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";

@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import { boolean } from "../boolean";
 import { document } from "../document";
-import { fields } from "../fields";
+import { field } from "../field";
 import { mockRule } from "../test-utils";
 
 import { reference } from ".";
@@ -46,7 +47,15 @@ describe("reference", () => {
   });
 
   it("adds references", () => {
-    const type = reference().to(document({ name: "foo", fields: fields() }));
+    const type = reference().to(
+      document({
+        name: "foo",
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }),
+      })
+    );
 
     const schema = type.schema();
 

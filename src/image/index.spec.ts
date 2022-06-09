@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
-import { fields } from "../fields";
+import { field } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
 
@@ -125,16 +125,14 @@ describe("image", () => {
 
   it("adds fields", () => {
     const type = image({
-      fields: fields()
-        .field({
-          name: "foo",
-          type: boolean(),
-        })
-        .field({
-          name: "bar",
-          optional: true,
-          type: boolean(),
-        }),
+      fields: field({
+        name: "foo",
+        type: boolean(),
+      }).field({
+        name: "bar",
+        optional: true,
+        type: boolean(),
+      }),
     });
 
     const schema = type.schema();
@@ -190,15 +188,13 @@ describe("image", () => {
   it("mocks the field values", () =>
     expect(
       image({
-        fields: fields()
-          .field({
-            name: "foo",
-            type: boolean(),
-          })
-          .field({
-            name: "bar",
-            type: string(),
-          }),
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }).field({
+          name: "bar",
+          type: string(),
+        }),
       }).mock(faker)
     ).toEqual({
       _type: "image",
@@ -232,15 +228,13 @@ describe("image", () => {
       },
     ] as const).toContainEqual(
       image({
-        fields: fields()
-          .field({
-            name: "foo",
-            type: boolean(),
-          })
-          .field({
-            name: "bar",
-            type: string(),
-          }),
+        fields: field({
+          name: "foo",
+          type: boolean(),
+        }).field({
+          name: "bar",
+          type: string(),
+        }),
         mock: (faker) =>
           faker.helpers.arrayElement([
             {
@@ -267,16 +261,14 @@ describe("image", () => {
 
   it("types custom validation", () => {
     const type = image({
-      fields: fields()
-        .field({
-          name: "foo",
-          optional: true,
-          type: boolean(),
-        })
-        .field({
-          name: "bar",
-          type: string(),
-        }),
+      fields: field({
+        name: "foo",
+        optional: true,
+        type: boolean(),
+      }).field({
+        name: "bar",
+        type: string(),
+      }),
       validation: (Rule) =>
         Rule.custom((value) => {
           const {
