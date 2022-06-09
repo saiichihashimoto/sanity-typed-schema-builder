@@ -15,27 +15,21 @@ type ItemDefinition = Omit<
   FieldOptionKeys
 >;
 
-type AddKeyToZod<Zod extends z.ZodType<any, any, any>> =
-  Zod extends z.ZodObject<infer T, infer UnknownKeys, infer Catchall, any, any>
-    ? z.ZodObject<
-        z.extendShape<T, { _key: z.ZodString }>,
-        UnknownKeys,
-        Catchall,
-        z.objectOutputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>,
-        z.objectInputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>
-      >
-    : Zod;
+type AddKeyToZod<Zod extends z.ZodFirstPartySchemaTypes> = Zod extends
+  | z.ZodObject<any, any, any, any, any>
+  | z.ZodIntersection<any, any>
+  ? z.ZodIntersection<Zod, z.ZodObject<{ _key: z.ZodString }>>
+  : Zod;
 
-const isZodObject = (
-  zod: z.ZodType<any, any, any>
-): zod is z.ZodObject<any, any, any, any, any> => "shape" in zod;
-
-const addKeyToZod = <Zod extends z.ZodType<any, any, any>>(zod: Zod) =>
-  !isZodObject(zod)
-    ? (zod as AddKeyToZod<Zod>)
-    : (zod.extend({
-        _key: z.string(),
-      }) as AddKeyToZod<Zod>);
+const addKeyToZod = <Zod extends z.ZodFirstPartySchemaTypes>(zod: Zod) =>
+  !(zod instanceof z.ZodObject) && !(zod instanceof z.ZodIntersection)
+    ? zod
+    : z.intersection(
+        zod,
+        z.object({
+          _key: z.string(),
+        })
+      );
 
 type ZodArray<
   Positions extends string,

@@ -6,12 +6,10 @@ type ValidateError<T, Shape> = Resolve<{
   received: Resolve<T>;
 }>;
 
-export type ValidateShape<Received, Expected> = (<
-  T
->() => T extends Resolve<Received> ? 1 : 2) extends <
-  T
->() => T extends Resolve<Expected> ? 1 : 2
-  ? Received
+export type ValidateShape<Received, Expected> = Received extends Expected
+  ? Expected extends Received
+    ? Received
+    : ValidateError<Received, Expected>
   : ValidateError<Received, Expected>;
 
 export const mockRule = () => {
