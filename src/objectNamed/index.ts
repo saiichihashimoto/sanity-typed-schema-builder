@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { preview } from "../fields";
+import { createType } from "../types";
 
 import type {
   FieldOptionKeys,
@@ -43,30 +44,27 @@ export const objectNamed = <
   Fields extends FieldsType<any, any>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
->(
-  def: Omit<
-    TypeValidation<
-      Schema.ObjectDefinition,
-      z.input<ZodObjectNamed<ObjectNames, Fields>>
-    >,
-    "fields" | "name" | "preview" | "type"
-  > & {
-    fields: Fields;
-    mock?: (faker: Faker) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
-    name: ObjectNames;
-    preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>;
-  }
-): ObjectNamedType<ObjectNames, Fields> => {
-  const {
-    name,
-    preview: previewDef,
-    fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
-    mock = (faker) => ({
-      ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
-      _type: name,
-    }),
-  } = def;
-
+>({
+  name,
+  preview: previewDef,
+  fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
+  mock = (faker) => ({
+    ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
+    _type: name,
+  }),
+  ...def
+}: Omit<
+  TypeValidation<
+    Schema.ObjectDefinition,
+    z.input<ZodObjectNamed<ObjectNames, Fields>>
+  >,
+  "fields" | "name" | "preview" | "type"
+> & {
+  fields: Fields;
+  mock?: (faker: Faker) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
+  name: ObjectNames;
+  preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>;
+}): ObjectNamedType<ObjectNames, Fields> => {
   const zod = z.intersection(
     fieldsZod as InferFieldsZod<Fields>,
     z.object({
@@ -75,27 +73,29 @@ export const objectNamed = <
   ) as unknown as ZodObjectNamed<ObjectNames, Fields>;
 
   return {
-    mock,
-    zod,
-    parse: zod.parse.bind(zod),
-    schema: () => {
-      const schemaForFields = fieldsSchema();
-
-      return {
-        ...def,
-        type: "object",
-        fields: schemaForFields,
-        preview: preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>(
-          previewDef,
-          schemaForFields
-        ),
-      };
-    },
-    ref: () => ({
+    ...createType({
       mock,
       zod,
-      parse: zod.parse.bind(zod),
-      schema: () => ({ type: name }),
+      schema: () => {
+        const schemaForFields = fieldsSchema();
+
+        return {
+          ...def,
+          name,
+          type: "object",
+          fields: schemaForFields,
+          preview: preview<
+            z.input<ZodObjectNamed<ObjectNames, Fields>>,
+            Select
+          >(previewDef, schemaForFields),
+        };
+      },
     }),
+    ref: () =>
+      createType({
+        mock,
+        zod,
+        schema: () => ({ type: name }),
+      }),
   };
 };

@@ -1,34 +1,29 @@
 import { z } from "zod";
 
+import { createType } from "../types";
+
 import type { FieldOptionKeys } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-interface URLType
-  extends SanityType<
-    Omit<TypeValidation<Schema.UrlDefinition, string>, FieldOptionKeys>,
-    z.ZodString
-  > {}
-
-export const url = (
-  def: Omit<
-    TypeValidation<Schema.UrlDefinition, string>,
-    FieldOptionKeys | "type"
-  > & {
-    mock?: (faker: Faker) => string;
-  } = {}
-): URLType => {
-  const { mock = (faker: Faker) => faker.internet.url() } = def;
-  const zod = z.string().url();
-
-  return {
+export const url = ({
+  mock = (faker: Faker) => faker.internet.url(),
+  ...def
+}: Omit<
+  TypeValidation<Schema.UrlDefinition, string>,
+  FieldOptionKeys | "type"
+> & {
+  mock?: (faker: Faker) => string;
+} = {}): SanityType<
+  Omit<TypeValidation<Schema.UrlDefinition, string>, FieldOptionKeys>,
+  z.ZodString
+> =>
+  createType({
     mock,
-    zod,
-    parse: zod.parse.bind(zod),
+    zod: z.string().url(),
     schema: () => ({
       ...def,
       type: "url",
     }),
-  };
-};
+  });

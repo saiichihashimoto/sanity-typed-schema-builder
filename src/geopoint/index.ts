@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { createType } from "../types";
+
 import type { FieldOptionKeys } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
@@ -14,46 +16,36 @@ type ZodGeopoint = z.ZodObject<{
 
 type SanityGeopoint = z.input<ZodGeopoint>;
 
-interface GeopointType
-  extends SanityType<
-    Omit<
-      TypeValidation<Schema.GeopointDefinition, SanityGeopoint>,
-      FieldOptionKeys
-    >,
-    ZodGeopoint
-  > {}
-
-export const geopoint = (
-  def: Omit<
+export const geopoint = ({
+  mock = (faker) => ({
+    _type: "geopoint",
+    alt: faker.datatype.number({ min: 0, max: 1000 }),
+    lat: faker.datatype.number({ min: -90, max: 90 }),
+    lng: faker.datatype.number({ min: -180, max: 180 }),
+  }),
+  ...def
+}: Omit<
+  TypeValidation<Schema.GeopointDefinition, SanityGeopoint>,
+  FieldOptionKeys | "type"
+> & {
+  mock?: (faker: Faker) => SanityGeopoint;
+} = {}): SanityType<
+  Omit<
     TypeValidation<Schema.GeopointDefinition, SanityGeopoint>,
-    FieldOptionKeys | "type"
-  > & {
-    mock?: (faker: Faker) => SanityGeopoint;
-  } = {}
-): GeopointType => {
-  const {
-    mock = (faker) => ({
-      _type: "geopoint",
-      alt: faker.datatype.number({ min: 0, max: 1000 }),
-      lat: faker.datatype.number({ min: -90, max: 90 }),
-      lng: faker.datatype.number({ min: -180, max: 180 }),
-    }),
-  } = def;
-
-  const zod = z.object({
-    _type: z.literal("geopoint"),
-    alt: z.number(),
-    lat: z.number(),
-    lng: z.number(),
-  });
-
-  return {
-    zod,
-    parse: zod.parse.bind(zod),
+    FieldOptionKeys
+  >,
+  ZodGeopoint
+> =>
+  createType({
     mock,
+    zod: z.object({
+      _type: z.literal("geopoint"),
+      alt: z.number(),
+      lat: z.number(),
+      lng: z.number(),
+    }),
     schema: () => ({
       ...def,
       type: "geopoint",
     }),
-  };
-};
+  });
