@@ -1,3 +1,4 @@
+import type { Faker } from "@faker-js/faker";
 import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
@@ -8,7 +9,7 @@ import type { z } from "zod";
 // TODO Type Definition across the board
 
 export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
-  mock: () => z.input<Zod>;
+  mock: (faker: Faker) => z.input<Zod>;
   parse: (data: unknown) => z.output<Zod>;
   schema: () => Definition;
   zod: Zod;

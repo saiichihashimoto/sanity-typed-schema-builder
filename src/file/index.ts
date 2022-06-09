@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../fields";
@@ -47,8 +46,8 @@ export const file = <
         undefined as unknown as z.input<InferFieldsZod<Fields>>,
       zod: fieldsZod = z.object({}),
     } = {},
-    mock = () => ({
-      ...fieldsMock(),
+    mock = (faker) => ({
+      ...fieldsMock(faker),
       _type: "file",
       asset: {
         _type: "reference",
@@ -71,7 +70,7 @@ export const file = <
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => ({
       ...def,
       type: "file",

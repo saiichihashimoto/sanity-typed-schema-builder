@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
@@ -153,7 +154,7 @@ describe("object", () => {
             name: "bar",
             type: string(),
           }),
-      }).mock()
+      }).mock(faker)
     ).toEqual({
       _type: "foo",
       foo: expect.any(Boolean),
@@ -181,7 +182,7 @@ describe("object", () => {
             { _type: "foo", foo: true, bar: "foo" },
             { _type: "foo", foo: false, bar: "bar" },
           ] as const),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("sets preview.select", () =>

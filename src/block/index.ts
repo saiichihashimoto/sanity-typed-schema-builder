@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
@@ -27,7 +26,7 @@ export const block = (
   } = {}
 ): BlockType => {
   const {
-    mock = (): PortableTextBlock => ({
+    mock = (faker): PortableTextBlock => ({
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -46,7 +45,7 @@ export const block = (
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => ({
       ...def,
       type: "block",

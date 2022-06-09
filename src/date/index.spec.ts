@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
@@ -30,7 +31,7 @@ describe("date", () => {
   });
 
   it("mocks a string", () => {
-    const value = date().mock();
+    const value = date().mock(faker);
 
     expect(value).toEqual(expect.any(String));
 
@@ -44,7 +45,7 @@ describe("date", () => {
       date({
         mock: (faker) =>
           faker.helpers.arrayElement(["2010-05-06", "2011-04-27"]),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("types custom validation", () => {

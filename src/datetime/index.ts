@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
@@ -27,7 +26,7 @@ export const datetime = (
     max,
     min,
     validation,
-    mock = () =>
+    mock = (faker) =>
       faker.date
         .between(
           min ?? "2021-06-03T03:24:55.395Z",
@@ -61,7 +60,7 @@ export const datetime = (
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => ({
       ...def,
       type: "datetime",

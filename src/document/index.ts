@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import { preview } from "../fields";
@@ -61,13 +60,13 @@ export const document = <
     name,
     preview: previewDef,
     fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
-    mock = () => {
+    mock = (faker) => {
       const createdAt = faker.date
         .between("2021-06-03T03:24:55.395Z", "2022-06-04T18:50:36.539Z")
         .toISOString();
 
       return {
-        ...(fieldsMock() as z.input<InferFieldsZod<Fields>>),
+        ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
         _id: faker.datatype.uuid(),
         _createdAt: createdAt,
         _rev: faker.datatype.string(23),
@@ -94,7 +93,7 @@ export const document = <
     name,
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => {
       const schemaForFields = fieldsSchema();
 

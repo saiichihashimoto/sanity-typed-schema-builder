@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { document } from "../document";
@@ -64,7 +65,7 @@ describe("reference", () => {
   });
 
   it("mocks a reference", () =>
-    expect(reference().mock()).toEqual({
+    expect(reference().mock(faker)).toEqual({
       _ref: expect.any(String),
       _type: "reference",
     }));
@@ -94,7 +95,7 @@ describe("reference", () => {
               _weak: true,
             },
           ]),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("types custom validation", () => {

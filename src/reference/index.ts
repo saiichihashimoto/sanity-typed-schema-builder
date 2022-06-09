@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { DocumentType } from "../document";
@@ -56,9 +55,9 @@ const referenceInternal = <DocumentName extends string>(
   });
 
   return {
+    mock,
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
     schema: () => ({
       ...def,
       type: "reference",

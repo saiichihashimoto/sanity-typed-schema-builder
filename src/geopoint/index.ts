@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
@@ -33,7 +32,7 @@ export const geopoint = (
   } = {}
 ): GeopointType => {
   const {
-    mock = () => ({
+    mock = (faker) => ({
       _type: "geopoint",
       alt: faker.datatype.number({ min: 0, max: 1000 }),
       lat: faker.datatype.number({ min: -90, max: 90 }),
@@ -51,7 +50,7 @@ export const geopoint = (
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => ({
       ...def,
       type: "geopoint",

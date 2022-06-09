@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
@@ -39,9 +38,9 @@ export const slug = (
     .transform(({ current }) => current);
 
   return {
+    mock,
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
     schema: () => ({
       ...def,
       type: "slug",

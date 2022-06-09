@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
@@ -21,7 +20,7 @@ export const date = (
   } = {}
 ): DateType => {
   const {
-    mock = () =>
+    mock = (faker) =>
       `${`${faker.datatype.number({
         min: 1990,
         max: 2020,
@@ -40,7 +39,7 @@ export const date = (
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => ({
       ...def,
       type: "date",
