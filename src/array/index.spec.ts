@@ -90,11 +90,20 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferInput<typeof type>,
-      Array<{ foo: boolean }>
-    > = [{ foo: true }, { foo: false }];
+      Array<{
+        _key: string;
+        foo: boolean;
+      }>
+    > = [
+      { _key: "a", foo: true },
+      { _key: "b", foo: false },
+    ];
     const parsedValue: ValidateShape<
       InferOutput<typeof type>,
-      Array<{ foo: boolean }>
+      Array<{
+        _key: string;
+        foo: boolean;
+      }>
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -148,11 +157,32 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferInput<typeof type>,
-      Array<{ foo: boolean } | { bar: boolean }>
-    > = [{ foo: true }, { bar: true }];
+      Array<
+        | {
+            _key: string;
+            foo: boolean;
+          }
+        | {
+            _key: string;
+            bar: boolean;
+          }
+      >
+    > = [
+      { _key: "a", foo: true },
+      { _key: "b", bar: true },
+    ];
     const parsedValue: ValidateShape<
       InferOutput<typeof type>,
-      Array<{ foo: boolean } | { bar: boolean }>
+      Array<
+        | {
+            _key: string;
+            foo: boolean;
+          }
+        | {
+            _key: string;
+            bar: boolean;
+          }
+      >
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -275,7 +305,18 @@ describe("array", () => {
         Rule.custom((value) => {
           const elements: ValidateShape<
             typeof value,
-            PartialDeep<Array<{ foo: boolean } | { bar: boolean }>>
+            PartialDeep<
+              Array<
+                | {
+                    _key: string;
+                    foo: boolean;
+                  }
+                | {
+                    _key: string;
+                    bar: boolean;
+                  }
+              >
+            >
           > = value;
 
           return elements.length > 50 || "Needs to be 50 characters";

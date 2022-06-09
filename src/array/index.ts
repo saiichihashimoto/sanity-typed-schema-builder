@@ -15,6 +15,28 @@ type ItemDefinition = Omit<
   FieldOptionKeys
 >;
 
+type AddKeyToZod<Zod extends z.ZodType<any, any, any>> =
+  Zod extends z.ZodObject<infer T, infer UnknownKeys, infer Catchall, any, any>
+    ? z.ZodObject<
+        z.extendShape<T, { _key: z.ZodString }>,
+        UnknownKeys,
+        Catchall,
+        z.objectOutputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>,
+        z.objectInputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>
+      >
+    : Zod;
+
+const isZodObject = (
+  zod: z.ZodType<any, any, any>
+): zod is z.ZodObject<any, any, any, any, any> => "shape" in zod;
+
+const addKeyToZod = <Zod extends z.ZodType<any, any, any>>(zod: Zod) =>
+  !isZodObject(zod)
+    ? (zod as AddKeyToZod<Zod>)
+    : (zod.extend({
+        _key: z.string(),
+      }) as AddKeyToZod<Zod>);
+
 type ZodArray<
   Positions extends string,
   Items extends {
@@ -25,12 +47,12 @@ type ZodArray<
   "00" extends Positions
     ? z.ZodUnion<
         readonly [
-          InferZod<Items[keyof Items]>,
-          ...Array<InferZod<Items[keyof Items]>>
+          AddKeyToZod<InferZod<Items[keyof Items]>>,
+          ...Array<AddKeyToZod<InferZod<Items[keyof Items]>>>
         ]
       >
     : "0" extends Positions
-    ? InferZod<Items[keyof Items]>
+    ? AddKeyToZod<InferZod<Items[keyof Items]>>
     : z.ZodNever,
   NonEmpty extends true ? "atleastone" : "many"
 >;
@@ -70,20 +92,17 @@ const itemsInternal = <
     items.length === 0
       ? z.never()
       : items.length === 1
-      ? items[0]!.zod
+      ? addKeyToZod(items[0]!.zod)
       : z.union([
-          items[0]!.zod,
-          items[1]!.zod,
+          addKeyToZod(items[0]!.zod),
+          addKeyToZod(items[1]!.zod),
           ...(items
             .slice(2)
             .map(
               <Zod extends z.ZodType<any, any, any>>({
                 zod,
-              }: SanityType<ItemDefinition, Zod>) => zod
-            ) as unknown as readonly [
-            InferZod<Items[keyof Items]>,
-            ...Array<InferZod<Items[keyof Items]>>
-          ]),
+              }: SanityType<ItemDefinition, Zod>) => addKeyToZod(zod)
+            ) as unknown as Array<InferZod<Items[keyof Items]>>),
         ])
   ) as ZodArray<Positions, Items, false>;
 
