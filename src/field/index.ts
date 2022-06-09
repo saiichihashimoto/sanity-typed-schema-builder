@@ -1,7 +1,13 @@
 import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
-import type { InferZod, Resolve, SanityType, TypeValidation } from "../types";
+import type {
+  AnyObject,
+  InferZod,
+  Resolve,
+  SanityType,
+  TypeValidation,
+} from "../types";
 import type {
   PrepareViewOptions,
   PreviewConfig,
@@ -218,7 +224,7 @@ export const field = <
   >([options]);
 
 export type Preview<
-  Value extends Record<string, unknown>,
+  Value extends AnyObject,
   Select extends NonNullable<PreviewConfig["select"]>
 > =
   | {
@@ -262,7 +268,7 @@ export type Preview<
     };
 
 export const preview = <
-  Value extends Record<string, unknown>,
+  Value extends AnyObject,
   Select extends NonNullable<PreviewConfig["select"]>
 >(
   preview: Preview<Value, Select> | undefined,

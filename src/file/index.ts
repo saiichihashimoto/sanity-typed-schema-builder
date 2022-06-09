@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../field";
-import type { SanityType, TypeValidation } from "../types";
+import type { EmptyObject, SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -22,7 +22,7 @@ type ZodFile<Fields extends FieldsType<any, any>> = z.ZodIntersection<
 >;
 
 export const file = <
-  Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
+  Fields extends FieldsType<any, any> = FieldsType<never, EmptyObject>
 >(
   def: Omit<
     TypeValidation<Schema.FileDefinition, z.input<ZodFile<Fields>>>,
