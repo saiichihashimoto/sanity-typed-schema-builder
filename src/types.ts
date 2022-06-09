@@ -15,6 +15,7 @@ export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
   zod: Zod;
 }
 
+// TODO createType tests
 export const createType = <Definition, Zod extends z.ZodType<any, any, any>>({
   zod,
   parse = zod.parse.bind(zod),

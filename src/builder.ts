@@ -1,6 +1,7 @@
 export { array, items } from "./array";
 export { block } from "./block";
 export { boolean } from "./boolean";
+export { createType } from "./types";
 export { date } from "./date";
 export { datetime } from "./datetime";
 export { document } from "./document";
