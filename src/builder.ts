@@ -1,4 +1,4 @@
-export { array, items } from "./array";
+export { array, item } from "./array";
 export { block } from "./block";
 export { boolean } from "./boolean";
 export { createType } from "./types";

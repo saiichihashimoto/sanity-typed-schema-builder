@@ -123,8 +123,19 @@ const itemsInternal = <
     >([...items, item]),
 });
 
-export const items = <NonEmpty extends boolean>() =>
-  itemsInternal<"", Record<"", never>, NonEmpty>([]);
+export const item = <
+  Zod extends z.ZodType<any, any, any>,
+  NonEmpty extends boolean
+>(
+  item: SanityType<ItemDefinition, Zod>
+) =>
+  itemsInternal<
+    "0",
+    {
+      "0": SanityType<ItemDefinition, Zod>;
+    },
+    NonEmpty
+  >([item]);
 
 export const array = <
   Positions extends string,
