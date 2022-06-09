@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
@@ -129,7 +130,7 @@ describe("file", () => {
             name: "bar",
             type: string(),
           }),
-      }).mock()
+      }).mock(faker)
     ).toEqual({
       _type: "file",
       bar: expect.any(String),
@@ -192,7 +193,7 @@ describe("file", () => {
               bar: "bar",
             },
           ] as const),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("types custom validation", () => {

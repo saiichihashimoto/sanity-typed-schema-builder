@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { mockRule } from "../test-utils";
@@ -39,7 +40,7 @@ describe("slug", () => {
   });
 
   it("mocks a slug", () =>
-    expect(slug().mock()).toEqual({
+    expect(slug().mock(faker)).toEqual({
       _type: "slug",
       current: expect.any(String),
     }));
@@ -55,7 +56,7 @@ describe("slug", () => {
             { _type: "slug", current: "a-slug" },
             { _type: "slug", current: "b-slug" },
           ]),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("types custom validation", () => {

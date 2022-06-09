@@ -153,10 +153,10 @@ const fieldsInternal = <
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () =>
+    mock: (faker) =>
       fromPairs(
         fields.map(
-          ({ name, type: { mock } }) => [name, mock()] as const
+          ({ name, type: { mock } }) => [name, mock(faker)] as const
         ) as Array<[string, any]>
       ) as z.input<InferZod<FieldsType<FieldNames, Fields>>>,
     schema: () =>

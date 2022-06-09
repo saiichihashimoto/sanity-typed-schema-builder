@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import type { FieldOptionKeys } from "../fields";
@@ -20,14 +19,14 @@ export const boolean = (
     mock?: (faker: Faker) => boolean;
   } = {}
 ): BooleanType => {
-  const { mock = () => faker.datatype.boolean() } = def;
+  const { mock = (faker) => faker.datatype.boolean() } = def;
 
   const zod = z.boolean();
 
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => ({
       ...def,
       type: "boolean",

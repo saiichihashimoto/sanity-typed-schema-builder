@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { z } from "zod";
 
 import { preview } from "../fields";
@@ -62,8 +61,8 @@ export const objectNamed = <
     name,
     preview: previewDef,
     fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
-    mock = () => ({
-      ...(fieldsMock() as z.input<InferFieldsZod<Fields>>),
+    mock = (faker) => ({
+      ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
       _type: name,
     }),
   } = def;
@@ -76,9 +75,9 @@ export const objectNamed = <
   ) as unknown as ZodObjectNamed<ObjectNames, Fields>;
 
   return {
+    mock,
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
     schema: () => {
       const schemaForFields = fieldsSchema();
 
@@ -93,9 +92,9 @@ export const objectNamed = <
       };
     },
     ref: () => ({
+      mock,
       zod,
       parse: zod.parse.bind(zod),
-      mock: () => mock(faker),
       schema: () => ({ type: name }),
     }),
   };

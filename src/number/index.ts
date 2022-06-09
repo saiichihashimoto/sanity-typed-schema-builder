@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
@@ -68,7 +67,7 @@ export const number = (def: NumberDef = {}): NumberType => {
   return {
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
+    mock,
     schema: () => ({
       ...def,
       type: "number",

@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { mockRule } from "../test-utils";
@@ -32,13 +33,13 @@ describe("boolean", () => {
   });
 
   it("mocks a boolean", () =>
-    expect(boolean().mock()).toEqual(expect.any(Boolean)));
+    expect(boolean().mock(faker)).toEqual(expect.any(Boolean)));
 
   it("allows defining the mocks", () =>
     expect([true]).toContainEqual(
       boolean({
         mock: (faker) => faker.helpers.arrayElement([true]),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("types custom validation", () => {

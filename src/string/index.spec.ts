@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
@@ -118,13 +119,14 @@ describe("string", () => {
     }).toThrow(z.ZodError);
   });
 
-  it("mocks a word", () => expect(string().mock()).toEqual(expect.any(String)));
+  it("mocks a word", () =>
+    expect(string().mock(faker)).toEqual(expect.any(String)));
 
   it("allows defining the mocks", () =>
     expect(["Option 1", "Option 2"]).toContainEqual(
       string({
         mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("types custom validation", () => {

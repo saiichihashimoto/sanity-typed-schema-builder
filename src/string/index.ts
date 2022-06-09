@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
@@ -42,9 +41,9 @@ export const string = (def: StringDef = {}): StringType => {
   )(z.string());
 
   return {
+    mock,
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
     schema: () => ({
       ...def,
       type: "string",

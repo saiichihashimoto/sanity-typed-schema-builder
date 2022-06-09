@@ -1,5 +1,3 @@
-import { faker } from "@faker-js/faker";
-
 import { preview } from "../fields";
 
 import type {
@@ -44,9 +42,9 @@ export const object = <
   const zod = fieldsZod as InferFieldsZod<Fields>;
 
   return {
+    mock,
     zod,
     parse: zod.parse.bind(zod),
-    mock: () => mock(faker),
     schema: () => {
       const schemaForFields = fieldsSchema();
 
