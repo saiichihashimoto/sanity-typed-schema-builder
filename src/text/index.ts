@@ -1,18 +1,22 @@
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
+import { createType } from "../types";
+
 import type { FieldOptionKeys } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-interface TextType
-  extends SanityType<
-    Omit<TypeValidation<Schema.TextDefinition, string>, FieldOptionKeys>,
-    z.ZodString
-  > {}
-
-type TextDef = Omit<
+export const text = ({
+  length,
+  max,
+  min,
+  mock = (faker: Faker) => faker.lorem.paragraphs(),
+  regex,
+  validation,
+  ...def
+}: Omit<
   TypeValidation<Schema.TextDefinition, string>,
   FieldOptionKeys | "type"
 > & {
@@ -21,29 +25,18 @@ type TextDef = Omit<
   min?: number;
   mock?: (faker: Faker) => string;
   regex?: RegExp;
-};
-
-export const text = (def: TextDef = {}): TextType => {
-  const {
-    length,
-    max,
-    min,
-    mock = (faker: Faker) => faker.lorem.paragraphs(),
-    regex,
-    validation,
-  } = def;
-
-  const zod = flow(
-    (zod: z.ZodString) => (!min ? zod : zod.min(min)),
-    (zod) => (!max ? zod : zod.max(max)),
-    (zod) => (!length ? zod : zod.length(length)),
-    (zod) => (!regex ? zod : zod.regex(regex))
-  )(z.string());
-
-  return {
+} = {}): SanityType<
+  Omit<TypeValidation<Schema.TextDefinition, string>, FieldOptionKeys>,
+  z.ZodString
+> =>
+  createType({
     mock,
-    zod,
-    parse: zod.parse.bind(zod),
+    zod: flow(
+      (zod: z.ZodString) => (!min ? zod : zod.min(min)),
+      (zod) => (!max ? zod : zod.max(max)),
+      (zod) => (!length ? zod : zod.length(length)),
+      (zod) => (!regex ? zod : zod.regex(regex))
+    )(z.string()),
     schema: () => ({
       ...def,
       type: "text",
@@ -55,5 +48,4 @@ export const text = (def: TextDef = {}): TextType => {
         (rule) => validation?.(rule) ?? rule
       ),
     }),
-  };
-};
+  });

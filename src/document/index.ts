@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { preview } from "../fields";
+import { createType } from "../types";
 
 import type { FieldsType, InferFieldsZod, Preview } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
@@ -42,63 +43,58 @@ export const document = <
   Fields extends FieldsType<any, any>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
->(
-  def: Omit<
-    TypeValidation<
-      Schema.DocumentDefinition,
-      z.input<ZodDocument<DocumentNames, Fields>>
-    >,
-    "fields" | "name" | "preview" | "type"
-  > & {
-    fields: Fields;
-    mock?: (faker: Faker) => z.input<ZodDocument<DocumentNames, Fields>>;
-    name: DocumentNames;
-    preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>;
-  }
-): DocumentType<DocumentNames, Fields> => {
-  const {
-    name,
-    preview: previewDef,
-    fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
-    mock = (faker) => {
-      const createdAt = faker.date
-        .between("2021-06-03T03:24:55.395Z", "2022-06-04T18:50:36.539Z")
-        .toISOString();
+>({
+  name,
+  preview: previewDef,
+  fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
+  mock = (faker) => {
+    const createdAt = faker.date
+      .between("2021-06-03T03:24:55.395Z", "2022-06-04T18:50:36.539Z")
+      .toISOString();
 
-      return {
-        ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
-        _id: faker.datatype.uuid(),
-        _createdAt: createdAt,
-        _rev: faker.datatype.string(23),
-        _type: name,
-        _updatedAt: faker.date
-          .between(createdAt, "2022-06-05T18:50:36.539Z")
-          .toISOString(),
-      };
-    },
-  } = def;
-
-  const zod = z.intersection(
-    fieldsZod as InferFieldsZod<Fields>,
-    z.object({
-      _createdAt: z.string().transform((v) => new Date(v)),
-      _id: z.string().uuid(),
-      _rev: z.string(),
-      _type: z.literal(name),
-      _updatedAt: z.string().transform((v) => new Date(v)),
-    })
-  ) as unknown as ZodDocument<DocumentNames, Fields>;
-
-  return {
-    name,
-    zod,
-    parse: zod.parse.bind(zod),
+    return {
+      ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
+      _id: faker.datatype.uuid(),
+      _createdAt: createdAt,
+      _rev: faker.datatype.string(23),
+      _type: name,
+      _updatedAt: faker.date
+        .between(createdAt, "2022-06-05T18:50:36.539Z")
+        .toISOString(),
+    };
+  },
+  ...def
+}: Omit<
+  TypeValidation<
+    Schema.DocumentDefinition,
+    z.input<ZodDocument<DocumentNames, Fields>>
+  >,
+  "fields" | "name" | "preview" | "type"
+> & {
+  fields: Fields;
+  mock?: (faker: Faker) => z.input<ZodDocument<DocumentNames, Fields>>;
+  name: DocumentNames;
+  preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>;
+}): DocumentType<DocumentNames, Fields> => ({
+  name,
+  ...createType({
     mock,
+    zod: z.intersection(
+      fieldsZod as InferFieldsZod<Fields>,
+      z.object({
+        _createdAt: z.string().transform((v) => new Date(v)),
+        _id: z.string().uuid(),
+        _rev: z.string(),
+        _type: z.literal(name),
+        _updatedAt: z.string().transform((v) => new Date(v)),
+      })
+    ) as unknown as ZodDocument<DocumentNames, Fields>,
     schema: () => {
       const schemaForFields = fieldsSchema();
 
       return {
         ...def,
+        name,
         type: "document",
         fields: schemaForFields,
         preview: preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>(
@@ -107,5 +103,5 @@ export const document = <
         ),
       };
     },
-  };
-};
+  }),
+});

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { createType } from "../types";
+
 import type { FieldsType, InferFieldsZod } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
@@ -42,20 +44,6 @@ type ZodImage<
   >
 >;
 
-interface ImageType<
-  Hotspot extends boolean,
-  Fields extends FieldsType<any, any>
-> extends SanityType<
-    Omit<
-      TypeValidation<
-        Schema.ImageDefinition,
-        z.input<ZodImage<Hotspot, Fields>>
-      >,
-      "name"
-    >,
-    ZodImage<Hotspot, Fields>
-  > {}
-
 export const image = <
   Hotspot extends boolean = false,
   Fields extends FieldsType<any, any> = FieldsType<never, Record<never, never>>
@@ -69,7 +57,13 @@ export const image = <
     hotspot?: Hotspot;
     mock?: (faker: Faker) => z.input<ZodImage<Hotspot, Fields>>;
   } = {}
-): ImageType<Hotspot, Fields> => {
+): SanityType<
+  Omit<
+    TypeValidation<Schema.ImageDefinition, z.input<ZodImage<Hotspot, Fields>>>,
+    "name"
+  >,
+  ZodImage<Hotspot, Fields>
+> => {
   const {
     hotspot,
     fields: {
@@ -137,47 +131,44 @@ export const image = <
       } as unknown as z.input<ZodImage<Hotspot, Fields>>),
   } = def;
 
-  const zod = z.intersection(
-    fieldsZod as InferFieldsZod<Fields>,
-    z.object(
-      !hotspot
-        ? {
-            _type: z.literal("image"),
-            asset: z.object({
-              _ref: z.string(),
-              _type: z.literal("reference"),
-            }),
-          }
-        : {
-            _type: z.literal("image"),
-            asset: z.object({
-              _ref: z.string(),
-              _type: z.literal("reference"),
-            }),
-            crop: z.object({
-              bottom: z.number(),
-              left: z.number(),
-              right: z.number(),
-              top: z.number(),
-            }),
-            hotspot: z.object({
-              height: z.number(),
-              width: z.number(),
-              x: z.number(),
-              y: z.number(),
-            }),
-          }
-    )
-  ) as unknown as ZodImage<Hotspot, Fields>;
-
-  return {
-    zod,
-    parse: zod.parse.bind(zod),
+  return createType({
     mock,
+    zod: z.intersection(
+      fieldsZod as InferFieldsZod<Fields>,
+      z.object(
+        !hotspot
+          ? {
+              _type: z.literal("image"),
+              asset: z.object({
+                _ref: z.string(),
+                _type: z.literal("reference"),
+              }),
+            }
+          : {
+              _type: z.literal("image"),
+              asset: z.object({
+                _ref: z.string(),
+                _type: z.literal("reference"),
+              }),
+              crop: z.object({
+                bottom: z.number(),
+                left: z.number(),
+                right: z.number(),
+                top: z.number(),
+              }),
+              hotspot: z.object({
+                height: z.number(),
+                width: z.number(),
+                x: z.number(),
+                y: z.number(),
+              }),
+            }
+      )
+    ) as unknown as ZodImage<Hotspot, Fields>,
     schema: () => ({
       ...def,
       type: "image",
       fields: fieldsSchema(),
     }),
-  };
+  });
 };

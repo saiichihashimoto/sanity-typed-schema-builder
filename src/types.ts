@@ -3,7 +3,7 @@ import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
 } from "@sanity/types";
-import type { PartialDeep } from "type-fest";
+import type { PartialDeep, SetOptional } from "type-fest";
 import type { z } from "zod";
 
 // TODO Type Definition across the board
@@ -14,6 +14,19 @@ export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
   schema: () => Definition;
   zod: Zod;
 }
+
+export const createType = <Definition, Zod extends z.ZodType<any, any, any>>({
+  zod,
+  parse = zod.parse.bind(zod),
+  ...def
+}: SetOptional<SanityType<Definition, Zod>, "parse">): SanityType<
+  Definition,
+  Zod
+> => ({
+  ...def,
+  parse,
+  zod,
+});
 
 type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
   custom: (fn: CustomValidator<Value>) => Rule<Value>;

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { createType } from "../types";
+
 import type { DocumentType } from "../document";
 import type { FieldOptionKeys } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
@@ -48,20 +50,19 @@ const referenceInternal = <DocumentName extends string>(
     }),
   } = def;
 
-  const zod = z.object({
-    _ref: z.string(),
-    _type: z.literal("reference"),
-    _weak: z.boolean().optional(),
-  });
-
   return {
-    mock,
-    zod,
-    parse: zod.parse.bind(zod),
-    schema: () => ({
-      ...def,
-      type: "reference",
-      to: documents.map(({ name }) => ({ type: name })),
+    ...createType({
+      mock,
+      zod: z.object({
+        _ref: z.string(),
+        _type: z.literal("reference"),
+        _weak: z.boolean().optional(),
+      }),
+      schema: () => ({
+        ...def,
+        type: "reference",
+        to: documents.map(({ name }) => ({ type: name })),
+      }),
     }),
     to: <Name extends string>(document: DocumentType<Name, any>) =>
       // @ts-expect-error -- Not sure how to solve this

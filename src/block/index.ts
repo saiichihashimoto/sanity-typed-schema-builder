@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { createType } from "../types";
+
 import type { FieldOptionKeys } from "../fields";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
@@ -20,35 +22,29 @@ type BlockDef = Omit<
   FieldOptionKeys | "type"
 >;
 
-export const block = (
-  def: BlockDef & {
-    mock?: (faker: Faker) => PortableTextBlock;
-  } = {}
-): BlockType => {
-  const {
-    mock = (faker): PortableTextBlock => ({
-      style: "normal",
-      _type: "block",
-      markDefs: [],
-      children: [
-        {
-          _type: "span",
-          text: faker.lorem.paragraph(),
-          marks: [],
-        },
-      ],
-    }),
-  } = def;
-  // TODO Validate PortableTextBlock somehow
-  const zod = z.any();
-
-  return {
-    zod,
-    parse: zod.parse.bind(zod),
+export const block = ({
+  mock = (faker): PortableTextBlock => ({
+    style: "normal",
+    _type: "block",
+    markDefs: [],
+    children: [
+      {
+        _type: "span",
+        text: faker.lorem.paragraph(),
+        marks: [],
+      },
+    ],
+  }),
+  ...def
+}: BlockDef & {
+  mock?: (faker: Faker) => PortableTextBlock;
+} = {}): BlockType =>
+  createType({
     mock,
+    // TODO Validate PortableTextBlock somehow
+    zod: z.any(),
     schema: () => ({
       ...def,
       type: "block",
     }),
-  };
-};
+  });
