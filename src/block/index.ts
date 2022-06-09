@@ -8,20 +8,6 @@ import type { Faker } from "@faker-js/faker";
 import type { PortableTextBlock } from "@portabletext/types";
 import type { Schema } from "@sanity/types";
 
-interface BlockType
-  extends SanityType<
-    Omit<
-      TypeValidation<Schema.BlockDefinition, PortableTextBlock>,
-      FieldOptionKeys
-    >,
-    z.ZodType<PortableTextBlock>
-  > {}
-
-type BlockDef = Omit<
-  TypeValidation<Schema.BlockDefinition, PortableTextBlock>,
-  FieldOptionKeys | "type"
->;
-
 export const block = ({
   mock = (faker): PortableTextBlock => ({
     style: "normal",
@@ -36,9 +22,18 @@ export const block = ({
     ],
   }),
   ...def
-}: BlockDef & {
+}: Omit<
+  TypeValidation<Schema.BlockDefinition, PortableTextBlock>,
+  FieldOptionKeys | "type"
+> & {
   mock?: (faker: Faker) => PortableTextBlock;
-} = {}): BlockType =>
+} = {}): SanityType<
+  Omit<
+    TypeValidation<Schema.BlockDefinition, PortableTextBlock>,
+    FieldOptionKeys
+  >,
+  z.ZodType<PortableTextBlock>
+> =>
   createType({
     mock,
     // TODO Validate PortableTextBlock somehow

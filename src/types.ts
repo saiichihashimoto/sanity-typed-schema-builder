@@ -6,8 +6,10 @@ import type {
 import type { PartialDeep, SetOptional } from "type-fest";
 import type { z } from "zod";
 
-// TODO Type Definition across the board
+export type AnyObject = Record<string, unknown>;
+export type EmptyObject = Record<string, never>;
 
+// TODO Type Definition across the board
 export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
   mock: (faker: Faker) => z.input<Zod>;
   parse: (data: unknown) => z.output<Zod>;
