@@ -14,7 +14,7 @@ export const boolean = ({
   TypeValidation<Schema.BooleanDefinition, boolean>,
   FieldOptionKeys | "type"
 > & {
-  mock?: (faker: Faker) => boolean;
+  mock?: (faker: Faker, path: string) => boolean;
 } = {}): SanityType<
   Omit<TypeValidation<Schema.BooleanDefinition, boolean>, FieldOptionKeys>,
   z.ZodBoolean

@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { mockRule } from "../test-utils";
@@ -122,7 +121,7 @@ describe("datetime", () => {
   });
 
   it("mocks a string", () => {
-    const value = datetime().mock(faker);
+    const value = datetime().mock();
 
     expect(value).toEqual(expect.any(String));
     expect(new Date(value).toString()).not.toEqual("Invalid Date");
@@ -139,7 +138,7 @@ describe("datetime", () => {
             "2022-06-03T03:24:55.390Z",
             "2022-06-03T03:24:55.399Z",
           ]),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("types custom validation", () => {

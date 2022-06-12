@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { mockRule } from "../test-utils";
@@ -41,7 +40,7 @@ describe("block", () => {
   });
 
   it("mocks block content", () =>
-    expect(block().mock(faker)).toEqual({
+    expect(block().mock()).toEqual({
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -129,7 +128,7 @@ describe("block", () => {
               ],
             },
           ]),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("types custom validation", () => {

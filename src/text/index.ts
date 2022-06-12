@@ -12,7 +12,7 @@ export const text = ({
   length,
   max,
   min,
-  mock = (faker: Faker) => faker.lorem.paragraphs(),
+  mock = (faker) => faker.lorem.paragraphs(),
   regex,
   validation,
   ...def
@@ -23,7 +23,7 @@ export const text = ({
   length?: number;
   max?: number;
   min?: number;
-  mock?: (faker: Faker) => string;
+  mock?: (faker: Faker, path: string) => string;
   regex?: RegExp;
 } = {}): SanityType<
   Omit<TypeValidation<Schema.TextDefinition, string>, FieldOptionKeys>,

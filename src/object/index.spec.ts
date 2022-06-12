@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
@@ -72,7 +71,7 @@ describe("object", () => {
           name: "bar",
           type: string(),
         }),
-      }).mock(faker)
+      }).mock()
     ).toEqual({
       foo: expect.any(Boolean),
       bar: expect.any(String),
@@ -96,7 +95,7 @@ describe("object", () => {
             { foo: true, bar: "foo" },
             { foo: false, bar: "bar" },
           ]),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("sets preview.select", () =>

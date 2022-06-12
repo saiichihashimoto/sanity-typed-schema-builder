@@ -1,4 +1,5 @@
-import type { Faker } from "@faker-js/faker";
+import { Faker, faker as globalFaker } from "@faker-js/faker";
+
 import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
@@ -6,12 +7,16 @@ import type {
 import type { PartialDeep, SetOptional, Simplify } from "type-fest";
 import type { z } from "zod";
 
+const hashCode = (str: string) =>
+  // eslint-disable-next-line no-bitwise -- copied from somewhere
+  Array.from(str).reduce((s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0, 0);
+
 export type AnyObject = Record<string, unknown>;
 export type EmptyObject = Record<string, never>;
 
 // TODO Type Definition across the board
 export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
-  mock: (faker: Faker) => z.input<Zod>;
+  mock: (path?: string) => z.input<Zod>;
   parse: (data: unknown) => z.output<Zod>;
   schema: () => Definition;
   zod: Zod;
@@ -19,17 +24,33 @@ export interface SanityType<Definition, Zod extends z.ZodType<any, any, any>> {
 
 // TODO createType tests
 export const createType = <Definition, Zod extends z.ZodType<any, any, any>>({
+  mock,
   zod,
   parse = zod.parse.bind(zod),
   ...def
-}: SetOptional<SanityType<Definition, Zod>, "parse">): SanityType<
-  Definition,
-  Zod
-> => ({
-  ...def,
-  parse,
-  zod,
-});
+}: Omit<SetOptional<SanityType<Definition, Zod>, "parse">, "mock"> & {
+  mock: (faker: Faker, path: string) => z.input<Zod>;
+}): SanityType<Definition, Zod> => {
+  const fakers: Record<string, Faker> = {};
+
+  return {
+    ...def,
+    parse,
+    zod,
+    mock: (path = "") => {
+      const faker = fakers[path] ?? new Faker({ locales: globalFaker.locales });
+
+      if (!(path in fakers)) {
+        // eslint-disable-next-line fp/no-mutation -- Allowing for local dictionary
+        fakers[path] = faker;
+        faker.seed(hashCode(path));
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Not sure why this is happening
+      return mock(faker, path);
+    },
+  };
+};
 
 type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
   custom: (fn: CustomValidator<Value>) => Rule<Value>;

@@ -1,4 +1,5 @@
 import { preview } from "../field";
+import { createType } from "../types";
 
 import type {
   FieldOptionKeys,
@@ -18,14 +19,14 @@ export const object = <
 >({
   preview: previewDef,
   fields: { mock: fieldsMock, schema: fieldsSchema, zod: fieldsZod },
-  mock = fieldsMock,
+  mock = (faker, path) => fieldsMock(path),
   ...def
 }: Omit<
   TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
   FieldOptionKeys | "fields" | "preview" | "type"
 > & {
   fields: Fields;
-  mock?: (faker: Faker) => z.input<InferFieldsZod<Fields>>;
+  mock?: (faker: Faker, path: string) => z.input<InferFieldsZod<Fields>>;
   preview?: Preview<z.input<InferFieldsZod<Fields>>, Select>;
 }): SanityType<
   Omit<
@@ -36,7 +37,7 @@ export const object = <
 > => {
   const zod = fieldsZod as InferFieldsZod<Fields>;
 
-  return {
+  return createType({
     mock,
     zod,
     parse: zod.parse.bind(zod),
@@ -50,5 +51,11 @@ export const object = <
         preview: preview(previewDef, schemaForFields),
       };
     },
-  };
+  }) as SanityType<
+    Omit<
+      TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
+      FieldOptionKeys
+    >,
+    InferFieldsZod<Fields>
+  >;
 };

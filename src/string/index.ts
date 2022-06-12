@@ -12,7 +12,7 @@ export const string = ({
   length,
   max,
   min,
-  mock = (faker: Faker) => faker.random.word(),
+  mock = (faker) => faker.random.word(),
   regex,
   validation,
   ...def
@@ -23,7 +23,7 @@ export const string = ({
   length?: number;
   max?: number;
   min?: number;
-  mock?: (faker: Faker) => string;
+  mock?: (faker: Faker, path: string) => string;
   regex?: RegExp;
 } = {}): SanityType<
   Omit<TypeValidation<Schema.StringDefinition, string>, FieldOptionKeys>,

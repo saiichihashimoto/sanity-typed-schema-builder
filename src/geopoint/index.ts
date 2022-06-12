@@ -28,7 +28,7 @@ export const geopoint = ({
   TypeValidation<Schema.GeopointDefinition, SanityGeopoint>,
   FieldOptionKeys | "type"
 > & {
-  mock?: (faker: Faker) => SanityGeopoint;
+  mock?: (faker: Faker, path: string) => SanityGeopoint;
 } = {}): SanityType<
   Omit<
     TypeValidation<Schema.GeopointDefinition, SanityGeopoint>,

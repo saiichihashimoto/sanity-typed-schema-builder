@@ -26,7 +26,7 @@ export const datetime = ({
 > & {
   max?: string;
   min?: string;
-  mock?: (faker: Faker) => string;
+  mock?: (faker: Faker, path: string) => string;
 } = {}): SanityType<
   Omit<TypeValidation<Schema.DatetimeDefinition, string>, FieldOptionKeys>,
   z.ZodType<Date, any, string>

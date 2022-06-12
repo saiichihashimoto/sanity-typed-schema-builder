@@ -48,8 +48,8 @@ export const objectNamed = <
   name,
   preview: previewDef,
   fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
-  mock = (faker) => ({
-    ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
+  mock = (faker, path) => ({
+    ...(fieldsMock(path) as z.input<InferFieldsZod<Fields>>),
     _type: name,
   }),
   ...def
@@ -61,7 +61,10 @@ export const objectNamed = <
   "fields" | "name" | "preview" | "type"
 > & {
   fields: Fields;
-  mock?: (faker: Faker) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
+  mock?: (
+    faker: Faker,
+    path: string
+  ) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
   name: ObjectNames;
   preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>;
 }): ObjectNamedType<ObjectNames, Fields> => {
