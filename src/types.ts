@@ -3,7 +3,7 @@ import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
 } from "@sanity/types";
-import type { PartialDeep, SetOptional } from "type-fest";
+import type { PartialDeep, SetOptional, Simplify } from "type-fest";
 import type { z } from "zod";
 
 export type AnyObject = Record<string, unknown>;
@@ -49,22 +49,16 @@ export type InferZod<T extends SanityType<any, any>> = T extends SanityType<
   ? Zod
   : never;
 
-export type Resolve<T> = T extends (...args: any[]) => any
-  ? T
-  : T extends abstract new (...args: any[]) => any
-  ? T
-  : { [K in keyof T]: T[K] };
-
 export type InferInput<T extends SanityType<any, any>> = T extends SanityType<
   any,
   infer Zod
 >
-  ? Resolve<z.input<Zod>>
+  ? Simplify<z.input<Zod>>
   : never;
 
 export type InferOutput<T extends SanityType<any, any>> = T extends SanityType<
   any,
   infer Zod
 >
-  ? Resolve<z.output<Zod>>
+  ? Simplify<z.output<Zod>>
   : never;

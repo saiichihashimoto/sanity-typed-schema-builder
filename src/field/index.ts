@@ -1,13 +1,7 @@
 import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
-import type {
-  AnyObject,
-  InferZod,
-  Resolve,
-  SanityType,
-  TypeValidation,
-} from "../types";
+import type { AnyObject, InferZod, SanityType, TypeValidation } from "../types";
 import type {
   PrepareViewOptions,
   PreviewConfig,
@@ -15,6 +9,7 @@ import type {
   Rule,
   Schema,
 } from "@sanity/types";
+import type { Simplify } from "type-fest";
 
 export type FieldOptionKeys = "description" | "name" | "title";
 
@@ -96,7 +91,7 @@ export interface FieldsType<
   ) => FieldsType<
     NewFieldNames,
     // @ts-expect-error -- Not sure how to solve this
-    Resolve<
+    Simplify<
       Fields & {
         [field in Name]: FieldOptions<Name, Zod, Optional>;
       }
@@ -199,7 +194,7 @@ const fieldsInternal = <
       fieldsInternal<
         NewFieldNames,
         // @ts-expect-error -- Not sure how to solve this
-        Resolve<
+        Simplify<
           Fields & {
             [field in Name]: FieldOptions<Name, Zod, Optional>;
           }
@@ -232,14 +227,14 @@ export type Preview<
     }
   | {
       component?: React.ComponentType<
-        Resolve<
+        Simplify<
           Omit<Value, keyof Select> & {
             [field in keyof Select]: unknown;
           }
         >
       >;
       prepare: (
-        object: Resolve<
+        object: Simplify<
           Omit<Value, keyof Select> & {
             [field in keyof Select]: unknown;
           }
@@ -250,14 +245,14 @@ export type Preview<
     }
   | {
       component: React.ComponentType<
-        Resolve<
+        Simplify<
           Omit<Value, keyof Select> & {
             [field in keyof Select]: unknown;
           }
         >
       >;
       prepare?: (
-        object: Resolve<
+        object: Simplify<
           Omit<Value, keyof Select> & {
             [field in keyof Select]: unknown;
           }

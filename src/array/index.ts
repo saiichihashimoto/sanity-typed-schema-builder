@@ -4,9 +4,10 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys } from "../field";
-import type { InferZod, Resolve, SanityType, TypeValidation } from "../types";
+import type { InferZod, SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
+import type { Simplify } from "type-fest";
 
 type UnArray<T> = T extends Array<infer U> ? U : never;
 
@@ -66,7 +67,7 @@ interface ItemsType<
   ) => ItemsType<
     Positions | NewPosition,
     // @ts-expect-error -- Not sure how to solve this
-    Resolve<
+    Simplify<
       Items & {
         [field in NewPosition]: SanityType<ItemDefinition, Zod>;
       }
@@ -114,7 +115,7 @@ const itemsInternal = <
     itemsInternal<
       Positions | NewPosition,
       // @ts-expect-error -- Not sure how to solve this
-      Resolve<
+      Simplify<
         Items & {
           [field in NewPosition]: SanityType<ItemDefinition, Zod>;
         }
