@@ -165,7 +165,10 @@ export const array = <
   length?: number;
   max?: number;
   min?: number;
-  mock?: (faker: Faker) => z.input<ZodArray<Positions, Items, NonEmpty>>;
+  mock?: (
+    faker: Faker,
+    path: string
+  ) => z.input<ZodArray<Positions, Items, NonEmpty>>;
   nonempty?: NonEmpty;
   of: ItemsType<Positions, Items>;
 }): SanityType<

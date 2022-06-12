@@ -29,7 +29,7 @@ export const file = <
     FieldOptionKeys | "fields" | "preview" | "type"
   > & {
     fields?: Fields;
-    mock?: (faker: Faker) => z.input<ZodFile<Fields>>;
+    mock?: (faker: Faker, path: string) => z.input<ZodFile<Fields>>;
   } = {}
 ): SanityType<
   Omit<
@@ -45,8 +45,8 @@ export const file = <
         undefined as unknown as z.input<InferFieldsZod<Fields>>,
       zod: fieldsZod = z.object({}),
     } = {},
-    mock = (faker) => ({
-      ...fieldsMock(faker),
+    mock = (faker, path) => ({
+      ...fieldsMock(path),
       _type: "file",
       asset: {
         _type: "reference",

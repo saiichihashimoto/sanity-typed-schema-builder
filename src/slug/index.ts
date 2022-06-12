@@ -13,7 +13,7 @@ interface SanitySlug {
 }
 
 export const slug = ({
-  mock = (faker: Faker) => ({
+  mock = (faker) => ({
     _type: "slug",
     current: faker.lorem.slug(),
   }),
@@ -22,7 +22,7 @@ export const slug = ({
   TypeValidation<Schema.SlugDefinition, SanitySlug>,
   FieldOptionKeys | "type"
 > & {
-  mock?: (faker: Faker) => SanitySlug;
+  mock?: (faker: Faker, path: string) => SanitySlug;
 } = {}): SanityType<
   Omit<TypeValidation<Schema.SlugDefinition, SanitySlug>, FieldOptionKeys>,
   z.ZodType<string, any, SanitySlug>

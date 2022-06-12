@@ -34,7 +34,7 @@ export const number = ({
   lessThan?: number;
   max?: number;
   min?: number;
-  mock?: (faker: Faker) => number;
+  mock?: (faker: Faker, path: string) => number;
   negative?: boolean;
   positive?: boolean;
   precision?: number;

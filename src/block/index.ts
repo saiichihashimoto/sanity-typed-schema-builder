@@ -26,7 +26,7 @@ export const block = ({
   TypeValidation<Schema.BlockDefinition, PortableTextBlock>,
   FieldOptionKeys | "type"
 > & {
-  mock?: (faker: Faker) => PortableTextBlock;
+  mock?: (faker: Faker, path: string) => PortableTextBlock;
 } = {}): SanityType<
   Omit<
     TypeValidation<Schema.BlockDefinition, PortableTextBlock>,

@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
@@ -120,13 +119,13 @@ describe("text", () => {
   });
 
   it("mocks some paragraphs", () =>
-    expect(text().mock(faker)).toEqual(expect.any(String)));
+    expect(text().mock()).toEqual(expect.any(String)));
 
   it("allows defining the mocks", () =>
     expect(["Option 1", "Option 2"]).toContainEqual(
       text({
         mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("types custom validation", () => {

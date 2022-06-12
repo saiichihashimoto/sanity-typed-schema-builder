@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { mockRule } from "../test-utils";
@@ -46,7 +45,7 @@ describe("geopoint", () => {
   });
 
   it("mocks a geopoint", () =>
-    expect(geopoint().mock(faker)).toEqual({
+    expect(geopoint().mock()).toEqual({
       _type: "geopoint",
       lat: expect.any(Number),
       lng: expect.any(Number),
@@ -84,7 +83,7 @@ describe("geopoint", () => {
               alt: 12.37,
             },
           ]),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("types custom validation", () => {

@@ -1,6 +1,8 @@
 import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
+import { createType } from "../types";
+
 import type { AnyObject, InferZod, SanityType, TypeValidation } from "../types";
 import type {
   PrepareViewOptions,
@@ -152,37 +154,40 @@ const fieldsInternal = <
   const zod = z.object(fromPairs(tuples) as ZodRawObject);
 
   return {
-    zod,
-    parse: zod.parse.bind(zod),
-    mock: (faker) =>
-      fromPairs(
+    ...createType({
+      zod,
+      parse: zod.parse.bind(zod),
+      mock: (faker, path) =>
+        fromPairs(
+          fields.map(
+            ({ name, type: { mock } }) =>
+              [name, mock(`${path}.${name}`)] as const
+          ) as Array<[string, any]>
+        ) as z.input<InferZod<FieldsType<FieldNames, Fields>>>,
+      schema: () =>
         fields.map(
-          ({ name, type: { mock } }) => [name, mock(faker)] as const
-        ) as Array<[string, any]>
-      ) as z.input<InferZod<FieldsType<FieldNames, Fields>>>,
-    schema: () =>
-      fields.map(
-        <Name extends FieldNames>({
-          name,
-          type,
-          optional,
-          ...props
-        }: Fields[Name]) => {
-          const schema = type.schema();
+          <Name extends FieldNames>({
+            name,
+            type,
+            optional,
+            ...props
+          }: Fields[Name]) => {
+            const schema = type.schema();
 
-          const { validation } = schema;
+            const { validation } = schema;
 
-          return {
-            ...schema,
-            ...props,
-            name: name as Name,
-            validation: flow(
-              (rule: Rule) => (optional ? rule : rule.required()),
-              (rule) => validation?.(rule) ?? rule
-            ),
-          };
-        }
-      ),
+            return {
+              ...schema,
+              ...props,
+              name: name as Name,
+              validation: flow(
+                (rule: Rule) => (optional ? rule : rule.required()),
+                (rule) => validation?.(rule) ?? rule
+              ),
+            };
+          }
+        ),
+    }),
     field: <
       Name extends string,
       Zod extends z.ZodType<any, any, any>,

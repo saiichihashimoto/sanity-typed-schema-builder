@@ -55,7 +55,7 @@ export const image = <
   > & {
     fields?: Fields;
     hotspot?: Hotspot;
-    mock?: (faker: Faker) => z.input<ZodImage<Hotspot, Fields>>;
+    mock?: (faker: Faker, path: string) => z.input<ZodImage<Hotspot, Fields>>;
   } = {}
 ): SanityType<
   Omit<
@@ -72,9 +72,9 @@ export const image = <
         undefined as unknown as z.input<InferFieldsZod<Fields>>,
       zod: fieldsZod = z.object({}),
     } = {},
-    mock = (faker) =>
+    mock = (faker, path) =>
       ({
-        ...fieldsMock(faker),
+        ...fieldsMock(path),
         _type: "image",
         asset: {
           _type: "reference",

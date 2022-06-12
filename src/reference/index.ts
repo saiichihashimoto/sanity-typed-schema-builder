@@ -36,7 +36,7 @@ type ReferenceDef = Omit<
   TypeValidation<Schema.ReferenceDefinition, SanityReference>,
   FieldOptionKeys | "to" | "type"
 > & {
-  mock?: (faker: Faker) => SanityReference;
+  mock?: (faker: Faker, path: string) => SanityReference;
 };
 
 const referenceInternal = <DocumentName extends string>(

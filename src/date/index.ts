@@ -24,7 +24,7 @@ export const date = ({
   TypeValidation<Schema.DateDefinition, string>,
   FieldOptionKeys | "type"
 > & {
-  mock?: (faker: Faker) => string;
+  mock?: (faker: Faker, path: string) => string;
 } = {}): SanityType<
   Omit<TypeValidation<Schema.DateDefinition, string>, FieldOptionKeys>,
   z.ZodString

@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
@@ -103,7 +102,7 @@ describe("document", () => {
         name: "bar",
         type: string(),
       }),
-    }).mock(faker);
+    }).mock();
 
     expect(value).toEqual({
       _createdAt: expect.any(String),
@@ -173,7 +172,7 @@ describe("document", () => {
               bar: "bar",
             },
           ] as const),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("sets preview.select", () =>

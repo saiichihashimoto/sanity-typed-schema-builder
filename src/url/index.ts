@@ -8,13 +8,13 @@ import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
 export const url = ({
-  mock = (faker: Faker) => faker.internet.url(),
+  mock = (faker) => faker.internet.url(),
   ...def
 }: Omit<
   TypeValidation<Schema.UrlDefinition, string>,
   FieldOptionKeys | "type"
 > & {
-  mock?: (faker: Faker) => string;
+  mock?: (faker: Faker, path: string) => string;
 } = {}): SanityType<
   Omit<TypeValidation<Schema.UrlDefinition, string>, FieldOptionKeys>,
   z.ZodString

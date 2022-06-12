@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
@@ -44,9 +43,7 @@ describe("url", () => {
   });
 
   it("mocks a url", () =>
-    expect(z.string().url().parse(url().mock(faker))).toEqual(
-      expect.any(String)
-    ));
+    expect(z.string().url().parse(url().mock())).toEqual(expect.any(String)));
 
   it("allows defining the mocks", () =>
     expect(["https://google.com", "https://facebook.com"]).toContainEqual(
@@ -56,7 +53,7 @@ describe("url", () => {
             "https://google.com",
             "https://facebook.com",
           ]),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("types custom validation", () => {

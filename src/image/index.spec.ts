@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
@@ -195,7 +194,7 @@ describe("image", () => {
           name: "bar",
           type: string(),
         }),
-      }).mock(faker)
+      }).mock()
     ).toEqual({
       _type: "image",
       bar: expect.any(String),
@@ -256,7 +255,7 @@ describe("image", () => {
               bar: "bar",
             },
           ] as const),
-      }).mock(faker)
+      }).mock()
     ));
 
   it("types custom validation", () => {

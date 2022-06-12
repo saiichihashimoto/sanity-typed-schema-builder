@@ -47,13 +47,13 @@ export const document = <
   name,
   preview: previewDef,
   fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
-  mock = (faker) => {
+  mock = (faker, path) => {
     const createdAt = faker.date
       .between("2021-06-03T03:24:55.395Z", "2022-06-04T18:50:36.539Z")
       .toISOString();
 
     return {
-      ...(fieldsMock(faker) as z.input<InferFieldsZod<Fields>>),
+      ...(fieldsMock(path) as z.input<InferFieldsZod<Fields>>),
       _id: faker.datatype.uuid(),
       _createdAt: createdAt,
       _rev: faker.datatype.string(23),
@@ -72,7 +72,10 @@ export const document = <
   "fields" | "name" | "preview" | "type"
 > & {
   fields: Fields;
-  mock?: (faker: Faker) => z.input<ZodDocument<DocumentNames, Fields>>;
+  mock?: (
+    faker: Faker,
+    path: string
+  ) => z.input<ZodDocument<DocumentNames, Fields>>;
   name: DocumentNames;
   preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>;
 }): DocumentType<DocumentNames, Fields> => ({
