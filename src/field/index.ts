@@ -11,7 +11,7 @@ import type {
   Rule,
   Schema,
 } from "@sanity/types";
-import type { Simplify } from "type-fest";
+import type { Merge } from "type-fest";
 
 export type FieldOptionKeys = "description" | "name" | "title";
 
@@ -93,11 +93,9 @@ export interface FieldsType<
   ) => FieldsType<
     NewFieldNames,
     // @ts-expect-error -- Not sure how to solve this
-    Simplify<
-      Fields & {
-        [field in Name]: FieldOptions<Name, Zod, Optional>;
-      }
-    >
+    Fields & {
+      [field in Name]: FieldOptions<Name, Zod, Optional>;
+    }
   >;
 }
 
@@ -199,11 +197,9 @@ const fieldsInternal = <
       fieldsInternal<
         NewFieldNames,
         // @ts-expect-error -- Not sure how to solve this
-        Simplify<
-          Fields & {
-            [field in Name]: FieldOptions<Name, Zod, Optional>;
-          }
-        >
+        Fields & {
+          [field in Name]: FieldOptions<Name, Zod, Optional>;
+        }
       >([...fields, options]),
   };
 };
@@ -232,15 +228,17 @@ export type Preview<
     }
   | {
       component?: React.ComponentType<
-        Simplify<
-          Omit<Value, keyof Select> & {
+        Merge<
+          Value,
+          {
             [field in keyof Select]: unknown;
           }
         >
       >;
       prepare: (
-        object: Simplify<
-          Omit<Value, keyof Select> & {
+        object: Merge<
+          Value,
+          {
             [field in keyof Select]: unknown;
           }
         >,
@@ -250,15 +248,17 @@ export type Preview<
     }
   | {
       component: React.ComponentType<
-        Simplify<
-          Omit<Value, keyof Select> & {
+        Merge<
+          Value,
+          {
             [field in keyof Select]: unknown;
           }
         >
       >;
       prepare?: (
-        object: Simplify<
-          Omit<Value, keyof Select> & {
+        object: Merge<
+          Value,
+          {
             [field in keyof Select]: unknown;
           }
         >,
