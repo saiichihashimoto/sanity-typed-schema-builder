@@ -1,9 +1,9 @@
-import type { Resolve } from "./types";
 import type { Rule } from "@sanity/types";
+import type { Simplify } from "type-fest";
 
-type ValidateError<T, Shape> = Resolve<{
-  expected: Resolve<Shape>;
-  received: Resolve<T>;
+type ValidateError<T, Shape> = Simplify<{
+  expected: Simplify<Shape>;
+  received: Simplify<T>;
 }>;
 
 export type ValidateShape<Received, Expected> = Received extends Expected
