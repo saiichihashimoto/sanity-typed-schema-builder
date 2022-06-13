@@ -258,6 +258,25 @@ describe("image", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = image({
+      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse({
+      _type: "image",
+      asset: {
+        _type: "reference",
+        _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+      },
+    });
+
+    expect(parsedValue).toEqual(2);
+  });
+
   it("types custom validation", () => {
     const type = image({
       fields: field({

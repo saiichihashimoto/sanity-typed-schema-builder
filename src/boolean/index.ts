@@ -7,18 +7,22 @@ import type { TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-export const boolean = ({
+export const boolean = <Output = boolean>({
   mock = (faker) => faker.datatype.boolean(),
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, boolean>,
   ...def
 }: Omit<
   TypeValidation<Schema.BooleanDefinition, boolean>,
   FieldOptionKeys | "type"
 > & {
   mock?: (faker: Faker, path: string) => boolean;
+  zod?: (
+    zod: z.ZodType<boolean, any, boolean>
+  ) => z.ZodType<Output, any, boolean>;
 } = {}) =>
   createType({
     mock,
-    zod: z.boolean(),
+    zod: zodFn(z.boolean()),
     schema: () => ({
       ...def,
       type: "boolean",

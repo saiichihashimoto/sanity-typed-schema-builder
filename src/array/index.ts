@@ -7,6 +7,7 @@ import type { FieldOptionKeys } from "../field";
 import type { InferZod, Rule, SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
+import type { Simplify } from "type-fest";
 
 type UnArray<T> = T extends Array<infer U> ? U : never;
 
@@ -17,14 +18,14 @@ type ItemDefinition = Omit<
 >;
 
 type AddKeyToZod<Zod extends z.ZodFirstPartySchemaTypes> =
-  Zod extends z.ZodObject<infer T, infer UnknownKeys, infer Catchall, any, any>
-    ? z.ZodObject<
-        z.extendShape<T, { _key: z.ZodString }>,
-        UnknownKeys,
-        Catchall,
-        z.objectOutputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>,
-        z.objectInputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>
-      >
+  Zod extends z.ZodType<infer Output, infer Def, infer Input>
+    ? Input extends object
+      ? z.ZodType<
+          Simplify<Output & { _key: string }>,
+          Def,
+          Simplify<Input & { _key: string }>
+        >
+      : Zod
     : Zod;
 
 const addKeyToZod = <Zod extends z.ZodFirstPartySchemaTypes>(zod: Zod) =>
@@ -140,7 +141,8 @@ export const array = <
   Items extends {
     [field in Positions]: SanityType<ItemDefinition, any>;
   },
-  NonEmpty extends boolean = false
+  NonEmpty extends boolean = false,
+  Output = z.input<ZodArray<Positions, Items, NonEmpty>>
 >({
   length,
   max,
@@ -151,6 +153,12 @@ export const array = <
     faker: Faker
   ) => z.input<ZodArray<Positions, Items, NonEmpty>>,
   validation,
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<
+      Output,
+      any,
+      z.input<ZodArray<Positions, Items, NonEmpty>>
+    >,
   ...def
 }: Omit<
   TypeValidation<
@@ -168,19 +176,24 @@ export const array = <
   ) => z.input<ZodArray<Positions, Items, NonEmpty>>;
   nonempty?: NonEmpty;
   of: ItemsType<Positions, Items>;
+  zod?: (
+    zod: ZodArray<Positions, Items, NonEmpty>
+  ) => z.ZodType<Output, any, z.input<ZodArray<Positions, Items, NonEmpty>>>;
 }) =>
   createType({
     mock,
     zod: flow(
       (zod: ZodArray<Positions, Items, false>) =>
-        !nonempty ? zod : zod.nonempty(),
-      (zod: ZodArray<Positions, Items, NonEmpty>) =>
-        !min ? zod : zod.min(min),
-      (zod: ZodArray<Positions, Items, NonEmpty>) =>
-        !max ? zod : zod.max(max),
-      (zod: ZodArray<Positions, Items, NonEmpty>) =>
-        length === undefined ? zod : zod.length(length)
-    )(itemsZod) as ZodArray<Positions, Items, NonEmpty>,
+        (!nonempty ? zod : zod.nonempty()) as ZodArray<
+          Positions,
+          Items,
+          NonEmpty
+        >,
+      (zod) => (!min ? zod : zod.min(min)),
+      (zod) => (!max ? zod : zod.max(max)),
+      (zod) => (length === undefined ? zod : zod.length(length)),
+      (zod) => zodFn(zod)
+    )(itemsZod),
     schema: () => ({
       ...def,
       type: "array",

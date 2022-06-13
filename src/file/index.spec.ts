@@ -189,6 +189,25 @@ describe("file", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = file({
+      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse({
+      _type: "file",
+      asset: {
+        _type: "reference",
+        _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+      },
+    });
+
+    expect(parsedValue).toEqual(2);
+  });
+
   it("types custom validation", () => {
     const type = file({
       fields: field({

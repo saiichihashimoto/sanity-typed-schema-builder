@@ -47,6 +47,19 @@ describe("date", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = date({
+      zod: (zod) => zod.transform((value) => value.length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse("2017-02-12");
+
+    expect(parsedValue).toEqual(10);
+  });
+
   it("types custom validation", () => {
     const type = date({
       validation: (Rule) =>

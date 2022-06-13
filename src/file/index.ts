@@ -24,7 +24,8 @@ type ZodFile<Fields extends FieldsType<any, any>> =
     : never;
 
 export const file = <
-  Fields extends FieldsType<any, any> = FieldsType<never, EmptyObject>
+  Fields extends FieldsType<any, any> = FieldsType<never, EmptyObject>,
+  Output = z.output<ZodFile<Fields>>
 >(
   def: Omit<
     TypeValidation<Schema.FileDefinition, z.input<ZodFile<Fields>>>,
@@ -32,6 +33,9 @@ export const file = <
   > & {
     fields?: Fields;
     mock?: (faker: Faker, path: string) => z.input<ZodFile<Fields>>;
+    zod?: (
+      zod: ZodFile<Fields>
+    ) => z.ZodType<Output, any, z.input<ZodFile<Fields>>>;
   } = {}
 ) => {
   const {
@@ -49,17 +53,21 @@ export const file = <
         _ref: faker.datatype.uuid(),
       },
     }),
+    zod: zodFn = (zod) =>
+      zod as unknown as z.ZodType<Output, any, z.input<ZodFile<Fields>>>,
   } = def;
 
   return createType({
     mock,
-    zod: (fieldsZod as InferFieldsZod<Fields>).extend({
-      _type: z.literal("file"),
-      asset: z.object({
-        _ref: z.string(),
-        _type: z.literal("reference"),
-      }),
-    }) as unknown as ZodFile<Fields>,
+    zod: zodFn(
+      (fieldsZod as InferFieldsZod<Fields>).extend({
+        _type: z.literal("file"),
+        asset: z.object({
+          _ref: z.string(),
+          _type: z.literal("reference"),
+        }),
+      }) as unknown as ZodFile<Fields>
+    ),
     schema: () => ({
       ...def,
       type: "file",

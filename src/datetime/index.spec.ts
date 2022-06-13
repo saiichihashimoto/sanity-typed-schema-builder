@@ -141,6 +141,19 @@ describe("datetime", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = datetime({
+      zod: (zod) => zod.transform((value) => value.length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse("2022-06-03T03:24:55.395Z");
+
+    expect(parsedValue).toEqual(24);
+  });
+
   it("types custom validation", () => {
     const type = datetime({
       validation: (Rule) =>

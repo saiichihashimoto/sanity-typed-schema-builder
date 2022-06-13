@@ -12,26 +12,35 @@ interface SanitySlug {
   current: string;
 }
 
-export const slug = ({
+export const slug = <Output = string>({
   mock = (faker) => ({
     _type: "slug",
     current: faker.lorem.slug(),
   }),
+  zod: zodFn = (zod) =>
+    zod.transform(({ current }) => current) as unknown as z.ZodType<
+      Output,
+      any,
+      SanitySlug
+    >,
   ...def
 }: Omit<
   TypeValidation<Schema.SlugDefinition, SanitySlug>,
   FieldOptionKeys | "type"
 > & {
   mock?: (faker: Faker, path: string) => SanitySlug;
+  zod?: (
+    zod: z.ZodType<SanitySlug, any, SanitySlug>
+  ) => z.ZodType<Output, any, SanitySlug>;
 } = {}) =>
   createType({
     mock,
-    zod: z
-      .object({
+    zod: zodFn(
+      z.object({
         _type: z.literal("slug"),
         current: z.string(),
       })
-      .transform(({ current }) => current),
+    ),
     schema: () => ({
       ...def,
       type: "slug",

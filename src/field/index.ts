@@ -149,12 +149,9 @@ const fieldsInternal = <
       : InferZod<InferType<Fields[field]>>;
   };
 
-  const zod = z.object(fromPairs(tuples) as ZodRawObject);
-
   return {
     ...createType({
-      zod,
-      parse: zod.parse.bind(zod),
+      zod: z.object(fromPairs(tuples) as ZodRawObject),
       mock: (faker, path) =>
         fromPairs(
           fields.map(

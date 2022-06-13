@@ -212,6 +212,19 @@ describe("number", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = number({
+      zod: (zod) => zod.transform((value) => `${value}`),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      string
+    > = type.parse(5);
+
+    expect(parsedValue).toEqual("5");
+  });
+
   it("types custom validation", () => {
     const type = number({
       validation: (Rule) =>

@@ -8,7 +8,7 @@ import type { Rule, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-export const datetime = ({
+export const datetime = <Output = Date>({
   max,
   min,
   validation,
@@ -19,6 +19,12 @@ export const datetime = ({
         max ?? "2022-06-04T18:50:36.539Z"
       )
       .toISOString(),
+  zod: zodFn = (zod) =>
+    zod
+      .transform((value) => new Date(value))
+      .refine((date) => date.toString() !== "Invalid Date", {
+        message: "Invalid Date",
+      }) as unknown as z.ZodType<Output, any, string>,
   ...def
 }: Omit<
   TypeValidation<Schema.DatetimeDefinition, string>,
@@ -27,30 +33,25 @@ export const datetime = ({
   max?: string;
   min?: string;
   mock?: (faker: Faker, path: string) => string;
+  zod?: (zod: z.ZodType<string, any, string>) => z.ZodType<Output, any, string>;
 } = {}) =>
   createType({
     mock,
     zod: flow(
-      (zod: z.ZodType<Date, any, string>) =>
+      (zod: z.ZodType<string, any, string>) =>
         !min
           ? zod
-          : zod.refine((date) => new Date(min) <= date, {
+          : zod.refine((date) => new Date(min) <= new Date(date), {
               message: `Greater than ${min}`,
             }),
-      (zod: z.ZodType<Date, any, string>) =>
+      (zod: z.ZodType<string, any, string>) =>
         !max
           ? zod
-          : zod.refine((date) => date <= new Date(max), {
+          : zod.refine((date) => new Date(date) <= new Date(max), {
               message: `Less than ${max}`,
-            })
-    )(
-      z
-        .string()
-        .transform((value) => new Date(value))
-        .refine((date) => date.toString() !== "Invalid Date", {
-          message: "Invalid Date",
-        })
-    ),
+            }),
+      zodFn
+    )(z.string()),
     schema: () => ({
       ...def,
       type: "datetime",
