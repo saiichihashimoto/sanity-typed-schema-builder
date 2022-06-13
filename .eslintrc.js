@@ -219,7 +219,7 @@ const config = {
       /* eslint-disable sort-keys-fix/sort-keys-fix -- Sorting rules */
     },
     {
-      files: [...testFiles, "./*.ts", "**/*.js"],
+      files: [...testFiles, "./src/test-utils.ts", "./*.ts", "**/*.js"],
       /* eslint-enable sort-keys-fix/sort-keys-fix -- Sorting rules */
       rules: {
         "import/no-extraneous-dependencies": [

@@ -4,7 +4,7 @@ import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
 } from "@sanity/types";
-import type { Merge, PartialDeep, SetOptional } from "type-fest";
+import type { PartialDeep } from "type-fest";
 import type { z } from "zod";
 
 const hashCode = (str: string) =>
@@ -13,6 +13,11 @@ const hashCode = (str: string) =>
 
 export type AnyObject = Record<string, unknown>;
 export type EmptyObject = Record<string, never>;
+
+export type Merge<A, B> = Omit<A, keyof B> & B;
+
+type SetOptional<T, Keys extends keyof T> = Omit<T, Keys> &
+  Partial<Pick<T, Keys>>;
 
 // TODO Type Definition across the board
 export interface SanityType<

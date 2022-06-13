@@ -3,7 +3,13 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { AnyObject, InferZod, SanityType, TypeValidation } from "../types";
+import type {
+  AnyObject,
+  InferZod,
+  Merge,
+  SanityType,
+  TypeValidation,
+} from "../types";
 import type {
   PrepareViewOptions,
   PreviewConfig,
@@ -11,7 +17,6 @@ import type {
   Rule,
   Schema,
 } from "@sanity/types";
-import type { Merge } from "type-fest";
 
 export type FieldOptionKeys = "description" | "name" | "title";
 

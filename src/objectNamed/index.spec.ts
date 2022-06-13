@@ -8,7 +8,7 @@ import { mockRule } from "../test-utils";
 import { objectNamed } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferInput, InferOutput, Merge } from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("object", () => {
@@ -196,12 +196,14 @@ describe("object", () => {
         prepare: (selection) => {
           const value: ValidateShape<
             typeof selection,
-            {
-              _type: "foo";
-              bar?: string;
-              bleh: unknown;
-              foo: string;
-            }
+            Merge<
+              {
+                _type: "foo";
+                bar?: string;
+                foo: string;
+              },
+              { bleh: unknown }
+            >
           > = selection;
 
           const { foo, bar } = value;
