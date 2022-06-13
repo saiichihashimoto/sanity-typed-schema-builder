@@ -40,35 +40,34 @@ type ReferenceDef = Omit<
 };
 
 const referenceInternal = <DocumentName extends string>(
-  def: ReferenceDef,
-  documents: Array<DocumentType<DocumentName, any>>
-): ReferenceType<DocumentName> => {
-  const {
+  {
     mock = (faker) => ({
       _ref: faker.datatype.uuid(),
       _type: "reference",
     }),
-  } = def;
-
-  return {
-    ...createType({
-      mock,
-      zod: z.object({
-        _ref: z.string(),
-        _type: z.literal("reference"),
-        _weak: z.boolean().optional(),
-      }),
-      schema: () => ({
-        ...def,
-        type: "reference",
-        to: documents.map(({ name }) => ({ type: name })),
-      }),
+    ...def
+  }: ReferenceDef,
+  documents: Array<DocumentType<DocumentName, any>>
+): ReferenceType<DocumentName> => ({
+  ...createType({
+    mock,
+    zod: z.object({
+      _ref: z.string(),
+      _type: z.literal("reference"),
+      _weak: z.boolean().optional(),
     }),
-    to: <Name extends string>(document: DocumentType<Name, any>) =>
-      // @ts-expect-error -- Not sure how to solve this
-      referenceInternal<DocumentName | Name>(def, [...documents, document]),
-  };
-};
+    schema: () => ({
+      ...def,
+      type: "reference",
+      to: documents.map(({ name }) => ({ type: name })),
+    }),
+  }),
+  to: <Name extends string>(document: DocumentType<Name, any>) =>
+    referenceInternal<DocumentName | Name>({ mock, ...def }, [
+      ...documents,
+      document,
+    ]),
+});
 
 export const reference = (def: ReferenceDef = {}): ReferenceType<never> =>
   referenceInternal(def, []);

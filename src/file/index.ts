@@ -7,19 +7,21 @@ import type { EmptyObject, SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-type ZodFile<Fields extends FieldsType<any, any>> = z.ZodIntersection<
-  InferFieldsZod<Fields>,
-  z.ZodObject<
-    {
-      _type: z.ZodLiteral<"file">;
-      asset: z.ZodObject<{
-        _ref: z.ZodString;
-        _type: z.ZodLiteral<"reference">;
-      }>;
-    },
-    "strip"
-  >
->;
+type ZodFile<Fields extends FieldsType<any, any>> =
+  InferFieldsZod<Fields> extends z.ZodObject<infer T, any, any, any, any>
+    ? z.ZodObject<
+        z.extendShape<
+          T,
+          {
+            _type: z.ZodLiteral<"file">;
+            asset: z.ZodObject<{
+              _ref: z.ZodString;
+              _type: z.ZodLiteral<"reference">;
+            }>;
+          }
+        >
+      >
+    : never;
 
 export const file = <
   Fields extends FieldsType<any, any> = FieldsType<never, EmptyObject>
@@ -57,16 +59,13 @@ export const file = <
 
   return createType({
     mock,
-    zod: z.intersection(
-      fieldsZod as InferFieldsZod<Fields>,
-      z.object({
-        _type: z.literal("file"),
-        asset: z.object({
-          _ref: z.string(),
-          _type: z.literal("reference"),
-        }),
-      })
-    ) as unknown as ZodFile<Fields>,
+    zod: (fieldsZod as InferFieldsZod<Fields>).extend({
+      _type: z.literal("file"),
+      asset: z.object({
+        _ref: z.string(),
+        _type: z.literal("reference"),
+      }),
+    }) as unknown as ZodFile<Fields>,
     schema: () => ({
       ...def,
       type: "file",

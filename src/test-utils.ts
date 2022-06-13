@@ -1,15 +1,16 @@
 import type { Rule } from "@sanity/types";
-import type { Simplify } from "type-fest";
+import type { IsEqual } from "type-fest/source/internal";
 
-type ValidateError<T, Shape> = Simplify<{
-  expected: Simplify<Shape>;
-  received: Simplify<T>;
-}>;
+interface ValidateError<Received, Expected> {
+  expected: Expected;
+  received: Received;
+}
 
-export type ValidateShape<Received, Expected> = Received extends Expected
-  ? Expected extends Received
-    ? Received
-    : ValidateError<Received, Expected>
+export type ValidateShape<Received, Expected> = IsEqual<
+  Expected,
+  Received
+> extends true
+  ? Received
   : ValidateError<Received, Expected>;
 
 export const mockRule = () => {

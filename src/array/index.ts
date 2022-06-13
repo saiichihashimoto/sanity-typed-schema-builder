@@ -16,21 +16,23 @@ type ItemDefinition = Omit<
   FieldOptionKeys
 >;
 
-type AddKeyToZod<Zod extends z.ZodFirstPartySchemaTypes> = Zod extends
-  | z.ZodObject<any, any, any, any, any>
-  | z.ZodIntersection<any, any>
-  ? z.ZodIntersection<Zod, z.ZodObject<{ _key: z.ZodString }>>
-  : Zod;
+type AddKeyToZod<Zod extends z.ZodFirstPartySchemaTypes> =
+  Zod extends z.ZodObject<infer T, infer UnknownKeys, infer Catchall, any, any>
+    ? z.ZodObject<
+        z.extendShape<T, { _key: z.ZodString }>,
+        UnknownKeys,
+        Catchall,
+        z.objectOutputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>,
+        z.objectInputType<z.extendShape<T, { _key: z.ZodString }>, Catchall>
+      >
+    : Zod;
 
 const addKeyToZod = <Zod extends z.ZodFirstPartySchemaTypes>(zod: Zod) =>
-  !(zod instanceof z.ZodObject) && !(zod instanceof z.ZodIntersection)
+  !(zod instanceof z.ZodObject)
     ? zod
-    : z.intersection(
-        zod,
-        z.object({
-          _key: z.string(),
-        })
-      );
+    : zod.extend({
+        _key: z.string(),
+      });
 
 type ZodArray<
   Positions extends string,

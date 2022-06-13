@@ -10,39 +10,40 @@ import type { Schema } from "@sanity/types";
 type ZodImage<
   Hotspot extends boolean,
   Fields extends FieldsType<any, any>
-> = z.ZodIntersection<
-  InferFieldsZod<Fields>,
-  z.ZodObject<
-    Hotspot extends false
-      ? {
-          _type: z.ZodLiteral<"image">;
-          asset: z.ZodObject<{
-            _ref: z.ZodString;
-            _type: z.ZodLiteral<"reference">;
-          }>;
-        }
-      : {
-          _type: z.ZodLiteral<"image">;
-          asset: z.ZodObject<{
-            _ref: z.ZodString;
-            _type: z.ZodLiteral<"reference">;
-          }>;
-          crop: z.ZodObject<{
-            bottom: z.ZodNumber;
-            left: z.ZodNumber;
-            right: z.ZodNumber;
-            top: z.ZodNumber;
-          }>;
-          hotspot: z.ZodObject<{
-            height: z.ZodNumber;
-            width: z.ZodNumber;
-            x: z.ZodNumber;
-            y: z.ZodNumber;
-          }>;
-        },
-    "strip"
-  >
->;
+> = InferFieldsZod<Fields> extends z.ZodObject<infer T, any, any, any, any>
+  ? z.ZodObject<
+      z.extendShape<
+        T,
+        Hotspot extends false
+          ? {
+              _type: z.ZodLiteral<"image">;
+              asset: z.ZodObject<{
+                _ref: z.ZodString;
+                _type: z.ZodLiteral<"reference">;
+              }>;
+            }
+          : {
+              _type: z.ZodLiteral<"image">;
+              asset: z.ZodObject<{
+                _ref: z.ZodString;
+                _type: z.ZodLiteral<"reference">;
+              }>;
+              crop: z.ZodObject<{
+                bottom: z.ZodNumber;
+                left: z.ZodNumber;
+                right: z.ZodNumber;
+                top: z.ZodNumber;
+              }>;
+              hotspot: z.ZodObject<{
+                height: z.ZodNumber;
+                width: z.ZodNumber;
+                x: z.ZodNumber;
+                y: z.ZodNumber;
+              }>;
+            }
+      >
+    >
+  : never;
 
 export const image = <
   Hotspot extends boolean = false,
@@ -133,37 +134,34 @@ export const image = <
 
   return createType({
     mock,
-    zod: z.intersection(
-      fieldsZod as InferFieldsZod<Fields>,
-      z.object(
-        !hotspot
-          ? {
-              _type: z.literal("image"),
-              asset: z.object({
-                _ref: z.string(),
-                _type: z.literal("reference"),
-              }),
-            }
-          : {
-              _type: z.literal("image"),
-              asset: z.object({
-                _ref: z.string(),
-                _type: z.literal("reference"),
-              }),
-              crop: z.object({
-                bottom: z.number(),
-                left: z.number(),
-                right: z.number(),
-                top: z.number(),
-              }),
-              hotspot: z.object({
-                height: z.number(),
-                width: z.number(),
-                x: z.number(),
-                y: z.number(),
-              }),
-            }
-      )
+    zod: (fieldsZod as InferFieldsZod<Fields>).extend(
+      !hotspot
+        ? {
+            _type: z.literal("image"),
+            asset: z.object({
+              _ref: z.string(),
+              _type: z.literal("reference"),
+            }),
+          }
+        : {
+            _type: z.literal("image"),
+            asset: z.object({
+              _ref: z.string(),
+              _type: z.literal("reference"),
+            }),
+            crop: z.object({
+              bottom: z.number(),
+              left: z.number(),
+              right: z.number(),
+              top: z.number(),
+            }),
+            hotspot: z.object({
+              height: z.number(),
+              width: z.number(),
+              x: z.number(),
+              y: z.number(),
+            }),
+          }
     ) as unknown as ZodImage<Hotspot, Fields>,
     schema: () => ({
       ...def,

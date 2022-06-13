@@ -16,26 +16,23 @@ import type { Schema } from "@sanity/types";
 type ZodObjectNamed<
   ObjectNames extends string,
   Fields extends FieldsType<any, any>
-> = z.ZodIntersection<
-  InferFieldsZod<Fields>,
-  z.ZodObject<{
-    _type: z.ZodLiteral<ObjectNames>;
-  }>
->;
+> = InferFieldsZod<Fields> extends z.ZodObject<infer T, any, any, any, any>
+  ? z.ZodObject<z.extendShape<T, { _type: z.ZodLiteral<ObjectNames> }>>
+  : never;
 
 interface ObjectNamedType<
   ObjectNames extends string,
-  Fields extends FieldsType<any, any>
+  Fields extends FieldsType<any, any>,
+  Zod extends ZodObjectNamed<ObjectNames, Fields>
 > extends SanityType<
-    TypeValidation<
-      Schema.ObjectDefinition,
-      z.input<ZodObjectNamed<ObjectNames, Fields>>
-    > & { name: ObjectNames },
-    ZodObjectNamed<ObjectNames, Fields>
+    TypeValidation<Schema.ObjectDefinition, z.input<Zod>> & {
+      name: ObjectNames;
+    },
+    Zod
   > {
   ref: () => SanityType<
     Omit<Schema.TypeReference<any>, FieldOptionKeys> & { type: ObjectNames },
-    ZodObjectNamed<ObjectNames, Fields>
+    Zod
   >;
 }
 
@@ -67,13 +64,14 @@ export const objectNamed = <
   ) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
   name: ObjectNames;
   preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>;
-}): ObjectNamedType<ObjectNames, Fields> => {
-  const zod = z.intersection(
-    fieldsZod as InferFieldsZod<Fields>,
-    z.object({
-      _type: z.literal(name),
-    })
-  ) as unknown as ZodObjectNamed<ObjectNames, Fields>;
+}): ObjectNamedType<
+  ObjectNames,
+  Fields,
+  ZodObjectNamed<ObjectNames, Fields>
+> => {
+  const zod = (fieldsZod as InferFieldsZod<Fields>).extend({
+    _type: z.literal(name),
+  }) as unknown as ZodObjectNamed<ObjectNames, Fields>;
 
   return {
     ...createType({
@@ -87,10 +85,7 @@ export const objectNamed = <
           name,
           type: "object",
           fields: schemaForFields,
-          preview: preview<
-            z.input<ZodObjectNamed<ObjectNames, Fields>>,
-            Select
-          >(previewDef, schemaForFields),
+          preview: preview(previewDef, schemaForFields),
         };
       },
     }),
