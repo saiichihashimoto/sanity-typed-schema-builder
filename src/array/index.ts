@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys } from "../field";
-import type { InferZod, SanityType, TypeValidation } from "../types";
+import type { InferZod, Rule, SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -168,16 +168,7 @@ export const array = <
   ) => z.input<ZodArray<Positions, Items, NonEmpty>>;
   nonempty?: NonEmpty;
   of: ItemsType<Positions, Items>;
-}): SanityType<
-  Omit<
-    TypeValidation<
-      Schema.ArrayDefinition<z.input<ZodArray<Positions, Items, NonEmpty>>>,
-      z.input<ZodArray<Positions, Items, NonEmpty>>
-    >,
-    FieldOptionKeys
-  >,
-  ZodArray<Positions, Items, NonEmpty>
-> =>
+}) =>
   createType({
     mock,
     zod: flow(
@@ -195,7 +186,8 @@ export const array = <
       type: "array",
       of: itemsSchema(),
       validation: flow(
-        (rule) => (!nonempty ? rule : rule.min(1)),
+        (rule: Rule<z.input<ZodArray<Positions, Items, NonEmpty>>>) =>
+          !nonempty ? rule : rule.min(1),
         (rule) => (!min ? rule : rule.min(min)),
         (rule) => (!max ? rule : rule.max(max)),
         (rule) => (length === undefined ? rule : rule.length(length)),

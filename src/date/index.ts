@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys } from "../field";
-import type { SanityType, TypeValidation } from "../types";
+import type { TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -25,10 +25,7 @@ export const date = ({
   FieldOptionKeys | "type"
 > & {
   mock?: (faker: Faker, path: string) => string;
-} = {}): SanityType<
-  Omit<TypeValidation<Schema.DateDefinition, string>, FieldOptionKeys>,
-  z.ZodString
-> =>
+} = {}) =>
   createType({
     mock,
     // TODO Check date validity against dateFormat with something like moment (moment is too big)

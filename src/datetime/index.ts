@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys } from "../field";
-import type { SanityType, TypeValidation } from "../types";
+import type { Rule, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -27,10 +27,7 @@ export const datetime = ({
   max?: string;
   min?: string;
   mock?: (faker: Faker, path: string) => string;
-} = {}): SanityType<
-  Omit<TypeValidation<Schema.DatetimeDefinition, string>, FieldOptionKeys>,
-  z.ZodType<Date, any, string>
-> =>
+} = {}) =>
   createType({
     mock,
     zod: flow(
@@ -58,8 +55,8 @@ export const datetime = ({
       ...def,
       type: "datetime",
       validation: flow(
-        // HACK min/max should allow strings only for datetime, but right now are typed as numbers
-        (rule) => (!min ? rule : rule.min(min as unknown as number)),
+        (rule: Rule<string>) =>
+          !min ? rule : rule.min(min as unknown as number),
         (rule) => (!max ? rule : rule.max(max as unknown as number)),
         (rule) => validation?.(rule) ?? rule
       ),

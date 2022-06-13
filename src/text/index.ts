@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys } from "../field";
-import type { SanityType, TypeValidation } from "../types";
+import type { Rule, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -25,10 +25,7 @@ export const text = ({
   min?: number;
   mock?: (faker: Faker, path: string) => string;
   regex?: RegExp;
-} = {}): SanityType<
-  Omit<TypeValidation<Schema.TextDefinition, string>, FieldOptionKeys>,
-  z.ZodString
-> =>
+} = {}) =>
   createType({
     mock,
     zod: flow(
@@ -41,7 +38,7 @@ export const text = ({
       ...def,
       type: "text",
       validation: flow(
-        (rule) => (!min ? rule : rule.min(min)),
+        (rule: Rule<string>) => (!min ? rule : rule.min(min)),
         (rule) => (!max ? rule : rule.max(max)),
         (rule) => (!length ? rule : rule.length(length)),
         (rule) => (!regex ? rule : rule.regex(regex)),

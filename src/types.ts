@@ -60,14 +60,18 @@ export const createType = <
   };
 };
 
-type Rule<Value> = Merge<
+export type Rule<Value> = Merge<
   RuleWithoutTypedCustom,
-  { custom: (fn: CustomValidator<Value>) => Rule<Value> }
+  {
+    custom: (
+      fn: CustomValidator<PartialDeep<Value>>
+    ) => Rule<PartialDeep<Value>>;
+  }
 >;
 
 export type TypeValidation<Definition, Value> = Merge<
   Definition,
-  { validation?: (rule: Rule<PartialDeep<Value>>) => Rule<PartialDeep<Value>> }
+  { validation?: (rule: Rule<Value>) => Rule<Value> }
 >;
 
 export type InferZod<T extends SanityType<any, any>> = T extends SanityType<

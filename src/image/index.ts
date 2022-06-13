@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldsType, InferFieldsZod } from "../field";
-import type { EmptyObject, SanityType, TypeValidation } from "../types";
+import type { EmptyObject, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -58,13 +58,7 @@ export const image = <
     hotspot?: Hotspot;
     mock?: (faker: Faker, path: string) => z.input<ZodImage<Hotspot, Fields>>;
   } = {}
-): SanityType<
-  Omit<
-    TypeValidation<Schema.ImageDefinition, z.input<ZodImage<Hotspot, Fields>>>,
-    "name"
-  >,
-  ZodImage<Hotspot, Fields>
-> => {
+) => {
   const {
     hotspot,
     fields: {

@@ -50,7 +50,7 @@ describe("datetime", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.min).toHaveBeenCalledWith("2022-06-03T03:24:55.394Z");
 
@@ -75,7 +75,7 @@ describe("datetime", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.396Z");
 
@@ -103,7 +103,7 @@ describe("datetime", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.min).toHaveBeenCalledWith("2022-06-03T03:24:55.395Z");
     expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.395Z");
@@ -153,7 +153,7 @@ describe("datetime", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });

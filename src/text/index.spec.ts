@@ -35,7 +35,7 @@ describe("text", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.min).toHaveBeenCalledWith(3);
 
@@ -57,7 +57,7 @@ describe("text", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.max).toHaveBeenCalledWith(4);
 
@@ -79,7 +79,7 @@ describe("text", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.length).toHaveBeenCalledWith(3);
 
@@ -101,7 +101,7 @@ describe("text", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.regex).toHaveBeenCalledWith(/^foo$/);
 
@@ -140,7 +140,7 @@ describe("text", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
