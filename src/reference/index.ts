@@ -4,7 +4,7 @@ import { createType } from "../types";
 
 import type { DocumentType } from "../document";
 import type { FieldOptionKeys } from "../field";
-import type { TypeValidation } from "../types";
+import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -24,6 +24,19 @@ type ReferenceDef<Output> = Omit<
   ) => z.ZodType<Output, any, SanityReference>;
 };
 
+interface ReferenceType<DocumentName extends string, Output>
+  extends SanityType<
+    Omit<
+      TypeValidation<Schema.ReferenceDefinition, SanityReference>,
+      FieldOptionKeys
+    >,
+    z.ZodType<Output, any, SanityReference>
+  > {
+  to: <Name extends string>(
+    document: DocumentType<Name, any>
+  ) => ReferenceType<DocumentName | Name, Output>;
+}
+
 const referenceInternal = <DocumentName extends string, Output>(
   {
     mock = (faker) => ({
@@ -35,7 +48,7 @@ const referenceInternal = <DocumentName extends string, Output>(
     ...def
   }: ReferenceDef<Output>,
   documents: Array<DocumentType<DocumentName, any>>
-) => ({
+): ReferenceType<DocumentName, Output> => ({
   ...createType({
     mock,
     zod: zodFn(
