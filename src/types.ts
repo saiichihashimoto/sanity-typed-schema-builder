@@ -60,14 +60,9 @@ export const createType = <
   };
 };
 
-export type Rule<Value> = Merge<
-  RuleWithoutTypedCustom,
-  {
-    custom: (
-      fn: CustomValidator<PartialDeep<Value>>
-    ) => Rule<PartialDeep<Value>>;
-  }
->;
+export type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
+  custom: (fn: CustomValidator<PartialDeep<Value>>) => Rule<PartialDeep<Value>>;
+};
 
 export type TypeValidation<Definition, Value> = Merge<
   Definition,
