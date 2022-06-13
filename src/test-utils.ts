@@ -1,10 +1,11 @@
 import type { Rule } from "@sanity/types";
+import type { Simplify } from "type-fest";
 import type { IsEqual } from "type-fest/source/internal";
 
-interface ValidateError<Received, Expected> {
+type ValidateError<Received, Expected> = Simplify<{
   expected: Expected;
   received: Received;
-}
+}>;
 
 export type ValidateShape<Received, Expected> = IsEqual<
   Expected,
