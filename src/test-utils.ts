@@ -1,15 +1,24 @@
 import type { Rule } from "@sanity/types";
 import type { Simplify } from "type-fest";
+import type { IsEqual } from "type-fest/source/internal";
 
-type ValidateError<T, Shape> = Simplify<{
-  expected: Simplify<Shape>;
-  received: Simplify<T>;
+type RecursiveSimplify<T> = T;
+// type RecursiveSimplify<T> = T extends Array<infer U>
+//   ? Array<RecursiveSimplify<U>>
+//   : T extends object
+//   ? { [K in keyof T]: RecursiveSimplify<T[K]> }
+//   : T;
+
+type ValidateError<Received, Expected> = Simplify<{
+  expected: RecursiveSimplify<Expected>;
+  received: RecursiveSimplify<Received>;
 }>;
 
-export type ValidateShape<Received, Expected> = Received extends Expected
-  ? Expected extends Received
-    ? Received
-    : ValidateError<Received, Expected>
+export type ValidateShape<Received, Expected> = IsEqual<
+  RecursiveSimplify<Expected>,
+  RecursiveSimplify<Received>
+> extends true
+  ? RecursiveSimplify<Received>
   : ValidateError<Received, Expected>;
 
 export const mockRule = () => {

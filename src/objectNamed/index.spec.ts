@@ -92,7 +92,6 @@ describe("object", () => {
         _type: "bar";
         foo: {
           _type: "foo";
-        } & {
           hello: string;
         };
       }
@@ -109,7 +108,6 @@ describe("object", () => {
         _type: "bar";
         foo: {
           _type: "foo";
-        } & {
           hello: string;
         };
       }
