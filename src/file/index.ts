@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../field";
-import type { EmptyObject, SanityType, TypeValidation } from "../types";
+import type { EmptyObject, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -33,13 +33,7 @@ export const file = <
     fields?: Fields;
     mock?: (faker: Faker, path: string) => z.input<ZodFile<Fields>>;
   } = {}
-): SanityType<
-  Omit<
-    TypeValidation<Schema.FileDefinition, z.input<ZodFile<Fields>>>,
-    FieldOptionKeys
-  >,
-  ZodFile<Fields>
-> => {
+) => {
   const {
     fields: {
       schema: fieldsSchema = () => undefined,

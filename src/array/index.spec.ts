@@ -167,7 +167,7 @@ describe("array", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.min).toHaveBeenCalledWith(1);
 
@@ -189,7 +189,7 @@ describe("array", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.max).toHaveBeenCalledWith(1);
 
@@ -211,7 +211,7 @@ describe("array", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.length).toHaveBeenCalledWith(1);
 
@@ -236,7 +236,7 @@ describe("array", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.min).toHaveBeenCalledWith(1);
 
@@ -297,7 +297,7 @@ describe("array", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });

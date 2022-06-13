@@ -5,8 +5,12 @@ import { mockRule } from "../test-utils";
 import { block } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
-import type { PortableTextBlock } from "@portabletext/types";
+import type { InferInput } from "../types";
+import type {
+  PortableTextBlock,
+  PortableTextMarkDefinition,
+  TypedObject,
+} from "@portabletext/types";
 import type { PartialDeep } from "type-fest";
 
 describe("block", () => {
@@ -19,7 +23,7 @@ describe("block", () => {
   it("parses into a block", () => {
     const type = block();
 
-    const value: ValidateShape<InferInput<typeof type>, PortableTextBlock> = {
+    const value: InferInput<typeof type> = {
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -31,9 +35,11 @@ describe("block", () => {
         },
       ],
     };
-    const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      PortableTextBlock
+    const parsedValue: PortableTextBlock<
+      PortableTextMarkDefinition,
+      TypedObject,
+      string,
+      string
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -137,7 +143,14 @@ describe("block", () => {
         Rule.custom((value) => {
           const block: ValidateShape<
             typeof value,
-            PartialDeep<PortableTextBlock>
+            PartialDeep<
+              PortableTextBlock<
+                PortableTextMarkDefinition,
+                TypedObject & Record<string, unknown>,
+                string,
+                string
+              >
+            >
           > = value;
 
           return (block.children?.length ?? 0) > 0 || "Needs to have children";

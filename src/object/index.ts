@@ -7,7 +7,7 @@ import type {
   InferFieldsZod,
   Preview,
 } from "../field";
-import type { SanityType, TypeValidation } from "../types";
+import type { TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 import type { z } from "zod";
@@ -28,13 +28,7 @@ export const object = <
   fields: Fields;
   mock?: (faker: Faker, path: string) => z.input<InferFieldsZod<Fields>>;
   preview?: Preview<z.input<InferFieldsZod<Fields>>, Select>;
-}): SanityType<
-  Omit<
-    TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
-    FieldOptionKeys
-  >,
-  InferFieldsZod<Fields>
-> => {
+}) => {
   const zod = fieldsZod as InferFieldsZod<Fields>;
 
   return createType({
@@ -51,11 +45,5 @@ export const object = <
         preview: preview(previewDef, schemaForFields),
       };
     },
-  }) as SanityType<
-    Omit<
-      TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
-      FieldOptionKeys
-    >,
-    InferFieldsZod<Fields>
-  >;
+  });
 };

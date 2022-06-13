@@ -35,7 +35,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.min).toHaveBeenCalledWith(1);
 
@@ -57,7 +57,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.max).toHaveBeenCalledWith(6);
 
@@ -79,7 +79,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.greaterThan).toHaveBeenCalledWith(1);
 
@@ -101,7 +101,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.lessThan).toHaveBeenCalledWith(6);
 
@@ -123,7 +123,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.integer).toHaveBeenCalled();
 
@@ -145,7 +145,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.positive).toHaveBeenCalled();
 
@@ -167,7 +167,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.negative).toHaveBeenCalled();
 
@@ -189,7 +189,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.precision).toHaveBeenCalledWith(2);
 
@@ -224,7 +224,7 @@ describe("number", () => {
 
     const rule = mockRule();
 
-    type.schema().validation?.(rule);
+    type.schema().validation(rule);
 
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });

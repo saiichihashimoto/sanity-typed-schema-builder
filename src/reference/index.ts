@@ -4,32 +4,14 @@ import { createType } from "../types";
 
 import type { DocumentType } from "../document";
 import type { FieldOptionKeys } from "../field";
-import type { SanityType, TypeValidation } from "../types";
+import type { TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-type ZodReference = z.ZodObject<
-  {
-    _ref: z.ZodString;
-    _type: z.ZodLiteral<"reference">;
-    _weak: z.ZodOptional<z.ZodBoolean>;
-  },
-  "strip"
->;
-
-type SanityReference = z.input<ZodReference>;
-
-interface ReferenceType<DocumentName extends string>
-  extends SanityType<
-    Omit<
-      TypeValidation<Schema.ReferenceDefinition, SanityReference>,
-      FieldOptionKeys
-    >,
-    ZodReference
-  > {
-  to: <Name extends string>(
-    document: DocumentType<Name, any>
-  ) => ReferenceType<DocumentName | Name>;
+interface SanityReference {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
 }
 
 type ReferenceDef = Omit<
@@ -48,7 +30,7 @@ const referenceInternal = <DocumentName extends string>(
     ...def
   }: ReferenceDef,
   documents: Array<DocumentType<DocumentName, any>>
-): ReferenceType<DocumentName> => ({
+) => ({
   ...createType({
     mock,
     zod: z.object({
@@ -69,5 +51,5 @@ const referenceInternal = <DocumentName extends string>(
     ]),
 });
 
-export const reference = (def: ReferenceDef = {}): ReferenceType<never> =>
-  referenceInternal(def, []);
+export const reference = (def: ReferenceDef = {}) =>
+  referenceInternal<never>(def, []);

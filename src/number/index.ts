@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys } from "../field";
-import type { SanityType, TypeValidation } from "../types";
+import type { Rule, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
@@ -38,10 +38,7 @@ export const number = ({
   negative?: boolean;
   positive?: boolean;
   precision?: number;
-} = {}): SanityType<
-  Omit<TypeValidation<Schema.NumberDefinition, number>, FieldOptionKeys>,
-  z.ZodType<number, z.ZodNumberDef | z.ZodEffectsDef<z.ZodNumber>>
-> =>
+} = {}) =>
   createType({
     mock,
     zod: flow(
@@ -66,7 +63,7 @@ export const number = ({
       type: "number",
       validation: flow(
         flow(
-          (rule) => (!min ? rule : rule.min(min)),
+          (rule: Rule<number>) => (!min ? rule : rule.min(min)),
           (rule) => (!max ? rule : rule.max(max)),
           (rule) => (!greaterThan ? rule : rule.greaterThan(greaterThan)),
           (rule) => (!lessThan ? rule : rule.lessThan(lessThan)),
