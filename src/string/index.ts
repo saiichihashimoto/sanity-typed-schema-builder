@@ -8,13 +8,14 @@ import type { Rule, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-export const string = ({
+export const string = <Output = string>({
   length,
   max,
   min,
   mock = (faker) => faker.random.word(),
   regex,
   validation,
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, string>,
   ...def
 }: Omit<
   TypeValidation<Schema.StringDefinition, string>,
@@ -25,6 +26,7 @@ export const string = ({
   min?: number;
   mock?: (faker: Faker, path: string) => string;
   regex?: RegExp;
+  zod?: (zod: z.ZodType<string, any, string>) => z.ZodType<Output, any, string>;
 } = {}) =>
   createType({
     mock,
@@ -32,7 +34,8 @@ export const string = ({
       (zod: z.ZodString) => (!min ? zod : zod.min(min)),
       (zod) => (!max ? zod : zod.max(max)),
       (zod) => (!length ? zod : zod.length(length)),
-      (zod) => (!regex ? zod : zod.regex(regex))
+      (zod) => (!regex ? zod : zod.regex(regex)),
+      zodFn
     )(z.string()),
     schema: () => ({
       ...def,

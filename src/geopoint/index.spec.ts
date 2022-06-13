@@ -86,6 +86,24 @@ describe("geopoint", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = geopoint({
+      zod: (zod) => zod.transform(({ lat }) => lat),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse({
+      _type: "geopoint",
+      lat: 58.63169011423141,
+      lng: 9.089101352587932,
+      alt: 13.37,
+    });
+
+    expect(parsedValue).toEqual(58.63169011423141);
+  });
+
   it("types custom validation", () => {
     const type = geopoint({
       validation: (Rule) =>

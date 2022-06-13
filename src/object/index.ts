@@ -15,11 +15,14 @@ import type { z } from "zod";
 export const object = <
   Fields extends FieldsType<any, any>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {}
+  Select extends Record<string, string> = {},
+  Output = z.output<InferFieldsZod<Fields>>
 >({
   preview: previewDef,
   fields: { mock: fieldsMock, schema: fieldsSchema, zod: fieldsZod },
   mock = (faker, path) => fieldsMock(path),
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<Output, any, z.input<InferFieldsZod<Fields>>>,
   ...def
 }: Omit<
   TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
@@ -28,13 +31,17 @@ export const object = <
   fields: Fields;
   mock?: (faker: Faker, path: string) => z.input<InferFieldsZod<Fields>>;
   preview?: Preview<z.input<InferFieldsZod<Fields>>, Select>;
-}) => {
-  const zod = fieldsZod as InferFieldsZod<Fields>;
-
-  return createType({
+  zod?: (
+    zod: z.ZodType<
+      z.input<InferFieldsZod<Fields>>,
+      any,
+      z.input<InferFieldsZod<Fields>>
+    >
+  ) => z.ZodType<Output, any, z.input<InferFieldsZod<Fields>>>;
+}) =>
+  createType({
     mock,
-    zod,
-    parse: zod.parse.bind(zod),
+    zod: zodFn(fieldsZod as InferFieldsZod<Fields>),
     schema: () => {
       const schemaForFields = fieldsSchema();
 
@@ -46,4 +53,3 @@ export const object = <
       };
     },
   });
-};

@@ -142,6 +142,19 @@ describe("string", () => {
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
 
+  it("allows defining the zod", () => {
+    const type = string({
+      zod: (zod) => zod.transform((value) => value.length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse("Test string");
+
+    expect(parsedValue).toEqual(11);
+  });
+
   it("types custom validation", () => {
     const type = string({
       validation: (Rule) =>

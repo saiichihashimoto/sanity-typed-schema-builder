@@ -56,6 +56,19 @@ describe("url", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = url({
+      zod: (zod) => zod.transform((value) => value.length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse("https://google.com");
+
+    expect(parsedValue).toEqual(18);
+  });
+
   it("types custom validation", () => {
     const type = url({
       validation: (Rule) =>

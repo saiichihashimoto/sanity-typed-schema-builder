@@ -28,13 +28,14 @@ type ZodDocument<
 
 export interface DocumentType<
   DocumentNames extends string,
-  Fields extends FieldsType<any, any>
+  Fields extends FieldsType<any, any>,
+  Output = z.output<ZodDocument<DocumentNames, Fields>>
 > extends SanityType<
     TypeValidation<
       Schema.DocumentDefinition,
       z.input<ZodDocument<DocumentNames, Fields>>
     > & { name: DocumentNames },
-    ZodDocument<DocumentNames, Fields>
+    z.ZodType<Output, any, z.input<ZodDocument<DocumentNames, Fields>>>
   > {
   name: DocumentNames;
 }
@@ -43,7 +44,8 @@ export const document = <
   DocumentNames extends string,
   Fields extends FieldsType<any, any>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {}
+  Select extends Record<string, string> = {},
+  Output = z.output<ZodDocument<DocumentNames, Fields>>
 >({
   name,
   preview: previewDef,
@@ -64,6 +66,12 @@ export const document = <
         .toISOString(),
     };
   },
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<
+      Output,
+      any,
+      z.input<ZodDocument<DocumentNames, Fields>>
+    >,
   ...def
 }: Omit<
   TypeValidation<
@@ -79,17 +87,26 @@ export const document = <
   ) => z.input<ZodDocument<DocumentNames, Fields>>;
   name: DocumentNames;
   preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>;
-}): DocumentType<DocumentNames, Fields> => ({
+  zod?: (
+    zod: z.ZodType<
+      z.input<ZodDocument<DocumentNames, Fields>>,
+      any,
+      z.input<ZodDocument<DocumentNames, Fields>>
+    >
+  ) => z.ZodType<Output, any, z.input<ZodDocument<DocumentNames, Fields>>>;
+}): DocumentType<DocumentNames, Fields, Output> => ({
   name,
   ...createType({
     mock,
-    zod: (fieldsZod as InferFieldsZod<Fields>).extend({
-      _createdAt: z.string().transform((v) => new Date(v)),
-      _id: z.string().uuid(),
-      _rev: z.string(),
-      _type: z.literal(name),
-      _updatedAt: z.string().transform((v) => new Date(v)),
-    }) as unknown as ZodDocument<DocumentNames, Fields>,
+    zod: zodFn(
+      (fieldsZod as InferFieldsZod<Fields>).extend({
+        _createdAt: z.string().transform((v) => new Date(v)),
+        _id: z.string().uuid(),
+        _rev: z.string(),
+        _type: z.literal(name),
+        _updatedAt: z.string().transform((v) => new Date(v)),
+      }) as unknown as ZodDocument<DocumentNames, Fields>
+    ),
     schema: () => {
       const schemaForFields = fieldsSchema();
 

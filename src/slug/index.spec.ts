@@ -58,6 +58,19 @@ describe("slug", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = slug({
+      zod: (zod) => zod.transform(({ _type }) => _type),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      "slug"
+    > = type.parse({ _type: "slug", current: "a-slug" });
+
+    expect(parsedValue).toEqual("slug");
+  });
+
   it("types custom validation", () => {
     const type = slug({
       validation: (Rule) =>

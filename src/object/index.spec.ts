@@ -172,6 +172,23 @@ describe("object", () => {
     });
   });
 
+  it("allows defining the zod", () => {
+    const type = object({
+      fields: field({
+        name: "foo",
+        type: boolean(),
+      }),
+      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse({ foo: true });
+
+    expect(parsedValue).toEqual(1);
+  });
+
   it("types custom validation", () => {
     const type = object({
       fields: field({

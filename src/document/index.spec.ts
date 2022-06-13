@@ -266,6 +266,31 @@ describe("document", () => {
     });
   });
 
+  it("allows defining the zod", () => {
+    const type = document({
+      name: "foo",
+      fields: field({
+        name: "foo",
+        type: boolean(),
+      }),
+      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse({
+      _createdAt: "2022-06-03T03:24:55.395Z",
+      _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
+      _rev: "somerevstring",
+      _type: "foo",
+      _updatedAt: "2022-06-03T03:24:55.395Z",
+      foo: true,
+    });
+
+    expect(parsedValue).toEqual(6);
+  });
+
   it("types custom validation", () => {
     const type = document({
       name: "foo",

@@ -106,6 +106,22 @@ describe("reference", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = reference({
+      zod: (zod) => zod.transform(({ _ref }) => _ref),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      string
+    > = type.parse({
+      _ref: "ffda9bed-b959-4100-abeb-9f1e241e9445",
+      _type: "reference",
+    });
+
+    expect(parsedValue).toEqual("ffda9bed-b959-4100-abeb-9f1e241e9445");
+  });
+
   it("types custom validation", () => {
     const type = reference({
       validation: (Rule) =>

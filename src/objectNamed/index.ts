@@ -19,7 +19,8 @@ export const objectNamed = <
   ObjectNames extends string,
   Fields extends FieldsType<any, any>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {}
+  Select extends Record<string, string> = {},
+  Output = z.output<ZodObjectNamed<ObjectNames, Fields>>
 >({
   name,
   preview: previewDef,
@@ -28,6 +29,12 @@ export const objectNamed = <
     ...(fieldsMock(path) as z.input<InferFieldsZod<Fields>>),
     _type: name,
   }),
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<
+      Output,
+      any,
+      z.input<ZodObjectNamed<ObjectNames, Fields>>
+    >,
   ...def
 }: Omit<
   TypeValidation<
@@ -43,10 +50,19 @@ export const objectNamed = <
   ) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
   name: ObjectNames;
   preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>;
+  zod?: (
+    zod: z.ZodType<
+      z.input<ZodObjectNamed<ObjectNames, Fields>>,
+      any,
+      z.input<ZodObjectNamed<ObjectNames, Fields>>
+    >
+  ) => z.ZodType<Output, any, z.input<ZodObjectNamed<ObjectNames, Fields>>>;
 }) => {
-  const zod = (fieldsZod as InferFieldsZod<Fields>).extend({
-    _type: z.literal(name),
-  }) as unknown as ZodObjectNamed<ObjectNames, Fields>;
+  const zod = zodFn(
+    (fieldsZod as InferFieldsZod<Fields>).extend({
+      _type: z.literal(name),
+    }) as unknown as ZodObjectNamed<ObjectNames, Fields>
+  );
 
   return {
     ...createType({

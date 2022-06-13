@@ -41,6 +41,19 @@ describe("boolean", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = boolean({
+      zod: (zod) => zod.transform((value) => value.toString()),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      string
+    > = type.parse(true);
+
+    expect(parsedValue).toEqual("true");
+  });
+
   it("types custom validation", () => {
     const type = boolean({
       validation: (Rule) =>

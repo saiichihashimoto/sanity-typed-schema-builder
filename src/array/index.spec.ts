@@ -256,6 +256,20 @@ describe("array", () => {
     }).toThrow(z.ZodError);
   });
 
+  it("allows defining the zod", () => {
+    const type = array({
+      of: item(boolean()),
+      zod: (zod) => zod.transform((value) => value.length),
+    });
+
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      number
+    > = type.parse([true, false]);
+
+    expect(parsedValue).toEqual(2);
+  });
+
   it("types custom validation", () => {
     const type = array({
       of: item(

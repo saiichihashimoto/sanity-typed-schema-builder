@@ -137,6 +137,27 @@ describe("block", () => {
       }).mock()
     ));
 
+  it("allows defining the zod", () => {
+    const type = block({
+      zod: (zod) => zod.transform(({ _type }) => _type),
+    });
+
+    const parsedValue: string = type.parse({
+      style: "normal",
+      _type: "block",
+      markDefs: [],
+      children: [
+        {
+          _type: "span",
+          text: "Amazing, actually.",
+          marks: [],
+        },
+      ],
+    });
+
+    expect(parsedValue).toEqual("block");
+  });
+
   it("types custom validation", () => {
     const type = block({
       validation: (Rule) =>

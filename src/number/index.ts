@@ -8,7 +8,7 @@ import type { Rule, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-export const number = ({
+export const number = <Output = number>({
   greaterThan,
   integer,
   lessThan,
@@ -24,6 +24,7 @@ export const number = ({
       min,
       precision: 1 / 10 ** (precision ?? 0),
     }),
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, number>,
   ...def
 }: Omit<
   TypeValidation<Schema.NumberDefinition, number>,
@@ -38,6 +39,7 @@ export const number = ({
   negative?: boolean;
   positive?: boolean;
   precision?: number;
+  zod?: (zod: z.ZodType<number, any, number>) => z.ZodType<Output, any, number>;
 } = {}) =>
   createType({
     mock,
@@ -56,7 +58,8 @@ export const number = ({
           ? zod
           : zod.transform(
               (value) => Math.round(value * 10 ** precision) / 10 ** precision
-            )
+            ),
+      zodFn
     )(z.number()),
     schema: () => ({
       ...def,

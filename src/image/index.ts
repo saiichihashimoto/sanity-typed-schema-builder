@@ -47,7 +47,8 @@ type ZodImage<
 
 export const image = <
   Hotspot extends boolean = false,
-  Fields extends FieldsType<any, any> = FieldsType<never, EmptyObject>
+  Fields extends FieldsType<any, any> = FieldsType<never, EmptyObject>,
+  Output = z.output<ZodImage<Hotspot, Fields>>
 >(
   def: Omit<
     TypeValidation<Schema.ImageDefinition, z.input<ZodImage<Hotspot, Fields>>>,
@@ -57,6 +58,9 @@ export const image = <
     fields?: Fields;
     hotspot?: Hotspot;
     mock?: (faker: Faker, path: string) => z.input<ZodImage<Hotspot, Fields>>;
+    zod?: (
+      zod: ZodImage<Hotspot, Fields>
+    ) => z.ZodType<Output, any, z.input<ZodImage<Hotspot, Fields>>>;
   } = {}
 ) => {
   const {
@@ -124,39 +128,47 @@ export const image = <
               },
             }),
       } as unknown as z.input<ZodImage<Hotspot, Fields>>),
+    zod: zodFn = (zod) =>
+      zod as unknown as z.ZodType<
+        Output,
+        any,
+        z.input<ZodImage<Hotspot, Fields>>
+      >,
   } = def;
 
   return createType({
     mock,
-    zod: (fieldsZod as InferFieldsZod<Fields>).extend(
-      !hotspot
-        ? {
-            _type: z.literal("image"),
-            asset: z.object({
-              _ref: z.string(),
-              _type: z.literal("reference"),
-            }),
-          }
-        : {
-            _type: z.literal("image"),
-            asset: z.object({
-              _ref: z.string(),
-              _type: z.literal("reference"),
-            }),
-            crop: z.object({
-              bottom: z.number(),
-              left: z.number(),
-              right: z.number(),
-              top: z.number(),
-            }),
-            hotspot: z.object({
-              height: z.number(),
-              width: z.number(),
-              x: z.number(),
-              y: z.number(),
-            }),
-          }
-    ) as unknown as ZodImage<Hotspot, Fields>,
+    zod: zodFn(
+      (fieldsZod as InferFieldsZod<Fields>).extend(
+        !hotspot
+          ? {
+              _type: z.literal("image"),
+              asset: z.object({
+                _ref: z.string(),
+                _type: z.literal("reference"),
+              }),
+            }
+          : {
+              _type: z.literal("image"),
+              asset: z.object({
+                _ref: z.string(),
+                _type: z.literal("reference"),
+              }),
+              crop: z.object({
+                bottom: z.number(),
+                left: z.number(),
+                right: z.number(),
+                top: z.number(),
+              }),
+              hotspot: z.object({
+                height: z.number(),
+                width: z.number(),
+                x: z.number(),
+                y: z.number(),
+              }),
+            }
+      ) as unknown as ZodImage<Hotspot, Fields>
+    ),
     schema: () => ({
       ...def,
       type: "image",
