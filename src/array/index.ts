@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { FieldOptionKeys } from "../field";
-import type { InferZod, Rule, SanityType, TypeValidation } from "../types";
+import type { Rule, SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 import type { Simplify } from "type-fest";
@@ -17,17 +17,6 @@ type ItemDefinition = Omit<
   FieldOptionKeys
 >;
 
-type AddKeyToZod<Zod extends z.ZodFirstPartySchemaTypes> =
-  Zod extends z.ZodType<infer Output, infer Def, infer Input>
-    ? Input extends object
-      ? z.ZodType<
-          Simplify<Output & { _key: string }>,
-          Def,
-          Simplify<Input & { _key: string }>
-        >
-      : Zod
-    : Zod;
-
 const addKeyToZod = <Zod extends z.ZodFirstPartySchemaTypes>(zod: Zod) =>
   !(zod instanceof z.ZodObject)
     ? zod
@@ -35,172 +24,80 @@ const addKeyToZod = <Zod extends z.ZodFirstPartySchemaTypes>(zod: Zod) =>
         _key: z.string(),
       });
 
-type ZodArray<
-  Positions extends string,
-  Items extends {
-    [field in Positions]: SanityType<ItemDefinition, any>;
-  },
-  NonEmpty extends boolean
-> = z.ZodArray<
-  "00" extends Positions
-    ? z.ZodUnion<
-        readonly [
-          AddKeyToZod<InferZod<Items[keyof Items]>>,
-          ...Array<AddKeyToZod<InferZod<Items[keyof Items]>>>
-        ]
-      >
-    : "0" extends Positions
-    ? AddKeyToZod<InferZod<Items[keyof Items]>>
-    : z.ZodNever,
-  NonEmpty extends true ? "atleastone" : "many"
->;
-
-interface ItemsType<
-  Positions extends string,
-  Items extends {
-    [field in Positions]: SanityType<ItemDefinition, any>;
-  }
-> extends SanityType<ItemDefinition[], ZodArray<Positions, Items, false>> {
-  item: <
-    Zod extends z.ZodType<any, any, any>,
-    NewPosition extends Exclude<`${Positions}0`, Positions>
-  >(
-    item: SanityType<ItemDefinition, Zod>
-  ) => ItemsType<
-    Positions | NewPosition,
-    // @ts-expect-error -- Not sure how to solve this
-    Items & {
-      [field in NewPosition]: SanityType<ItemDefinition, Zod>;
-    }
-  >;
-}
-
-const itemsInternal = <
-  Positions extends string,
-  Items extends {
-    [field in Positions]: SanityType<ItemDefinition, any>;
-  },
-  NonEmpty extends boolean
->(
-  items: Array<Items[keyof Items]>
-): ItemsType<Positions, Items> => ({
-  ...createType({
-    // FIXME Mock the array element types. Not sure how to allow an override, since the function has to be defined before we know the element types.
-    mock: () => [] as unknown as z.input<ZodArray<Positions, Items, NonEmpty>>,
-    zod: z.array(
-      items.length === 0
-        ? z.never()
-        : items.length === 1
-        ? addKeyToZod(items[0]!.zod)
-        : z.union([
-            addKeyToZod(items[0]!.zod),
-            addKeyToZod(items[1]!.zod),
-            ...(items
-              .slice(2)
-              .map(
-                <Zod extends z.ZodType<any, any, any>>({
-                  zod,
-                }: SanityType<ItemDefinition, Zod>) => addKeyToZod(zod)
-              ) as unknown as Array<InferZod<Items[keyof Items]>>),
-          ])
-    ) as ZodArray<Positions, Items, false>,
-    schema: () => items.map(({ schema }) => schema()),
-  }),
-  item: <
-    Zod extends z.ZodType<any, any, any>,
-    NewPosition extends Exclude<`${Positions}0`, Positions>
-  >(
-    item: SanityType<ItemDefinition, Zod>
-  ) =>
-    itemsInternal<
-      Positions | NewPosition,
-      // @ts-expect-error -- Not sure how to solve this
-      Items & {
-        [field in NewPosition]: SanityType<ItemDefinition, Zod>;
-      },
-      NonEmpty
-    >([...items, item]),
-});
-
-export const item = <
-  Zod extends z.ZodType<any, any, any>,
-  NonEmpty extends boolean
->(
-  item: SanityType<ItemDefinition, Zod>
-) =>
-  itemsInternal<
-    "0",
-    {
-      "0": SanityType<ItemDefinition, Zod>;
-    },
-    NonEmpty
-  >([item]);
-
 export const array = <
-  Positions extends string,
-  Items extends {
-    [field in Positions]: SanityType<ItemDefinition, any>;
-  },
+  ItemDefinitions extends ItemDefinition,
+  Zods extends z.ZodType<any, any, any>,
+  ItemsArray extends [
+    SanityType<ItemDefinitions, Zods>,
+    ...Array<SanityType<ItemDefinitions, Zods>>
+  ],
+  Zod extends z.ZodArray<
+    ItemsArray[number]["zod"] extends z.ZodType<
+      infer Output,
+      infer Definition,
+      infer Input
+    >
+      ? Input extends object
+        ? z.ZodType<
+            Simplify<Output & { _key: string }>,
+            Definition,
+            Simplify<Input & { _key: string }>
+          >
+        : ItemsArray[number]["zod"]
+      : never,
+    // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but NonEmpty has to be
+    NonEmpty extends true ? "atleastone" : "many"
+  >,
   NonEmpty extends boolean = false,
-  Output = z.input<ZodArray<Positions, Items, NonEmpty>>
+  Output = z.output<Zod>
 >({
   length,
   max,
   min,
   nonempty,
-  of: { schema: itemsSchema, mock: itemsMock, zod: itemsZod },
-  mock = itemsMock as unknown as (
-    faker: Faker
-  ) => z.input<ZodArray<Positions, Items, NonEmpty>>,
   validation,
-  zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<
-      Output,
-      any,
-      z.input<ZodArray<Positions, Items, NonEmpty>>
-    >,
+  of: items,
+  // FIXME Mock the array element types. Not sure how to allow an override, since the function has to be defined before we know the element types.
+  mock = () => [] as unknown as z.input<Zod>,
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
 }: Omit<
-  TypeValidation<
-    Schema.ArrayDefinition<z.input<ZodArray<Positions, Items, NonEmpty>>>,
-    z.input<ZodArray<Positions, Items, NonEmpty>>
-  >,
+  TypeValidation<Schema.ArrayDefinition<z.input<Zod>>, z.input<Zod>>,
   FieldOptionKeys | "of" | "type"
 > & {
   length?: number;
   max?: number;
   min?: number;
-  mock?: (
-    faker: Faker,
-    path: string
-  ) => z.input<ZodArray<Positions, Items, NonEmpty>>;
+  mock?: (faker: Faker, path: string) => z.input<Zod>;
   nonempty?: NonEmpty;
-  of: ItemsType<Positions, Items>;
-  zod?: (
-    zod: ZodArray<Positions, Items, NonEmpty>
-  ) => z.ZodType<Output, any, z.input<ZodArray<Positions, Items, NonEmpty>>>;
+  of: ItemsArray;
+  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
 }) =>
   createType({
     mock,
     zod: flow(
-      (zod: ZodArray<Positions, Items, false>) =>
-        (!nonempty ? zod : zod.nonempty()) as ZodArray<
-          Positions,
-          Items,
-          NonEmpty
-        >,
+      (zod: z.ZodArray<Zods>) => (!nonempty ? zod : zod.nonempty()) as Zod,
       (zod) => (!min ? zod : zod.min(min)),
       (zod) => (!max ? zod : zod.max(max)),
       (zod) => (length === undefined ? zod : zod.length(length)),
       (zod) => zodFn(zod)
-    )(itemsZod),
+    )(
+      z.array<Zods>(
+        items.length === 1
+          ? (addKeyToZod(items[0]!.zod) as unknown as Zods)
+          : (z.union([
+              addKeyToZod(items[0]!.zod),
+              addKeyToZod(items[1]!.zod),
+              ...items.slice(2).map(({ zod }) => addKeyToZod(zod)),
+            ]) as unknown as Zods)
+      )
+    ),
     schema: () => ({
       ...def,
       type: "array",
-      of: itemsSchema(),
+      of: items.map(({ schema }) => schema()),
       validation: flow(
-        (rule: Rule<z.input<ZodArray<Positions, Items, NonEmpty>>>) =>
-          !nonempty ? rule : rule.min(1),
+        (rule: Rule<z.input<Zod>>) => (!nonempty ? rule : rule.min(1)),
         (rule) => (!min ? rule : rule.min(min)),
         (rule) => (!max ? rule : rule.max(max)),
         (rule) => (length === undefined ? rule : rule.length(length)),

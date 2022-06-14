@@ -2,7 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
 import { document } from "../document";
-import { field } from "../field";
 import { mockRule } from "../test-utils";
 
 import { reference } from ".";
@@ -49,10 +48,12 @@ describe("reference", () => {
     const type = reference().to(
       document({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+        ],
       })
     );
 

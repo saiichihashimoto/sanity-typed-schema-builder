@@ -7,12 +7,7 @@ import type {
 import type { PartialDeep } from "type-fest";
 import type { z } from "zod";
 
-const hashCode = (str: string) =>
-  // eslint-disable-next-line no-bitwise -- copied from somewhere
-  Array.from(str).reduce((s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0, 0);
-
 export type AnyObject = Record<string, unknown>;
-export type EmptyObject = Record<string, never>;
 
 export type Merge<A, B> = Omit<A, keyof B> & B;
 
@@ -30,6 +25,14 @@ export interface SanityType<
   schema: () => Definition;
   zod: Zod;
 }
+
+export type InferInput<T extends SanityType<any, any>> = z.input<T["zod"]>;
+
+export type InferOutput<T extends SanityType<any, any>> = z.output<T["zod"]>;
+
+const hashCode = (str: string) =>
+  // eslint-disable-next-line no-bitwise -- copied from somewhere
+  Array.from(str).reduce((s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0, 0);
 
 // TODO createType tests
 export const createType = <
@@ -73,14 +76,3 @@ export type TypeValidation<Definition, Value> = Merge<
   Definition,
   { validation?: (rule: Rule<Value>) => Rule<Value> }
 >;
-
-export type InferZod<T extends SanityType<any, any>> = T extends SanityType<
-  any,
-  infer Zod
->
-  ? Zod
-  : never;
-
-export type InferInput<T extends SanityType<any, any>> = z.input<InferZod<T>>;
-
-export type InferOutput<T extends SanityType<any, any>> = z.output<InferZod<T>>;

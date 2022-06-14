@@ -2,7 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
 import { boolean } from "../boolean";
-import { field } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
 
@@ -17,10 +16,12 @@ describe("document", () => {
     expect(
       document({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+        ],
       }).schema()
     ).toEqual({
       name: "foo",
@@ -39,20 +40,24 @@ describe("document", () => {
       document({
         name: "foo",
         title: "Foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+        ],
       }).schema()
     ).toHaveProperty("title", "Foo"));
 
   it("parses into an document", () => {
     const type = document({
       name: "foo",
-      fields: field({
-        name: "foo",
-        type: boolean(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+      ],
     });
 
     const value: ValidateShape<
@@ -92,16 +97,107 @@ describe("document", () => {
     });
   });
 
+  it("allows optional fields", () => {
+    const type = document({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+        {
+          name: "bar",
+          optional: true,
+          type: string(),
+        },
+      ],
+    });
+
+    const schema = type.schema();
+
+    expect(schema).toHaveProperty("fields", [
+      {
+        name: "foo",
+        type: "boolean",
+        validation: expect.any(Function),
+      },
+      {
+        name: "bar",
+        type: "string",
+        validation: expect.any(Function),
+      },
+    ]);
+
+    const fooRule = mockRule();
+
+    ("validation" in schema.fields[0]!
+      ? schema.fields[0]
+      : undefined
+    )?.validation?.(fooRule);
+
+    expect(fooRule.required).toHaveBeenCalled();
+
+    const barRule = mockRule();
+
+    ("validation" in schema.fields[1]!
+      ? schema.fields[1]
+      : undefined
+    )?.validation?.(barRule);
+
+    expect(barRule.required).not.toHaveBeenCalled();
+
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        _createdAt: string;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: string;
+        bar?: string;
+        foo: boolean;
+      }
+    > = {
+      _createdAt: "2022-06-03T03:24:55.395Z",
+      _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
+      _rev: "somerevstring",
+      _type: "foo",
+      _updatedAt: "2022-06-03T03:24:55.395Z",
+      foo: true,
+    };
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      {
+        _createdAt: Date;
+        _id: string;
+        _rev: string;
+        _type: "foo";
+        _updatedAt: Date;
+        bar?: string;
+        foo: boolean;
+      }
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual({
+      ...value,
+      _createdAt: new Date("2022-06-03T03:24:55.395Z"),
+      _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
+    });
+  });
+
   it("mocks the field values", () => {
     const value = document({
       name: "foo",
-      fields: field({
-        name: "foo",
-        type: boolean(),
-      }).field({
-        name: "bar",
-        type: string(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+        {
+          name: "bar",
+          type: string(),
+        },
+      ],
     }).mock();
 
     expect(value).toEqual({
@@ -144,13 +240,16 @@ describe("document", () => {
     ] as const).toContainEqual(
       document({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }).field({
-          name: "bar",
-          type: string(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+          {
+            name: "bar",
+            type: string(),
+          },
+        ],
         mock: (faker) =>
           faker.helpers.arrayElement([
             {
@@ -179,10 +278,12 @@ describe("document", () => {
     expect(
       document({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+        ],
         preview: {
           select: {
             title: "someTitle",
@@ -200,14 +301,17 @@ describe("document", () => {
   it("types prepare function", () => {
     const type = document({
       name: "foo",
-      fields: field({
-        name: "foo",
-        type: string(),
-      }).field({
-        name: "bar",
-        optional: true,
-        type: string(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: string(),
+        },
+        {
+          name: "bar",
+          optional: true,
+          type: string(),
+        },
+      ],
       preview: {
         select: {
           bleh: "foo",
@@ -271,10 +375,12 @@ describe("document", () => {
   it("allows defining the zod", () => {
     const type = document({
       name: "foo",
-      fields: field({
-        name: "foo",
-        type: boolean(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+      ],
       zod: (zod) => zod.transform((value) => Object.keys(value).length),
     });
 
@@ -296,14 +402,17 @@ describe("document", () => {
   it("types custom validation", () => {
     const type = document({
       name: "foo",
-      fields: field({
-        name: "foo",
-        optional: true,
-        type: boolean(),
-      }).field({
-        name: "bar",
-        type: string(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          optional: true,
+          type: boolean(),
+        },
+        {
+          name: "bar",
+          type: string(),
+        },
+      ],
       validation: (Rule) =>
         Rule.custom((value) => {
           const {
