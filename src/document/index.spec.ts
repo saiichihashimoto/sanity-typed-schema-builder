@@ -8,8 +8,8 @@ import { mockRule } from "../test-utils";
 import { document } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput, Merge } from "../types";
-import type { PartialDeep } from "type-fest";
+import type { InferInput, InferOutput } from "../types";
+import type { Merge, PartialDeep } from "type-fest";
 
 describe("document", () => {
   it("builds a sanity config", () =>
