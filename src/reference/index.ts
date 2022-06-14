@@ -14,42 +14,39 @@ interface SanityReference {
   _weak?: boolean;
 }
 
-type ReferenceDef<Output> = Omit<
+export const reference = <
+  DocumentName extends string,
+  ReferencesArray extends [
+    DocumentType<DocumentName, any>,
+    ...Array<DocumentType<DocumentName, any>>
+  ],
+  Output = SanityReference
+>({
+  to: documents,
+  mock = (faker) => ({
+    _ref: faker.datatype.uuid(),
+    _type: "reference",
+  }),
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<Output, any, SanityReference>,
+  ...def
+}: Omit<
   TypeValidation<Schema.ReferenceDefinition, SanityReference>,
   FieldOptionKeys | "to" | "type"
 > & {
   mock?: (faker: Faker, path: string) => SanityReference;
+  to: ReferencesArray;
   zod?: (
     zod: z.ZodType<SanityReference, any, SanityReference>
   ) => z.ZodType<Output, any, SanityReference>;
-};
-
-interface ReferenceType<DocumentName extends string, Output>
-  extends SanityType<
-    Omit<
-      TypeValidation<Schema.ReferenceDefinition, SanityReference>,
-      FieldOptionKeys
-    >,
-    z.ZodType<Output, any, SanityReference>
-  > {
-  to: <Name extends string>(
-    document: DocumentType<Name, any>
-  ) => ReferenceType<DocumentName | Name, Output>;
-}
-
-const referenceInternal = <DocumentName extends string, Output>(
-  {
-    mock = (faker) => ({
-      _ref: faker.datatype.uuid(),
-      _type: "reference",
-    }),
-    zod: zodFn = (zod) =>
-      zod as unknown as z.ZodType<Output, any, SanityReference>,
-    ...def
-  }: ReferenceDef<Output>,
-  documents: Array<DocumentType<DocumentName, any>>
-): ReferenceType<DocumentName, Output> => ({
-  ...createType({
+}): SanityType<
+  Omit<
+    TypeValidation<Schema.ReferenceDefinition, SanityReference>,
+    FieldOptionKeys
+  >,
+  z.ZodType<Output, any, SanityReference>
+> =>
+  createType({
     mock,
     zod: zodFn(
       z.object({
@@ -63,14 +60,4 @@ const referenceInternal = <DocumentName extends string, Output>(
       type: "reference",
       to: documents.map(({ name }) => ({ type: name })),
     }),
-  }),
-  to: <Name extends string>(document: DocumentType<Name, any>) =>
-    referenceInternal<DocumentName | Name, Output>({ mock, ...def }, [
-      ...documents,
-      document,
-    ]),
-});
-
-export const reference = <Output = SanityReference>(
-  def: ReferenceDef<Output> = {}
-) => referenceInternal<never, Output>(def, []);
+  });
