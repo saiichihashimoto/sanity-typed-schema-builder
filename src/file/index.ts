@@ -1,77 +1,65 @@
 import { z } from "zod";
 
+import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
-import type { FieldOptionKeys, FieldsType, InferFieldsZod } from "../field";
-import type { EmptyObject, TypeValidation } from "../types";
+import type { FieldOptionKeys, FieldOptions, FieldsZodObject } from "../field";
+import type { TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-type ZodFile<Fields extends FieldsType<any, any>> =
-  InferFieldsZod<Fields> extends z.ZodObject<infer T, any, any, any, any>
-    ? z.ZodObject<
-        z.extendShape<
-          T,
-          {
-            _type: z.ZodLiteral<"file">;
-            asset: z.ZodObject<{
-              _ref: z.ZodString;
-              _type: z.ZodLiteral<"reference">;
-            }>;
-          }
-        >
-      >
-    : never;
-
 export const file = <
-  Fields extends FieldsType<any, any> = FieldsType<never, EmptyObject>,
-  Output = z.output<ZodFile<Fields>>
->(
-  def: Omit<
-    TypeValidation<Schema.FileDefinition, z.input<ZodFile<Fields>>>,
-    FieldOptionKeys | "fields" | "preview" | "type"
-  > & {
-    fields?: Fields;
-    mock?: (faker: Faker, path: string) => z.input<ZodFile<Fields>>;
-    zod?: (
-      zod: ZodFile<Fields>
-    ) => z.ZodType<Output, any, z.input<ZodFile<Fields>>>;
-  } = {}
-) => {
-  const {
-    fields: {
-      schema: fieldsSchema = () => undefined,
-      mock: fieldsMock = () =>
-        undefined as unknown as z.input<InferFieldsZod<Fields>>,
-      zod: fieldsZod = z.object({}),
-    } = {},
-    mock = (faker, path) => ({
-      ...fieldsMock(path),
+  Names extends string,
+  Zods extends z.ZodType<any, any, any>,
+  Optionals extends boolean,
+  Zod extends z.ZodObject<
+    // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but FieldsArray has to be
+    FieldsZodObject<FieldsArray> & {
+      _type: z.ZodLiteral<"file">;
+      asset: z.ZodObject<{
+        _ref: z.ZodString;
+        _type: z.ZodLiteral<"reference">;
+      }>;
+    }
+  >,
+  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>> = never[],
+  Output = z.output<Zod>
+>({
+  fields = [] as unknown as FieldsArray,
+  mock = (faker, path) =>
+    ({
+      ...fieldsMock(fields)(faker, path),
       _type: "file",
       asset: {
         _type: "reference",
         _ref: faker.datatype.uuid(),
       },
-    }),
-    zod: zodFn = (zod) =>
-      zod as unknown as z.ZodType<Output, any, z.input<ZodFile<Fields>>>,
-  } = def;
-
-  return createType({
+    } as unknown as z.input<Zod>),
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
+  ...def
+}: Omit<
+  TypeValidation<Schema.FileDefinition, z.input<Zod>>,
+  FieldOptionKeys | "fields" | "preview" | "type"
+> & {
+  fields?: FieldsArray;
+  mock?: (faker: Faker, path: string) => z.input<Zod>;
+  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
+} = {}) =>
+  createType({
     mock,
     zod: zodFn(
-      (fieldsZod as InferFieldsZod<Fields>).extend({
+      z.object({
+        ...fieldsZodObject(fields),
         _type: z.literal("file"),
         asset: z.object({
           _ref: z.string(),
           _type: z.literal("reference"),
         }),
-      }) as unknown as ZodFile<Fields>
+      }) as unknown as Zod
     ),
     schema: () => ({
       ...def,
+      ...(fields.length && fieldsSchema(fields)),
       type: "file",
-      fields: fieldsSchema(),
     }),
   });
-};

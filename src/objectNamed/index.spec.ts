@@ -1,7 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
-import { field } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
 
@@ -16,10 +15,12 @@ describe("object", () => {
     expect(
       objectNamed({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+        ],
       }).schema()
     ).toEqual({
       name: "foo",
@@ -37,10 +38,12 @@ describe("object", () => {
     expect(
       objectNamed({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+        ],
         hidden: false,
       }).schema()
     ).toHaveProperty("hidden", false));
@@ -48,10 +51,12 @@ describe("object", () => {
   it("parses into an object", () => {
     const type = objectNamed({
       name: "foo",
-      fields: field({
-        name: "foo",
-        type: boolean(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+      ],
     });
 
     const value: ValidateShape<
@@ -69,15 +74,81 @@ describe("object", () => {
     expect(parsedValue).toEqual(value);
   });
 
+  it("allows optional fields", () => {
+    const type = objectNamed({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+        {
+          name: "bar",
+          optional: true,
+          type: string(),
+        },
+      ],
+    });
+
+    const schema = type.schema();
+
+    expect(schema).toHaveProperty("fields", [
+      {
+        name: "foo",
+        type: "boolean",
+        validation: expect.any(Function),
+      },
+      {
+        name: "bar",
+        type: "string",
+        validation: expect.any(Function),
+      },
+    ]);
+
+    const fooRule = mockRule();
+
+    schema.fields[0]?.validation?.(fooRule);
+
+    expect(fooRule.required).toHaveBeenCalled();
+
+    const barRule = mockRule();
+
+    schema.fields[1]?.validation?.(barRule);
+
+    expect(barRule.required).not.toHaveBeenCalled();
+
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        _type: "foo";
+        bar?: string;
+        foo: boolean;
+      }
+    > = {
+      _type: "foo",
+      foo: true,
+    };
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      {
+        _type: "foo";
+        bar?: string;
+        foo: boolean;
+      }
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+  });
+
   it("makes a reference", () => {
     const type = objectNamed({
       name: "foo",
-      fields: field({ name: "hello", type: string() }),
+      fields: [{ name: "hello", type: string() }],
     });
 
     const type2 = objectNamed({
       name: "bar",
-      fields: field({ name: "foo", type: type.ref() }),
+      fields: [{ name: "foo", type: type.ref() }],
     });
 
     expect(type2.schema().fields[0]).toEqual({
@@ -120,13 +191,16 @@ describe("object", () => {
     expect(
       objectNamed({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }).field({
-          name: "bar",
-          type: string(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+          {
+            name: "bar",
+            type: string(),
+          },
+        ],
       }).mock()
     ).toEqual({
       _type: "foo",
@@ -141,13 +215,16 @@ describe("object", () => {
     ]).toContainEqual(
       objectNamed({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }).field({
-          name: "bar",
-          type: string(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+          {
+            name: "bar",
+            type: string(),
+          },
+        ],
         mock: (faker) =>
           faker.helpers.arrayElement([
             { _type: "foo", foo: true, bar: "foo" },
@@ -160,10 +237,12 @@ describe("object", () => {
     expect(
       objectNamed({
         name: "foo",
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+        ],
         preview: {
           select: {
             title: "someTitle",
@@ -181,14 +260,17 @@ describe("object", () => {
   it("allows a function selection value", () => {
     const type = objectNamed({
       name: "foo",
-      fields: field({
-        name: "foo",
-        type: string(),
-      }).field({
-        name: "bar",
-        optional: true,
-        type: string(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: string(),
+        },
+        {
+          name: "bar",
+          optional: true,
+          type: string(),
+        },
+      ],
       preview: {
         select: {
           bleh: "foo",
@@ -240,10 +322,12 @@ describe("object", () => {
   it("allows defining the zod", () => {
     const type = objectNamed({
       name: "foo",
-      fields: field({
-        name: "foo",
-        type: boolean(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+      ],
       zod: (zod) => zod.transform((value) => Object.keys(value).length),
     });
 
@@ -258,14 +342,17 @@ describe("object", () => {
   it("types custom validation", () => {
     const type = objectNamed({
       name: "foo",
-      fields: field({
-        name: "foo",
-        optional: true,
-        type: boolean(),
-      }).field({
-        name: "bar",
-        type: string(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          optional: true,
+          type: boolean(),
+        },
+        {
+          name: "bar",
+          type: string(),
+        },
+      ],
       validation: (Rule) =>
         Rule.custom((value) => {
           const {
@@ -289,4 +376,82 @@ describe("object", () => {
 
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
+
+  // it("handles deep references", () => {
+  //   const type = objectNamed({
+  //     name: "type",
+  //     title: "Title",
+  //     fields: field({
+  //       name: "value",
+  //       title: "Value",
+  //       type: string(),
+  //     }),
+  //   });
+
+  //   const value: ValidateShape<
+  //     InferInput<typeof type>,
+  //     {
+  //       _type: "type";
+  //       value: string;
+  //     }
+  //   > = {
+  //     _type: "type",
+  //     value: "foo",
+  //   };
+
+  //   const referencingType = objectNamed({
+  //     name: "referencingType",
+  //     title: "Referencing Title",
+  //     fields: field({
+  //       name: "value",
+  //       title: "Values",
+  //       type: type.ref(),
+  //     }),
+  //   });
+
+  //   const referencingValue: ValidateShape<
+  //     InferInput<typeof referencingType>,
+  //     {
+  //       _type: "referencingType";
+  //       value: {
+  //         _type: "type";
+  //         value: string;
+  //       };
+  //     }
+  //   > = {
+  //     _type: "referencingType",
+  //     value,
+  //   };
+
+  //   const deepReferencingType = objectNamed({
+  //     name: "deepReferencingType",
+  //     title: "Deep Referencing Title",
+  //     fields: field({
+  //       name: "referencingValue",
+  //       type: referencingType.ref(),
+  //     }),
+  //   });
+
+  //   // TS2589: Type instantiation is excessively deep and possibly infinite.
+  //   const deepReferencingValue: ValidateShape<
+  //     InferInput<typeof deepReferencingType>,
+  //     {
+  //       _type: "deepReferencingType";
+  //       referencingValue: {
+  //         _type: "referencingType";
+  //         value: {
+  //           _type: "type";
+  //           value: string;
+  //         };
+  //       };
+  //     }
+  //   > = {
+  //     _type: "deepReferencingType",
+  //     referencingValue,
+  //   };
+
+  //   expect(deepReferencingValue).toEqual(
+  //     deepReferencingType.parse(deepReferencingValue)
+  //   );
+  // });
 });
