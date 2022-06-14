@@ -4,7 +4,7 @@ import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
 } from "@sanity/types";
-import type { Merge, PartialDeep, SetOptional } from "type-fest";
+import type { Merge, PartialDeep, Promisable, SetOptional } from "type-fest";
 import type { z } from "zod";
 
 export type AnyObject = Record<string, unknown>;
@@ -87,6 +87,7 @@ export type SanityTypeDef<
 > = Merge<
   WithTypedValidation<Omit<Definition, NamedSchemaFields | "type">, Zod>,
   {
+    initialValue?: z.input<Zod> | (() => Promisable<z.input<Zod>>);
     mock?: (faker: Faker, path: string) => z.input<Zod>;
     zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
   }
@@ -99,6 +100,7 @@ export type SanityNamedTypeDef<
 > = Merge<
   WithTypedValidation<Omit<Definition, "type">, Zod>,
   {
+    initialValue?: z.input<Zod> | (() => Promisable<z.input<Zod>>);
     mock?: (faker: Faker, path: string) => z.input<Zod>;
     zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
   }

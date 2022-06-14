@@ -174,25 +174,6 @@ const schema = type.schema();
  */
 ```
 
-### `Rule.custom` is typed
-
-[Custom validation](https://www.sanity.io/docs/validation#091e10f957aa) is typed with a deep partial version of the value. We set it as a deep partial because values are not necessarily valid.
-
-```typescript
-s.object({
-  fields: [
-    {
-      name: "foo",
-      type: s.number({ hidden: true }),
-      validation: (Rule) =>
-        Rule.custom((value) => {
-          // value: { foo?: number }
-        }),
-    },
-  ],
-});
-```
-
 ### `preview` is typed
 
 TODO
