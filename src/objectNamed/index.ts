@@ -4,9 +4,9 @@ import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
 import type { FieldOptions, FieldsZodObject, Preview } from "../field";
-import type { TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type { SanityNamedTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
+import type { Merge } from "type-fest";
 
 export const objectNamed = <
   ObjectNames extends string,
@@ -33,16 +33,14 @@ export const objectNamed = <
     } as unknown as z.input<Zod>),
   zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
-}: Omit<
-  TypeValidation<Schema.ObjectDefinition, z.input<Zod>>,
-  "fields" | "name" | "preview" | "type"
-> & {
-  fields: FieldsArray;
-  mock?: (faker: Faker, path: string) => z.input<Zod>;
-  name: ObjectNames;
-  preview?: Preview<z.input<Zod>, Select>;
-  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
-}) => {
+}: Merge<
+  SanityNamedTypeDef<Schema.ObjectDefinition, Zod, Output>,
+  {
+    fields: FieldsArray;
+    name: ObjectNames;
+    preview?: Preview<z.input<Zod>, Select>;
+  }
+>) => {
   const zod = zodFn(
     z.object({
       ...fieldsZodObject(fields),

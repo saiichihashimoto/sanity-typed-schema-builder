@@ -3,9 +3,7 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { FieldOptionKeys } from "../field";
-import type { Rule, TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
 export const number = <Output = number>({
@@ -26,20 +24,19 @@ export const number = <Output = number>({
     }),
   zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, number>,
   ...def
-}: Omit<
-  TypeValidation<Schema.NumberDefinition, number>,
-  FieldOptionKeys | "type"
+}: SanityTypeDef<
+  Schema.NumberDefinition,
+  z.ZodType<number, any, number>,
+  Output
 > & {
   greaterThan?: number;
   integer?: boolean;
   lessThan?: number;
   max?: number;
   min?: number;
-  mock?: (faker: Faker, path: string) => number;
   negative?: boolean;
   positive?: boolean;
   precision?: number;
-  zod?: (zod: z.ZodType<number, any, number>) => z.ZodType<Output, any, number>;
 } = {}) =>
   createType({
     mock,

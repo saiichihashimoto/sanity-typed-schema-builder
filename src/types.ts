@@ -37,7 +37,7 @@ export const createType = <
   ...def
 }: Merge<
   SetOptional<SanityType<Definition, Zod>, "parse">,
-  { mock: (faker: Faker, path: string) => z.input<Zod> }
+  { mock: (faker: Faker, path: string) => Input }
 >): SanityType<Definition, Zod> => {
   const fakers: Record<string, Faker> = {};
 
@@ -65,16 +65,41 @@ export const createType = <
   };
 };
 
-export type Rule<Value> = Merge<
-  RuleWithoutTypedCustom,
+// Don't use Merge, because it creates a deep recursive type
+export type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
+  custom: (fn: CustomValidator<PartialDeep<Value>>) => Rule<PartialDeep<Value>>;
+};
+
+export type WithTypedValidation<
+  Definition,
+  Zod extends z.ZodType<any, any, any>
+> = Merge<
+  Definition,
+  { validation?: (rule: Rule<z.input<Zod>>) => Rule<z.input<Zod>> }
+>;
+
+export type NamedSchemaFields = "description" | "name" | "title";
+
+export type SanityTypeDef<
+  Definition,
+  Zod extends z.ZodType<any, any, any>,
+  Output
+> = Merge<
+  WithTypedValidation<Omit<Definition, NamedSchemaFields | "type">, Zod>,
   {
-    custom: (
-      fn: CustomValidator<PartialDeep<Value>>
-    ) => Rule<PartialDeep<Value>>;
+    mock?: (faker: Faker, path: string) => z.input<Zod>;
+    zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
   }
 >;
 
-export type TypeValidation<Definition, Value> = Merge<
+export type SanityNamedTypeDef<
   Definition,
-  { validation?: (rule: Rule<Value>) => Rule<Value> }
+  Zod extends z.ZodType<any, any, any>,
+  Output
+> = Merge<
+  WithTypedValidation<Omit<Definition, "type">, Zod>,
+  {
+    mock?: (faker: Faker, path: string) => z.input<Zod>;
+    zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
+  }
 >;

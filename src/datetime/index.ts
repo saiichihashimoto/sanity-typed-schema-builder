@@ -3,9 +3,7 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { FieldOptionKeys } from "../field";
-import type { Rule, TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
 export const datetime = <Output = Date>({
@@ -26,14 +24,13 @@ export const datetime = <Output = Date>({
         message: "Invalid Date",
       }) as unknown as z.ZodType<Output, any, string>,
   ...def
-}: Omit<
-  TypeValidation<Schema.DatetimeDefinition, string>,
-  FieldOptionKeys | "type"
+}: SanityTypeDef<
+  Schema.DatetimeDefinition,
+  z.ZodType<string, any, string>,
+  Output
 > & {
   max?: string;
   min?: string;
-  mock?: (faker: Faker, path: string) => string;
-  zod?: (zod: z.ZodType<string, any, string>) => z.ZodType<Output, any, string>;
 } = {}) =>
   createType({
     mock,

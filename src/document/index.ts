@@ -4,15 +4,19 @@ import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
 import type { FieldOptions, FieldsZodObject, Preview } from "../field";
-import type { SanityType, TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type {
+  SanityNamedTypeDef,
+  SanityType,
+  WithTypedValidation,
+} from "../types";
 import type { Schema } from "@sanity/types";
+import type { Merge } from "type-fest";
 
 export interface DocumentType<
   DocumentNames extends string,
   Zod extends z.ZodType<any, any, any>
 > extends SanityType<
-    TypeValidation<Schema.DocumentDefinition, z.input<Zod>> & {
+    WithTypedValidation<Schema.DocumentDefinition, Zod> & {
       name: DocumentNames;
     },
     Zod
@@ -60,16 +64,14 @@ export const document = <
   },
   zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
-}: Omit<
-  TypeValidation<Schema.DocumentDefinition, z.input<Zod>>,
-  "fields" | "name" | "preview" | "type"
-> & {
-  fields: FieldsArray;
-  mock?: (faker: Faker, path: string) => z.input<Zod>;
-  name: DocumentNames;
-  preview?: Preview<z.input<Zod>, Select>;
-  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
-}): DocumentType<DocumentNames, z.ZodType<Output, any, z.input<Zod>>> => ({
+}: Merge<
+  SanityNamedTypeDef<Schema.DocumentDefinition, Zod, Output>,
+  {
+    fields: FieldsArray;
+    name: DocumentNames;
+    preview?: Preview<z.input<Zod>, Select>;
+  }
+>): DocumentType<DocumentNames, z.ZodType<Output, any, z.input<Zod>>> => ({
   name,
   ...createType({
     mock,

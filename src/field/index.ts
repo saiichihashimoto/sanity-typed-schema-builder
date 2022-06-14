@@ -1,17 +1,20 @@
 import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
-import type { AnyObject, SanityType, TypeValidation } from "../types";
+import type {
+  AnyObject,
+  NamedSchemaFields,
+  SanityType,
+  WithTypedValidation,
+} from "../types";
 import type {
   PrepareViewOptions,
   PreviewConfig,
   PreviewValue,
-  Rule,
   Schema,
+  Rule as UntypedRule,
 } from "@sanity/types";
 import type { Merge } from "type-fest";
-
-export type FieldOptionKeys = "description" | "name" | "title";
 
 export type FieldOptions<
   Name extends string,
@@ -24,9 +27,9 @@ export type FieldOptions<
   name: Name;
   optional?: Optional;
   type: SanityType<
-    Omit<
-      TypeValidation<Schema.FieldDefinition<any>, z.input<Zod>>,
-      FieldOptionKeys
+    WithTypedValidation<
+      Omit<Schema.FieldDefinition<any>, NamedSchemaFields>,
+      Zod
     >,
     Zod
   >;
@@ -150,7 +153,7 @@ export const fieldsSchema = <
         ...props,
         name,
         validation: flow(
-          (rule: Rule) => (optional ? rule : rule.required()),
+          (rule: UntypedRule) => (optional ? rule : rule.required()),
           (rule) => validation?.(rule) ?? rule
         ),
       };
