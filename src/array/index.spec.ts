@@ -5,7 +5,7 @@ import { boolean } from "../boolean";
 import { object } from "../object";
 import { mockRule } from "../test-utils";
 
-import { array, item } from ".";
+import { array } from ".";
 
 import type { ValidateShape } from "../test-utils";
 import type { InferInput, InferOutput } from "../types";
@@ -13,19 +13,20 @@ import type { PartialDeep } from "type-fest";
 
 describe("array", () => {
   it("builds a sanity config", () =>
-    expect(array({ of: item(boolean()) }).schema()).toEqual({
+    expect(array({ of: [boolean()] }).schema()).toEqual({
       type: "array",
       of: [{ type: "boolean" }],
       validation: expect.any(Function),
     }));
 
   it("passes through schema values", () =>
-    expect(
-      array({ of: item(boolean()), hidden: false }).schema()
-    ).toHaveProperty("hidden", false));
+    expect(array({ of: [boolean()], hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
   it("adds primitive types", () => {
-    const type = array({ of: item(boolean()) });
+    const type = array({ of: [boolean()] });
 
     const value: ValidateShape<InferInput<typeof type>, boolean[]> = [];
     const parsedValue: ValidateShape<
@@ -36,9 +37,9 @@ describe("array", () => {
     expect(parsedValue).toEqual(value);
   });
 
-  it("adds keyednonprimitive types", () => {
+  it("adds keyed nonprimitive types", () => {
     const type = array({
-      of: item(
+      of: [
         object({
           fields: [
             {
@@ -46,8 +47,8 @@ describe("array", () => {
               type: boolean(),
             },
           ],
-        })
-      ),
+        }),
+      ],
     });
 
     const schema = type.schema();
@@ -88,7 +89,7 @@ describe("array", () => {
 
   it("creates union with multiple types", () => {
     const type = array({
-      of: item(
+      of: [
         object({
           fields: [
             {
@@ -96,8 +97,7 @@ describe("array", () => {
               type: boolean(),
             },
           ],
-        })
-      ).item(
+        }),
         object({
           fields: [
             {
@@ -105,8 +105,8 @@ describe("array", () => {
               type: boolean(),
             },
           ],
-        })
-      ),
+        }),
+      ],
     });
 
     const schema = type.schema();
@@ -168,7 +168,7 @@ describe("array", () => {
   });
 
   it("sets min", () => {
-    const type = array({ min: 1, of: item(boolean()) });
+    const type = array({ min: 1, of: [boolean()] });
 
     const rule = mockRule();
 
@@ -190,7 +190,7 @@ describe("array", () => {
   });
 
   it("sets max", () => {
-    const type = array({ max: 1, of: item(boolean()) });
+    const type = array({ max: 1, of: [boolean()] });
 
     const rule = mockRule();
 
@@ -212,7 +212,7 @@ describe("array", () => {
   });
 
   it("sets length", () => {
-    const type = array({ length: 1, of: item(boolean()) });
+    const type = array({ length: 1, of: [boolean()] });
 
     const rule = mockRule();
 
@@ -237,7 +237,7 @@ describe("array", () => {
   });
 
   it("sets nonempty", () => {
-    const type = array({ nonempty: true, of: item(boolean()) });
+    const type = array({ nonempty: true, of: [boolean()] });
 
     const rule = mockRule();
 
@@ -263,7 +263,7 @@ describe("array", () => {
 
   it("allows defining the zod", () => {
     const type = array({
-      of: item(boolean()),
+      of: [boolean()],
       zod: (zod) => zod.transform((value) => value.length),
     });
 
@@ -277,7 +277,7 @@ describe("array", () => {
 
   it("types custom validation", () => {
     const type = array({
-      of: item(
+      of: [
         object({
           fields: [
             {
@@ -285,8 +285,7 @@ describe("array", () => {
               type: boolean(),
             },
           ],
-        })
-      ).item(
+        }),
         object({
           fields: [
             {
@@ -294,8 +293,8 @@ describe("array", () => {
               type: boolean(),
             },
           ],
-        })
-      ),
+        }),
+      ],
       validation: (Rule) =>
         Rule.custom((value) => {
           const elements: ValidateShape<
