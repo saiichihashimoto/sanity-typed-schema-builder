@@ -1,62 +1,54 @@
 import { z } from "zod";
 
-import { preview } from "../field";
+import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
-import type { FieldsType, InferFieldsZod, Preview } from "../field";
+import type { FieldOptions, FieldsZodObject, Preview } from "../field";
 import type { SanityType, TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-type ZodDocument<
-  DocumentNames extends string,
-  Fields extends FieldsType<any, any>
-> = InferFieldsZod<Fields> extends z.ZodObject<infer T, any, any, any, any>
-  ? z.ZodObject<
-      z.extendShape<
-        T,
-        {
-          _createdAt: z.ZodType<Date, any, string>;
-          _id: z.ZodString;
-          _rev: z.ZodString;
-          _type: z.ZodLiteral<DocumentNames>;
-          _updatedAt: z.ZodType<Date, any, string>;
-        }
-      >
-    >
-  : never;
-
 export interface DocumentType<
   DocumentNames extends string,
-  Fields extends FieldsType<any, any>,
-  Output = z.output<ZodDocument<DocumentNames, Fields>>
+  Zod extends z.ZodType<any, any, any>
 > extends SanityType<
-    TypeValidation<
-      Schema.DocumentDefinition,
-      z.input<ZodDocument<DocumentNames, Fields>>
-    > & { name: DocumentNames },
-    z.ZodType<Output, any, z.input<ZodDocument<DocumentNames, Fields>>>
+    TypeValidation<Schema.DocumentDefinition, z.input<Zod>> & {
+      name: DocumentNames;
+    },
+    Zod
   > {
   name: DocumentNames;
 }
 
 export const document = <
   DocumentNames extends string,
-  Fields extends FieldsType<any, any>,
+  Names extends string,
+  Zods extends z.ZodType<any, any, any>,
+  Optionals extends boolean,
+  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>>,
+  Zod extends z.ZodObject<
+    FieldsZodObject<FieldsArray> & {
+      _createdAt: z.ZodType<Date, any, string>;
+      _id: z.ZodString;
+      _rev: z.ZodString;
+      _type: z.ZodLiteral<DocumentNames>;
+      _updatedAt: z.ZodType<Date, any, string>;
+    }
+  >,
+  Output = z.output<Zod>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {},
-  Output = z.output<ZodDocument<DocumentNames, Fields>>
+  Select extends Record<string, string> = {}
 >({
   name,
+  fields,
   preview: previewDef,
-  fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
   mock = (faker, path) => {
     const createdAt = faker.date
       .between("2021-06-03T03:24:55.395Z", "2022-06-04T18:50:36.539Z")
       .toISOString();
 
     return {
-      ...(fieldsMock(path) as z.input<InferFieldsZod<Fields>>),
+      ...fieldsMock(fields)(faker, `${path}.${name}`),
       _id: faker.datatype.uuid(),
       _createdAt: createdAt,
       _rev: faker.datatype.string(23),
@@ -64,59 +56,38 @@ export const document = <
       _updatedAt: faker.date
         .between(createdAt, "2022-06-05T18:50:36.539Z")
         .toISOString(),
-    };
+    } as unknown as z.input<Zod>;
   },
-  zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<
-      Output,
-      any,
-      z.input<ZodDocument<DocumentNames, Fields>>
-    >,
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
 }: Omit<
-  TypeValidation<
-    Schema.DocumentDefinition,
-    z.input<ZodDocument<DocumentNames, Fields>>
-  >,
+  TypeValidation<Schema.DocumentDefinition, z.input<Zod>>,
   "fields" | "name" | "preview" | "type"
 > & {
-  fields: Fields;
-  mock?: (
-    faker: Faker,
-    path: string
-  ) => z.input<ZodDocument<DocumentNames, Fields>>;
+  fields: FieldsArray;
+  mock?: (faker: Faker, path: string) => z.input<Zod>;
   name: DocumentNames;
-  preview?: Preview<z.input<ZodDocument<DocumentNames, Fields>>, Select>;
-  zod?: (
-    zod: z.ZodType<
-      z.input<ZodDocument<DocumentNames, Fields>>,
-      any,
-      z.input<ZodDocument<DocumentNames, Fields>>
-    >
-  ) => z.ZodType<Output, any, z.input<ZodDocument<DocumentNames, Fields>>>;
-}): DocumentType<DocumentNames, Fields, Output> => ({
+  preview?: Preview<z.input<Zod>, Select>;
+  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
+}): DocumentType<DocumentNames, z.ZodType<Output, any, z.input<Zod>>> => ({
   name,
   ...createType({
     mock,
     zod: zodFn(
-      (fieldsZod as InferFieldsZod<Fields>).extend({
+      z.object({
+        ...fieldsZodObject(fields),
         _createdAt: z.string().transform((v) => new Date(v)),
         _id: z.string().uuid(),
         _rev: z.string(),
         _type: z.literal(name),
         _updatedAt: z.string().transform((v) => new Date(v)),
-      }) as unknown as ZodDocument<DocumentNames, Fields>
+      }) as unknown as Zod
     ),
-    schema: () => {
-      const schemaForFields = fieldsSchema();
-
-      return {
-        ...def,
-        name,
-        type: "document",
-        fields: schemaForFields,
-        preview: preview(previewDef, schemaForFields),
-      };
-    },
+    schema: () => ({
+      ...def,
+      ...fieldsSchema(fields, previewDef),
+      name,
+      type: "document",
+    }),
   }),
 });

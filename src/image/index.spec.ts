@@ -1,7 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
-import { field } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
 
@@ -124,14 +123,17 @@ describe("image", () => {
 
   it("adds fields", () => {
     const type = image({
-      fields: field({
-        name: "foo",
-        type: boolean(),
-      }).field({
-        name: "bar",
-        optional: true,
-        type: boolean(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+        {
+          name: "bar",
+          optional: true,
+          type: boolean(),
+        },
+      ],
     });
 
     const schema = type.schema();
@@ -187,13 +189,16 @@ describe("image", () => {
   it("mocks the field values", () =>
     expect(
       image({
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }).field({
-          name: "bar",
-          type: string(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+          {
+            name: "bar",
+            type: string(),
+          },
+        ],
       }).mock()
     ).toEqual({
       _type: "image",
@@ -227,13 +232,16 @@ describe("image", () => {
       },
     ] as const).toContainEqual(
       image({
-        fields: field({
-          name: "foo",
-          type: boolean(),
-        }).field({
-          name: "bar",
-          type: string(),
-        }),
+        fields: [
+          {
+            name: "foo",
+            type: boolean(),
+          },
+          {
+            name: "bar",
+            type: string(),
+          },
+        ],
         mock: (faker) =>
           faker.helpers.arrayElement([
             {
@@ -279,14 +287,17 @@ describe("image", () => {
 
   it("types custom validation", () => {
     const type = image({
-      fields: field({
-        name: "foo",
-        optional: true,
-        type: boolean(),
-      }).field({
-        name: "bar",
-        type: string(),
-      }),
+      fields: [
+        {
+          name: "foo",
+          optional: true,
+          type: boolean(),
+        },
+        {
+          name: "bar",
+          type: string(),
+        },
+      ],
       validation: (Rule) =>
         Rule.custom((value) => {
           const {

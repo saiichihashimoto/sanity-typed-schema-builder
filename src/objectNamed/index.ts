@@ -1,84 +1,65 @@
 import { z } from "zod";
 
-import { preview } from "../field";
+import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
-import type { FieldsType, InferFieldsZod, Preview } from "../field";
+import type { FieldOptions, FieldsZodObject, Preview } from "../field";
 import type { TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
 
-type ZodObjectNamed<
-  ObjectNames extends string,
-  Fields extends FieldsType<any, any>
-> = InferFieldsZod<Fields> extends z.ZodObject<infer T, any, any, any, any>
-  ? z.ZodObject<z.extendShape<T, { _type: z.ZodLiteral<ObjectNames> }>>
-  : never;
-
 export const objectNamed = <
   ObjectNames extends string,
-  Fields extends FieldsType<any, any>,
+  Names extends string,
+  Zods extends z.ZodType<any, any, any>,
+  Optionals extends boolean,
+  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>>,
+  Zod extends z.ZodObject<
+    FieldsZodObject<FieldsArray> & {
+      _type: z.ZodLiteral<ObjectNames>;
+    }
+  >,
+  Output = z.output<Zod>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {},
-  Output = z.output<ZodObjectNamed<ObjectNames, Fields>>
+  Select extends Record<string, string> = {}
 >({
   name,
+  fields,
   preview: previewDef,
-  fields: { schema: fieldsSchema, mock: fieldsMock, zod: fieldsZod },
-  mock = (faker, path) => ({
-    ...(fieldsMock(path) as z.input<InferFieldsZod<Fields>>),
-    _type: name,
-  }),
-  zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<
-      Output,
-      any,
-      z.input<ZodObjectNamed<ObjectNames, Fields>>
-    >,
+  mock = (faker, path) =>
+    ({
+      ...fieldsMock(fields)(faker, `${path}.${name}`),
+      _type: name,
+    } as unknown as z.input<Zod>),
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
 }: Omit<
-  TypeValidation<
-    Schema.ObjectDefinition,
-    z.input<ZodObjectNamed<ObjectNames, Fields>>
-  >,
+  TypeValidation<Schema.ObjectDefinition, z.input<Zod>>,
   "fields" | "name" | "preview" | "type"
 > & {
-  fields: Fields;
-  mock?: (
-    faker: Faker,
-    path: string
-  ) => z.input<ZodObjectNamed<ObjectNames, Fields>>;
+  fields: FieldsArray;
+  mock?: (faker: Faker, path: string) => z.input<Zod>;
   name: ObjectNames;
-  preview?: Preview<z.input<ZodObjectNamed<ObjectNames, Fields>>, Select>;
-  zod?: (
-    zod: z.ZodType<
-      z.input<ZodObjectNamed<ObjectNames, Fields>>,
-      any,
-      z.input<ZodObjectNamed<ObjectNames, Fields>>
-    >
-  ) => z.ZodType<Output, any, z.input<ZodObjectNamed<ObjectNames, Fields>>>;
+  preview?: Preview<z.input<Zod>, Select>;
+  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
 }) => {
   const zod = zodFn(
-    (fieldsZod as InferFieldsZod<Fields>).extend({
+    z.object({
+      ...fieldsZodObject(fields),
       _type: z.literal(name),
-    }) as unknown as ZodObjectNamed<ObjectNames, Fields>
+    }) as unknown as Zod
   );
 
   return {
     ...createType({
       mock,
       zod,
-      schema: () => {
-        const schemaForFields = fieldsSchema();
-
-        return {
-          ...def,
-          name,
-          type: "object",
-          fields: schemaForFields,
-          preview: preview(previewDef, schemaForFields),
-        };
-      },
+      schema: () => ({
+        ...def,
+        ...fieldsSchema(fields, previewDef),
+        name,
+        type: "object",
+      }),
     }),
     ref: () =>
       createType({

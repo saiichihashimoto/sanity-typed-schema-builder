@@ -1,11 +1,10 @@
-export { array, item } from "./array";
+export { array } from "./array";
 export { block } from "./block";
 export { boolean } from "./boolean";
 export { createType } from "./types";
 export { date } from "./date";
 export { datetime } from "./datetime";
 export { document } from "./document";
-export { field } from "./field";
 export { file } from "./file";
 export { geopoint } from "./geopoint";
 export { image } from "./image";

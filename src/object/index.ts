@@ -1,55 +1,48 @@
-import { preview } from "../field";
+import { z } from "zod";
+
+import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
 import type {
   FieldOptionKeys,
-  FieldsType,
-  InferFieldsZod,
+  FieldOptions,
+  FieldsZodObject,
   Preview,
 } from "../field";
 import type { TypeValidation } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
-import type { z } from "zod";
 
 export const object = <
-  Fields extends FieldsType<any, any>,
+  Names extends string,
+  Zods extends z.ZodType<any, any, any>,
+  Optionals extends boolean,
+  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>>,
+  Zod extends z.ZodObject<FieldsZodObject<FieldsArray>>,
+  Output = z.output<Zod>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {},
-  Output = z.output<InferFieldsZod<Fields>>
+  Select extends Record<string, string> = {}
 >({
+  fields,
   preview: previewDef,
-  fields: { mock: fieldsMock, schema: fieldsSchema, zod: fieldsZod },
-  mock = (faker, path) => fieldsMock(path),
-  zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<Output, any, z.input<InferFieldsZod<Fields>>>,
+  mock = fieldsMock(fields),
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
 }: Omit<
-  TypeValidation<Schema.ObjectDefinition, z.input<InferFieldsZod<Fields>>>,
+  TypeValidation<Schema.ObjectDefinition, z.input<Zod>>,
   FieldOptionKeys | "fields" | "preview" | "type"
 > & {
-  fields: Fields;
-  mock?: (faker: Faker, path: string) => z.input<InferFieldsZod<Fields>>;
-  preview?: Preview<z.input<InferFieldsZod<Fields>>, Select>;
-  zod?: (
-    zod: z.ZodType<
-      z.input<InferFieldsZod<Fields>>,
-      any,
-      z.input<InferFieldsZod<Fields>>
-    >
-  ) => z.ZodType<Output, any, z.input<InferFieldsZod<Fields>>>;
+  fields: FieldsArray;
+  mock?: (faker: Faker, path: string) => z.input<Zod>;
+  preview?: Preview<z.input<Zod>, Select>;
+  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
 }) =>
   createType({
     mock,
-    zod: zodFn(fieldsZod as InferFieldsZod<Fields>),
-    schema: () => {
-      const schemaForFields = fieldsSchema();
-
-      return {
-        ...def,
-        type: "object",
-        fields: schemaForFields,
-        preview: preview(previewDef, schemaForFields),
-      };
-    },
+    zod: zodFn(z.object(fieldsZodObject(fields)) as unknown as Zod),
+    schema: () => ({
+      ...def,
+      ...fieldsSchema(fields, previewDef),
+      type: "object",
+    }),
   });
