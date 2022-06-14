@@ -18,48 +18,57 @@ interface SanityReference {
 
 describe("reference", () => {
   it("builds a sanity config", () =>
-    expect(reference().schema()).toEqual({
+    expect(
+      reference({
+        to: [
+          document({
+            name: "foo",
+            fields: [
+              {
+                name: "foo",
+                type: boolean(),
+              },
+            ],
+          }),
+        ],
+      }).schema()
+    ).toEqual({
       type: "reference",
-      to: [],
+      to: [{ type: "foo" }],
     }));
 
   it("passes through schema values", () =>
-    expect(reference({ hidden: false }).schema()).toHaveProperty(
-      "hidden",
-      false
-    ));
+    expect(
+      reference({
+        to: [
+          document({
+            name: "foo",
+            fields: [
+              {
+                name: "foo",
+                type: boolean(),
+              },
+            ],
+          }),
+        ],
+        hidden: false,
+      }).schema()
+    ).toHaveProperty("hidden", false));
 
   it("parses into a reference", () => {
-    const type = reference();
-
-    const value: ValidateShape<InferInput<typeof type>, SanityReference> = {
-      _type: "reference",
-      _ref: "somereference",
-    };
-    const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      SanityReference
-    > = type.parse(value);
-
-    expect(parsedValue).toEqual(value);
-  });
-
-  it("adds references", () => {
-    const type = reference().to(
-      document({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-        ],
-      })
-    );
-
-    const schema = type.schema();
-
-    expect(schema).toHaveProperty("to", [{ type: "foo" }]);
+    const type = reference({
+      to: [
+        document({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: boolean(),
+            },
+          ],
+        }),
+      ],
+    });
 
     const value: ValidateShape<InferInput<typeof type>, SanityReference> = {
       _type: "reference",
@@ -74,7 +83,21 @@ describe("reference", () => {
   });
 
   it("mocks a reference", () =>
-    expect(reference().mock()).toEqual({
+    expect(
+      reference({
+        to: [
+          document({
+            name: "foo",
+            fields: [
+              {
+                name: "foo",
+                type: boolean(),
+              },
+            ],
+          }),
+        ],
+      }).mock()
+    ).toEqual({
       _ref: expect.any(String),
       _type: "reference",
     }));
@@ -92,6 +115,17 @@ describe("reference", () => {
       },
     ]).toContainEqual(
       reference({
+        to: [
+          document({
+            name: "foo",
+            fields: [
+              {
+                name: "foo",
+                type: boolean(),
+              },
+            ],
+          }),
+        ],
         mock: (faker) =>
           faker.helpers.arrayElement([
             {
@@ -109,6 +143,17 @@ describe("reference", () => {
 
   it("allows defining the zod", () => {
     const type = reference({
+      to: [
+        document({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: boolean(),
+            },
+          ],
+        }),
+      ],
       zod: (zod) => zod.transform(({ _ref }) => _ref),
     });
 
@@ -125,6 +170,17 @@ describe("reference", () => {
 
   it("types custom validation", () => {
     const type = reference({
+      to: [
+        document({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: boolean(),
+            },
+          ],
+        }),
+      ],
       validation: (Rule) =>
         Rule.custom((value) => {
           const {
