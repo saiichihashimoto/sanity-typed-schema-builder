@@ -1,7 +1,7 @@
 import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
-import type { AnyObject, Merge, SanityType, TypeValidation } from "../types";
+import type { AnyObject, SanityType, TypeValidation } from "../types";
 import type {
   PrepareViewOptions,
   PreviewConfig,
@@ -9,6 +9,7 @@ import type {
   Rule,
   Schema,
 } from "@sanity/types";
+import type { Merge } from "type-fest";
 
 export type FieldOptionKeys = "description" | "name" | "title";
 
