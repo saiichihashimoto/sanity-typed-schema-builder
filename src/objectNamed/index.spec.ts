@@ -377,81 +377,87 @@ describe("object", () => {
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  // it("handles deep references", () => {
-  //   const type = objectNamed({
-  //     name: "type",
-  //     title: "Title",
-  //     fields: field({
-  //       name: "value",
-  //       title: "Value",
-  //       type: string(),
-  //     }),
-  //   });
+  it("handles deep references", () => {
+    const type = objectNamed({
+      name: "type",
+      title: "Title",
+      fields: [
+        {
+          name: "value",
+          title: "Value",
+          type: string(),
+        },
+      ],
+    });
 
-  //   const value: ValidateShape<
-  //     InferInput<typeof type>,
-  //     {
-  //       _type: "type";
-  //       value: string;
-  //     }
-  //   > = {
-  //     _type: "type",
-  //     value: "foo",
-  //   };
+    const value: ValidateShape<
+      InferInput<typeof type>,
+      {
+        _type: "type";
+        value: string;
+      }
+    > = {
+      _type: "type",
+      value: "foo",
+    };
 
-  //   const referencingType = objectNamed({
-  //     name: "referencingType",
-  //     title: "Referencing Title",
-  //     fields: field({
-  //       name: "value",
-  //       title: "Values",
-  //       type: type.ref(),
-  //     }),
-  //   });
+    const referencingType = objectNamed({
+      name: "referencingType",
+      title: "Referencing Title",
+      fields: [
+        {
+          name: "value",
+          title: "Values",
+          type: type.ref(),
+        },
+      ],
+    });
 
-  //   const referencingValue: ValidateShape<
-  //     InferInput<typeof referencingType>,
-  //     {
-  //       _type: "referencingType";
-  //       value: {
-  //         _type: "type";
-  //         value: string;
-  //       };
-  //     }
-  //   > = {
-  //     _type: "referencingType",
-  //     value,
-  //   };
+    const referencingValue: ValidateShape<
+      InferInput<typeof referencingType>,
+      {
+        _type: "referencingType";
+        value: {
+          _type: "type";
+          value: string;
+        };
+      }
+    > = {
+      _type: "referencingType",
+      value,
+    };
 
-  //   const deepReferencingType = objectNamed({
-  //     name: "deepReferencingType",
-  //     title: "Deep Referencing Title",
-  //     fields: field({
-  //       name: "referencingValue",
-  //       type: referencingType.ref(),
-  //     }),
-  //   });
+    const deepReferencingType = objectNamed({
+      name: "deepReferencingType",
+      title: "Deep Referencing Title",
+      fields: [
+        {
+          name: "referencingValue",
+          type: referencingType.ref(),
+        },
+      ],
+    });
 
-  //   // TS2589: Type instantiation is excessively deep and possibly infinite.
-  //   const deepReferencingValue: ValidateShape<
-  //     InferInput<typeof deepReferencingType>,
-  //     {
-  //       _type: "deepReferencingType";
-  //       referencingValue: {
-  //         _type: "referencingType";
-  //         value: {
-  //           _type: "type";
-  //           value: string;
-  //         };
-  //       };
-  //     }
-  //   > = {
-  //     _type: "deepReferencingType",
-  //     referencingValue,
-  //   };
+    // TS2589: Type instantiation is excessively deep and possibly infinite.
+    const deepReferencingValue: ValidateShape<
+      InferInput<typeof deepReferencingType>,
+      {
+        _type: "deepReferencingType";
+        referencingValue: {
+          _type: "referencingType";
+          value: {
+            _type: "type";
+            value: string;
+          };
+        };
+      }
+    > = {
+      _type: "deepReferencingType",
+      referencingValue,
+    };
 
-  //   expect(deepReferencingValue).toEqual(
-  //     deepReferencingType.parse(deepReferencingValue)
-  //   );
-  // });
+    expect(deepReferencingValue).toEqual(
+      deepReferencingType.parse(deepReferencingValue)
+    );
+  });
 });

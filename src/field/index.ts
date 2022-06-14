@@ -68,7 +68,6 @@ export const fieldsMock =
       fields.map(({ name, type: { mock } }) => [name, mock(`${path}.${name}`)])
     ) as z.input<z.ZodObject<FieldsZodObject<FieldsArray>>>;
 
- 
 export type Preview<
   Value extends AnyObject,
   Select extends NonNullable<PreviewConfig["select"]>
