@@ -2,9 +2,7 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { FieldOptionKeys } from "../field";
-import type { TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type { SanityTypeDef } from "../types";
 import type {
   PortableTextBlock,
   PortableTextMarkDefinition,
@@ -35,15 +33,11 @@ export const block = <Output = DefaultPortableTextBlock>({
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<Output, any, DefaultPortableTextBlock>,
   ...def
-}: Omit<
-  TypeValidation<Schema.BlockDefinition, DefaultPortableTextBlock>,
-  FieldOptionKeys | "type"
-> & {
-  mock?: (faker: Faker, path: string) => DefaultPortableTextBlock;
-  zod?: (
-    zod: z.ZodType<DefaultPortableTextBlock, any, DefaultPortableTextBlock>
-  ) => z.ZodType<Output, any, DefaultPortableTextBlock>;
-} = {}) =>
+}: SanityTypeDef<
+  Schema.BlockDefinition,
+  z.ZodType<DefaultPortableTextBlock, any, DefaultPortableTextBlock>,
+  Output
+> = {}) =>
   createType({
     mock,
     zod: zodFn(

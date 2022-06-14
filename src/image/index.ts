@@ -4,9 +4,17 @@ import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
 import type { FieldOptions, FieldsZodObject } from "../field";
-import type { TypeValidation } from "../types";
+import type { SanityNamedTypeDef } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { Schema } from "@sanity/types";
+import type { Merge } from "type-fest";
+
+const zeroToOne = (faker: Faker) =>
+  faker.datatype.number({
+    min: 0,
+    max: 1,
+    precision: 1 / 10 ** 15,
+  });
 
 export const image = <
   Names extends string,
@@ -62,63 +70,32 @@ export const image = <
         ? {}
         : {
             crop: {
-              top: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
-              bottom: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
-              left: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
-              right: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
+              top: zeroToOne(faker),
+              bottom: zeroToOne(faker),
+              left: zeroToOne(faker),
+              right: zeroToOne(faker),
             },
             hotspot: {
-              x: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
-              y: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
-              height: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
-              width: faker.datatype.number({
-                min: 0,
-                max: 1,
-                precision: 1 / 10 ** 15,
-              }),
+              x: zeroToOne(faker),
+              y: zeroToOne(faker),
+              height: zeroToOne(faker),
+              width: zeroToOne(faker),
             },
           }),
     } as unknown as z.input<Zod>),
   zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
-}: Omit<
-  TypeValidation<Schema.ImageDefinition, z.input<Zod>>,
-  // "title" and "description" actually show up in the UI
-  "fields" | "name" | "preview" | "type"
-> & {
-  fields?: FieldsArray;
-  hotspot?: Hotspot;
-  mock?: (faker: Faker, path: string) => z.input<Zod>;
-  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
-} = {}) =>
+}: Merge<
+  Omit<
+    SanityNamedTypeDef<Schema.ImageDefinition, Zod, Output>,
+    // "title" and "description" actually show up in the UI
+    "name" | "preview"
+  >,
+  {
+    fields?: FieldsArray;
+    hotspot?: Hotspot;
+  }
+> = {}) =>
   createType({
     mock,
     zod: zodFn(

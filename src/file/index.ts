@@ -3,10 +3,10 @@ import { z } from "zod";
 import { fieldsMock, fieldsSchema, fieldsZodObject } from "../field";
 import { createType } from "../types";
 
-import type { FieldOptionKeys, FieldOptions, FieldsZodObject } from "../field";
-import type { TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type { FieldOptions, FieldsZodObject } from "../field";
+import type { SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
+import type { Merge } from "type-fest";
 
 export const file = <
   Names extends string,
@@ -37,14 +37,12 @@ export const file = <
     } as unknown as z.input<Zod>),
   zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
-}: Omit<
-  TypeValidation<Schema.FileDefinition, z.input<Zod>>,
-  FieldOptionKeys | "fields" | "preview" | "type"
-> & {
-  fields?: FieldsArray;
-  mock?: (faker: Faker, path: string) => z.input<Zod>;
-  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
-} = {}) =>
+}: Merge<
+  SanityTypeDef<Schema.FileDefinition, Zod, Output>,
+  {
+    fields?: FieldsArray;
+  }
+> = {}) =>
   createType({
     mock,
     zod: zodFn(

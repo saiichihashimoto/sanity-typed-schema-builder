@@ -3,19 +3,16 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { FieldOptionKeys } from "../field";
-import type { Rule, SanityType, TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type {
+  NamedSchemaFields,
+  Rule,
+  SanityType,
+  SanityTypeDef,
+} from "../types";
 import type { Schema } from "@sanity/types";
-import type { Simplify } from "type-fest";
+import type { Merge } from "type-fest";
 
 type UnArray<T> = T extends Array<infer U> ? U : never;
-
-// HACK Shouldn't have to omit FieldOptionKeys because arrays don't need names
-type ItemDefinition = Omit<
-  UnArray<Schema.ArrayDefinition["of"]>,
-  FieldOptionKeys
->;
 
 const addKeyToZod = <Zod extends z.ZodFirstPartySchemaTypes>(zod: Zod) =>
   !(zod instanceof z.ZodObject)
@@ -25,7 +22,11 @@ const addKeyToZod = <Zod extends z.ZodFirstPartySchemaTypes>(zod: Zod) =>
       });
 
 export const array = <
-  ItemDefinitions extends ItemDefinition,
+  // HACK Shouldn't have to omit NamedSchemaFields because arrays don't need names
+  ItemDefinitions extends Omit<
+    UnArray<Schema.ArrayDefinition["of"]>,
+    NamedSchemaFields
+  >,
   Zods extends z.ZodType<any, any, any>,
   ItemsArray extends [
     SanityType<ItemDefinitions, Zods>,
@@ -39,9 +40,9 @@ export const array = <
     >
       ? Input extends object
         ? z.ZodType<
-            Simplify<Output & { _key: string }>,
+            Merge<Output, { _key: string }>,
             Definition,
-            Simplify<Input & { _key: string }>
+            Merge<Input, { _key: string }>
           >
         : ItemsArray[number]["zod"]
       : never,
@@ -61,18 +62,16 @@ export const array = <
   mock = () => [] as unknown as z.input<Zod>,
   zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
-}: Omit<
-  TypeValidation<Schema.ArrayDefinition<z.input<Zod>>, z.input<Zod>>,
-  FieldOptionKeys | "of" | "type"
-> & {
-  length?: number;
-  max?: number;
-  min?: number;
-  mock?: (faker: Faker, path: string) => z.input<Zod>;
-  nonempty?: NonEmpty;
-  of: ItemsArray;
-  zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
-}) =>
+}: Merge<
+  SanityTypeDef<Schema.ArrayDefinition<z.input<Zod>>, Zod, Output>,
+  {
+    length?: number;
+    max?: number;
+    min?: number;
+    nonempty?: NonEmpty;
+    of: ItemsArray;
+  }
+>) =>
   createType({
     mock,
     zod: flow(

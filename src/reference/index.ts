@@ -3,10 +3,9 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { DocumentType } from "../document";
-import type { FieldOptionKeys } from "../field";
-import type { SanityType, TypeValidation } from "../types";
-import type { Faker } from "@faker-js/faker";
+import type { SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
+import type { Merge } from "type-fest";
 
 interface SanityReference {
   _ref: string;
@@ -30,22 +29,16 @@ export const reference = <
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<Output, any, SanityReference>,
   ...def
-}: Omit<
-  TypeValidation<Schema.ReferenceDefinition, SanityReference>,
-  FieldOptionKeys | "to" | "type"
-> & {
-  mock?: (faker: Faker, path: string) => SanityReference;
-  to: ReferencesArray;
-  zod?: (
-    zod: z.ZodType<SanityReference, any, SanityReference>
-  ) => z.ZodType<Output, any, SanityReference>;
-}): SanityType<
-  Omit<
-    TypeValidation<Schema.ReferenceDefinition, SanityReference>,
-    FieldOptionKeys
+}: Merge<
+  SanityTypeDef<
+    Schema.ReferenceDefinition,
+    z.ZodType<SanityReference, any, SanityReference>,
+    Output
   >,
-  z.ZodType<Output, any, SanityReference>
-> =>
+  {
+    to: ReferencesArray;
+  }
+>) =>
   createType({
     mock,
     zod: zodFn(
