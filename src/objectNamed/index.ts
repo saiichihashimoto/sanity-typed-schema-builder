@@ -26,7 +26,7 @@ export const objectNamed = <
   name,
   fields,
   preview: previewDef,
-  mock = (faker, path) =>
+  mock = (faker, path = "") =>
     ({
       ...fieldsMock(fields)(faker, `${path}.${name}`),
       _type: name,

@@ -46,7 +46,7 @@ export const document = <
   name,
   fields,
   preview: previewDef,
-  mock = (faker, path) => {
+  mock = (faker, path = "") => {
     const createdAt = faker.date
       .between("2021-06-03T03:24:55.395Z", "2022-06-04T18:50:36.539Z")
       .toISOString();

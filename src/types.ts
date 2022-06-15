@@ -1,5 +1,4 @@
-import { Faker, faker as globalFaker } from "@faker-js/faker";
-
+import type { Faker } from "@faker-js/faker";
 import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
@@ -15,7 +14,7 @@ export interface SanityType<
   // Need to union with ZodObject, not clear why
   Zod extends z.ZodType<any, any, any> | z.ZodObject<any>
 > {
-  mock: (path?: string) => z.input<Zod>;
+  mock: (faker: Faker, path?: string) => z.input<Zod>;
   parse: (data: unknown) => z.output<Zod>;
   schema: () => Definition;
   zod: Zod;
@@ -37,33 +36,13 @@ export const createType = <
   ...def
 }: Merge<
   SetOptional<SanityType<Definition, Zod>, "parse">,
-  { mock: (faker: Faker, path: string) => Input }
->): SanityType<Definition, Zod> => {
-  const fakers: Record<string, Faker> = {};
-
-  return {
-    ...def,
-    parse,
-    zod,
-    mock: (path = "") => {
-      const faker = fakers[path] ?? new Faker({ locales: globalFaker.locales });
-
-      if (!(path in fakers)) {
-        // eslint-disable-next-line fp/no-mutation -- Allowing for local dictionary
-        fakers[path] = faker;
-        faker.seed(
-          Array.from(path).reduce(
-            // eslint-disable-next-line no-bitwise -- copied from somewhere
-            (s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0,
-            0
-          )
-        );
-      }
-
-      return mock(faker, path);
-    },
-  };
-};
+  { mock: (faker: Faker, path?: string) => Input }
+>): SanityType<Definition, Zod> => ({
+  ...def,
+  mock,
+  parse,
+  zod,
+});
 
 // Don't use Merge, because it creates a deep recursive type
 export type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
@@ -88,7 +67,7 @@ export type SanityTypeDef<
   WithTypedValidation<Omit<Definition, NamedSchemaFields | "type">, Zod>,
   {
     initialValue?: z.input<Zod> | (() => Promisable<z.input<Zod>>);
-    mock?: (faker: Faker, path: string) => z.input<Zod>;
+    mock?: (faker: Faker, path?: string) => z.input<Zod>;
     zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
   }
 >;
@@ -101,7 +80,7 @@ export type SanityNamedTypeDef<
   WithTypedValidation<Omit<Definition, "type">, Zod>,
   {
     initialValue?: z.input<Zod> | (() => Promisable<z.input<Zod>>);
-    mock?: (faker: Faker, path: string) => z.input<Zod>;
+    mock?: (faker: Faker, path?: string) => z.input<Zod>;
     zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
   }
 >;

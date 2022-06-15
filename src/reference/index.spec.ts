@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
@@ -96,7 +97,7 @@ describe("reference", () => {
             ],
           }),
         ],
-      }).mock()
+      }).mock(faker)
     ).toEqual({
       _ref: expect.any(String),
       _type: "reference",
@@ -138,7 +139,7 @@ describe("reference", () => {
               _weak: true,
             },
           ]),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("allows defining the zod", () => {
