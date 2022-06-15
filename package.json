@@ -20,7 +20,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@faker-js/faker": "7.1.0",
     "@portabletext/types": "1.0.3",
     "@sanity/types": "2.29.5-purple-unicorn.856",
     "@types/lodash": "4.14.182",
@@ -29,6 +28,7 @@
     "zod": "3.17.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "7.1.0",
     "@jest/globals": "28.1.0",
     "@jest/types": "27.5.1",
     "@types/jest": "27.4.1",

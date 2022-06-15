@@ -63,7 +63,9 @@ type FooType = s.infer<typeof fooType>;
  **/
 
 // Use @faker-js/faker to create mocks for tests!
-const fooMock = fooType.mock();
+import { faker } from "@faker-js/faker";
+
+const fooMock = fooType.mock(faker);
 
 // Use zod to parse untyped values (and transform values, note _createdAt & _updatedAt specifically)
 const parsedFoo: s.output<typeof fooType> = fooType.parse(someInput);

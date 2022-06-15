@@ -7,6 +7,7 @@ import type {
   SanityType,
   WithTypedValidation,
 } from "../types";
+import type { Faker } from "@faker-js/faker";
 import type {
   PrepareViewOptions,
   PreviewConfig,
@@ -67,9 +68,12 @@ export const fieldsMock =
   >(
     fields: FieldsArray
   ) =>
-  (faker: any, path: string) =>
+  (faker: Faker, path = "") =>
     fromPairs(
-      fields.map(({ name, type: { mock } }) => [name, mock(`${path}.${name}`)])
+      fields.map(({ name, type: { mock } }) => [
+        name,
+        mock(faker, `${path}.${name}`),
+      ])
     ) as z.input<z.ZodObject<FieldsZodObject<FieldsArray>>>;
 
 export type Preview<

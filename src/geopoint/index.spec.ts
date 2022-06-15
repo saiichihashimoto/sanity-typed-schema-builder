@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { mockRule } from "../test-utils";
@@ -45,7 +46,7 @@ describe("geopoint", () => {
   });
 
   it("mocks a geopoint", () =>
-    expect(geopoint().mock()).toEqual({
+    expect(geopoint().mock(faker)).toEqual({
       _type: "geopoint",
       lat: expect.any(Number),
       lng: expect.any(Number),
@@ -83,7 +84,7 @@ describe("geopoint", () => {
               alt: 12.37,
             },
           ]),
-      }).mock()
+      }).mock(faker)
     ));
 
   it("allows defining the zod", () => {
