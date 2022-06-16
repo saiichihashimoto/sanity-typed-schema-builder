@@ -206,6 +206,14 @@ describe("number", () => {
   it("mocks a number", () =>
     expect(number().mock(faker)).toEqual(expect.any(Number)));
 
+  it("mocks the same value with the same path", () => {
+    expect(number().mock(faker)).toEqual(number().mock(faker));
+    expect(number().mock(faker, ".foo")).toEqual(number().mock(faker, ".foo"));
+
+    expect(number().mock(faker, ".foo")).not.toEqual(number().mock(faker));
+    expect(number().mock(faker)).not.toEqual(number().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect([3, 4]).toContainEqual(
       number({

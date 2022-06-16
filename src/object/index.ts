@@ -32,7 +32,7 @@ export const object = <
 >) =>
   createType({
     mock,
-    zod: zodFn(z.object(fieldsZodObject(fields)) as unknown as Zod),
+    zod: zodFn(z.object(fieldsZodObject(fields)) as Zod),
     schema: () => ({
       ...def,
       ...fieldsSchema(fields, previewDef),

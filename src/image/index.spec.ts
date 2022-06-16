@@ -211,6 +211,14 @@ describe("image", () => {
       },
     }));
 
+  it("mocks the same value with the same path", () => {
+    expect(image().mock(faker)).toEqual(image().mock(faker));
+    expect(image().mock(faker, ".foo")).toEqual(image().mock(faker, ".foo"));
+
+    expect(image().mock(faker, ".foo")).not.toEqual(image().mock(faker));
+    expect(image().mock(faker)).not.toEqual(image().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect([
       {

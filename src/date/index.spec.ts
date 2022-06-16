@@ -40,6 +40,14 @@ describe("date", () => {
       .parse(value);
   });
 
+  it("mocks the same value with the same path", () => {
+    expect(date().mock(faker)).toEqual(date().mock(faker));
+    expect(date().mock(faker, ".foo")).toEqual(date().mock(faker, ".foo"));
+
+    expect(date().mock(faker, ".foo")).not.toEqual(date().mock(faker));
+    expect(date().mock(faker)).not.toEqual(date().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect(["2010-05-06", "2011-04-27"]).toContainEqual(
       date({

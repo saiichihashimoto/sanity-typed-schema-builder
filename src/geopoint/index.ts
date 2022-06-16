@@ -16,8 +16,8 @@ export const geopoint = <Output = SanityGeopoint>({
   mock = (faker) => ({
     _type: "geopoint",
     alt: faker.datatype.number({ min: 0, max: 1000 }),
-    lat: faker.datatype.number({ min: -90, max: 90 }),
-    lng: faker.datatype.number({ min: -180, max: 180 }),
+    lat: parseFloat(faker.address.latitude()),
+    lng: parseFloat(faker.address.longitude()),
   }),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<Output, any, SanityGeopoint>,

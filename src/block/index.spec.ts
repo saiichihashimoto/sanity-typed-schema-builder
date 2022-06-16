@@ -60,6 +60,14 @@ describe("block", () => {
       ],
     }));
 
+  it("mocks the same value with the same path", () => {
+    expect(block().mock(faker)).toEqual(block().mock(faker));
+    expect(block().mock(faker, ".foo")).toEqual(block().mock(faker, ".foo"));
+
+    expect(block().mock(faker, ".foo")).not.toEqual(block().mock(faker));
+    expect(block().mock(faker)).not.toEqual(block().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect([
       {

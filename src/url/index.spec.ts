@@ -48,6 +48,14 @@ describe("url", () => {
       expect.any(String)
     ));
 
+  it("mocks the same value with the same path", () => {
+    expect(url().mock(faker)).toEqual(url().mock(faker));
+    expect(url().mock(faker, ".foo")).toEqual(url().mock(faker, ".foo"));
+
+    expect(url().mock(faker, ".foo")).not.toEqual(url().mock(faker));
+    expect(url().mock(faker)).not.toEqual(url().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect(["https://google.com", "https://facebook.com"]).toContainEqual(
       url({
