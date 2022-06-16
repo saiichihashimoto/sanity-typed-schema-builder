@@ -122,6 +122,14 @@ describe("string", () => {
   it("mocks a word", () =>
     expect(string().mock(faker)).toEqual(expect.any(String)));
 
+  it("mocks the same value with the same path", () => {
+    expect(string().mock(faker)).toEqual(string().mock(faker));
+    expect(string().mock(faker, ".foo")).toEqual(string().mock(faker, ".foo"));
+
+    expect(string().mock(faker, ".foo")).not.toEqual(string().mock(faker));
+    expect(string().mock(faker)).not.toEqual(string().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect(["Option 1", "Option 2"]).toContainEqual(
       string({

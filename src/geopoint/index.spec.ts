@@ -53,6 +53,16 @@ describe("geopoint", () => {
       alt: expect.any(Number),
     }));
 
+  it("mocks the same value with the same path", () => {
+    expect(geopoint().mock(faker)).toEqual(geopoint().mock(faker));
+    expect(geopoint().mock(faker, ".foo")).toEqual(
+      geopoint().mock(faker, ".foo")
+    );
+
+    expect(geopoint().mock(faker, ".foo")).not.toEqual(geopoint().mock(faker));
+    expect(geopoint().mock(faker)).not.toEqual(geopoint().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect([
       {

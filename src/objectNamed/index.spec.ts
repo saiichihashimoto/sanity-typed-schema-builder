@@ -209,6 +209,32 @@ describe("object", () => {
       bar: expect.any(String),
     }));
 
+  it("mocks the same value with the same path", () => {
+    const objectDef = () => ({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: string(),
+        },
+      ],
+    });
+
+    expect(objectNamed(objectDef()).mock(faker)).toEqual(
+      objectNamed(objectDef()).mock(faker)
+    );
+    expect(objectNamed(objectDef()).mock(faker, ".foo")).toEqual(
+      objectNamed(objectDef()).mock(faker, ".foo")
+    );
+
+    expect(objectNamed(objectDef()).mock(faker, ".foo")).not.toEqual(
+      objectNamed(objectDef()).mock(faker)
+    );
+    expect(objectNamed(objectDef()).mock(faker)).not.toEqual(
+      objectNamed(objectDef()).mock(faker, ".foo")
+    );
+  });
+
   it("allows defining the mocks", () =>
     expect([
       { _type: "foo", foo: true, bar: "foo" },

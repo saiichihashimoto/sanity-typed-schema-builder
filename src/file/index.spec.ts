@@ -142,6 +142,14 @@ describe("file", () => {
       },
     }));
 
+  it("mocks the same value with the same path", () => {
+    expect(file().mock(faker)).toEqual(file().mock(faker));
+    expect(file().mock(faker, ".foo")).toEqual(file().mock(faker, ".foo"));
+
+    expect(file().mock(faker, ".foo")).not.toEqual(file().mock(faker));
+    expect(file().mock(faker)).not.toEqual(file().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect([
       {

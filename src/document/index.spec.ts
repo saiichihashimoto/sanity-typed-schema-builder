@@ -218,6 +218,32 @@ describe("document", () => {
     /* eslint-enable no-underscore-dangle */
   });
 
+  it("mocks the same value with the same path", () => {
+    const objectDef = () => ({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: string(),
+        },
+      ],
+    });
+
+    expect(document(objectDef()).mock(faker)).toEqual(
+      document(objectDef()).mock(faker)
+    );
+    expect(document(objectDef()).mock(faker, ".foo")).toEqual(
+      document(objectDef()).mock(faker, ".foo")
+    );
+
+    expect(document(objectDef()).mock(faker, ".foo")).not.toEqual(
+      document(objectDef()).mock(faker)
+    );
+    expect(document(objectDef()).mock(faker)).not.toEqual(
+      document(objectDef()).mock(faker, ".foo")
+    );
+  });
+
   it("allows defining the mocks", () =>
     expect([
       {

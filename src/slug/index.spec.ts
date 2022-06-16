@@ -45,6 +45,14 @@ describe("slug", () => {
       current: expect.any(String),
     }));
 
+  it("mocks the same value with the same path", () => {
+    expect(slug().mock(faker)).toEqual(slug().mock(faker));
+    expect(slug().mock(faker, ".foo")).toEqual(slug().mock(faker, ".foo"));
+
+    expect(slug().mock(faker, ".foo")).not.toEqual(slug().mock(faker));
+    expect(slug().mock(faker)).not.toEqual(slug().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect([
       { _type: "slug", current: "a-slug" },

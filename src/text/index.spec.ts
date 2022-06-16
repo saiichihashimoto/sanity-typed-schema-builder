@@ -122,6 +122,14 @@ describe("text", () => {
   it("mocks some paragraphs", () =>
     expect(text().mock(faker)).toEqual(expect.any(String)));
 
+  it("mocks the same value with the same path", () => {
+    expect(text().mock(faker)).toEqual(text().mock(faker));
+    expect(text().mock(faker, ".foo")).toEqual(text().mock(faker, ".foo"));
+
+    expect(text().mock(faker, ".foo")).not.toEqual(text().mock(faker));
+    expect(text().mock(faker)).not.toEqual(text().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect(["Option 1", "Option 2"]).toContainEqual(
       text({

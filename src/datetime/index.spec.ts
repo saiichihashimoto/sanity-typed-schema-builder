@@ -142,6 +142,16 @@ describe("datetime", () => {
       }).mock(faker)
     ));
 
+  it("mocks the same value with the same path", () => {
+    expect(datetime().mock(faker)).toEqual(datetime().mock(faker));
+    expect(datetime().mock(faker, ".foo")).toEqual(
+      datetime().mock(faker, ".foo")
+    );
+
+    expect(datetime().mock(faker, ".foo")).not.toEqual(datetime().mock(faker));
+    expect(datetime().mock(faker)).not.toEqual(datetime().mock(faker, ".foo"));
+  });
+
   it("allows defining the zod", () => {
     const type = datetime({
       zod: (zod) => zod.transform((value) => value.length),

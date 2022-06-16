@@ -35,6 +35,16 @@ describe("boolean", () => {
   it("mocks a boolean", () =>
     expect(boolean().mock(faker)).toEqual(expect.any(Boolean)));
 
+  it("mocks the same value with the same path", () => {
+    expect(boolean().mock(faker)).toEqual(boolean().mock(faker));
+    expect(boolean().mock(faker, ".foo")).toEqual(
+      boolean().mock(faker, ".foo")
+    );
+
+    expect(boolean().mock(faker, ".foo")).not.toEqual(boolean().mock(faker));
+    expect(boolean().mock(faker)).not.toEqual(boolean().mock(faker, ".foo"));
+  });
+
   it("allows defining the mocks", () =>
     expect([true]).toContainEqual(
       boolean({

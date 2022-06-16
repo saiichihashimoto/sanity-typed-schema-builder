@@ -103,6 +103,36 @@ describe("reference", () => {
       _type: "reference",
     }));
 
+  it("mocks the same value with the same path", () => {
+    const referenceDef: Parameters<typeof reference>[0] = {
+      to: [
+        document({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: boolean(),
+            },
+          ],
+        }),
+      ],
+    };
+
+    expect(reference(referenceDef).mock(faker)).toEqual(
+      reference(referenceDef).mock(faker)
+    );
+    expect(reference(referenceDef).mock(faker, ".foo")).toEqual(
+      reference(referenceDef).mock(faker, ".foo")
+    );
+
+    expect(reference(referenceDef).mock(faker, ".foo")).not.toEqual(
+      reference(referenceDef).mock(faker)
+    );
+    expect(reference(referenceDef).mock(faker)).not.toEqual(
+      reference(referenceDef).mock(faker, ".foo")
+    );
+  });
+
   it("allows defining the mocks", () =>
     expect([
       {
