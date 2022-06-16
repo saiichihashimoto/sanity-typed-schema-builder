@@ -32,7 +32,7 @@
     "@jest/globals": "28.1.0",
     "@jest/types": "27.5.1",
     "@types/jest": "27.4.1",
-    "@typescript-eslint/eslint-plugin": "5.27.1",
+    "@typescript-eslint/eslint-plugin": "5.28.0",
     "@typescript-eslint/parser": "5.27.1",
     "eslint": "8.13.0",
     "eslint-config-airbnb": "19.0.4",
