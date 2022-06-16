@@ -181,4 +181,25 @@ describe("string", () => {
 
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
+
+  it("types values from list", () => {
+    const type = string({
+      options: {
+        list: ["foo", { title: "Bar", value: "bar" }],
+      },
+    });
+
+    const value: ValidateShape<InferInput<typeof type>, "foo" | "bar"> = "foo";
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      "foo" | "bar"
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+    expect(["foo", "bar"]).toContain(type.mock(faker));
+
+    expect(() => {
+      type.parse("fo");
+    }).toThrow(z.ZodError);
+  });
 });

@@ -250,4 +250,25 @@ describe("number", () => {
 
     expect(rule.custom).toHaveBeenCalledWith(expect.any(Function));
   });
+
+  it("types values from list", () => {
+    const type = number({
+      options: {
+        list: [3, { title: "Four", value: 4 }],
+      },
+    });
+
+    const value: ValidateShape<InferInput<typeof type>, 3 | 4> = 3;
+    const parsedValue: ValidateShape<
+      InferOutput<typeof type>,
+      3 | 4
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+    expect([3, 4]).toContain(type.mock(faker));
+
+    expect(() => {
+      type.parse(2);
+    }).toThrow(z.ZodError);
+  });
 });

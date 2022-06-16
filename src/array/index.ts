@@ -1,7 +1,7 @@
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
-import { createType } from "../types";
+import { createType, zodUnion } from "../types";
 
 import type {
   NamedSchemaFields,
@@ -63,7 +63,7 @@ export const array = <
   zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
   ...def
 }: Merge<
-  SanityTypeDef<Schema.ArrayDefinition<z.input<Zod>>, Zod, Output>,
+  SanityTypeDef<Schema.ArrayDefinition<z.input<Zod>[number]>, Zod, Output>,
   {
     length?: number;
     max?: number;
@@ -81,15 +81,7 @@ export const array = <
       (zod) => (length === undefined ? zod : zod.length(length)),
       (zod) => zodFn(zod)
     )(
-      z.array<Zods>(
-        items.length === 1
-          ? (addKeyToZod(items[0]!.zod) as unknown as Zods)
-          : (z.union([
-              addKeyToZod(items[0]!.zod),
-              addKeyToZod(items[1]!.zod),
-              ...items.slice(2).map(({ zod }) => addKeyToZod(zod)),
-            ]) as unknown as Zods)
-      )
+      z.array<Zods>(zodUnion(items.map(({ zod }) => addKeyToZod(zod) as Zods)))
     ),
     schema: () => ({
       ...def,
