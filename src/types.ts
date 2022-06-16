@@ -1,12 +1,24 @@
+import { z } from "zod";
+
 import type { Faker } from "@faker-js/faker";
 import type {
   CustomValidator,
   Rule as RuleWithoutTypedCustom,
 } from "@sanity/types";
 import type { Merge, PartialDeep, Promisable, SetOptional } from "type-fest";
-import type { z } from "zod";
 
 export type AnyObject = Record<string, unknown>;
+
+export const zodUnion = <Zods extends z.ZodType<any, any, any>>(zods: Zods[]) =>
+  zods.length === 0
+    ? (z.never() as unknown as Zods)
+    : zods.length === 1
+    ? (zods[0]! as Zods)
+    : (z.union([
+        zods[0]! as Zods,
+        zods[1]! as Zods,
+        ...zods.slice(2),
+      ]) as unknown as Zods);
 
 // TODO Type Definition across the board
 export interface SanityType<
