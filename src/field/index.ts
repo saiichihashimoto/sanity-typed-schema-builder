@@ -84,35 +84,7 @@ export type Preview<
       select: PreviewValue;
     }
   | {
-      component?: React.ComponentType<
-        Merge<
-          Value,
-          {
-            [field in keyof Select]: unknown;
-          }
-        >
-      >;
       prepare: (
-        object: Merge<
-          Value,
-          {
-            [field in keyof Select]: unknown;
-          }
-        >,
-        viewOptions?: PrepareViewOptions
-      ) => PreviewValue;
-      select?: Select;
-    }
-  | {
-      component: React.ComponentType<
-        Merge<
-          Value,
-          {
-            [field in keyof Select]: unknown;
-          }
-        >
-      >;
-      prepare?: (
         object: Merge<
           Value,
           {
@@ -135,10 +107,10 @@ export const fieldsSchema = <
 ) => {
   const preview: PreviewConfig | undefined = !previewDef
     ? undefined
-    : !("prepare" in previewDef) && !("component" in previewDef)
+    : !("prepare" in previewDef)
     ? (previewDef as PreviewConfig)
     : {
-        ...(previewDef as Pick<PreviewConfig, "component" | "prepare">),
+        ...(previewDef as Pick<PreviewConfig, "prepare">),
         select: {
           ...fromPairs(fields.map(({ name }) => [name, name])),
           ...previewDef.select,
