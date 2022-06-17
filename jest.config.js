@@ -11,7 +11,9 @@ const config = {
   moduleDirectories: ["node_modules"],
   resetMocks: true,
   restoreMocks: true,
-  timers: "modern",
+  fakeTimers: {
+    enableGlobally: true,
+  },
 };
 
 module.exports = config;
