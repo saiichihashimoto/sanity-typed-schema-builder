@@ -207,7 +207,7 @@ describe("image", () => {
       foo: expect.any(Boolean),
       asset: {
         _type: "reference",
-        _ref: expect.any(String),
+        _ref: expect.stringMatching(/^image-\w+-\d+x\d+-\w+$/),
       },
     }));
 

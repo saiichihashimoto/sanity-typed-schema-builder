@@ -64,7 +64,22 @@ export const image = <
       _type: "image",
       asset: {
         _type: "reference",
-        _ref: faker.datatype.uuid(),
+        _ref: `image-${faker.random.alphaNumeric(24)}-${faker.datatype.number({
+          min: 900,
+          max: 3000,
+        })}x${faker.datatype.number({
+          min: 900,
+          max: 3000,
+        })}-${faker.helpers.arrayElement([
+          "bmp",
+          "gif",
+          "jpeg",
+          "jpg",
+          "png",
+          "svg",
+          "tif",
+          "tiff",
+        ])}`,
       },
       ...(!hotspot
         ? {}
