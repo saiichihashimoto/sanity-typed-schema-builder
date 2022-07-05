@@ -1,7 +1,7 @@
 # https://github.com/probot/settings
 repository:
   private: true
-  has_issues: false
+  has_issues: true
   has_projects: false
   has_wiki: false
   default_branch: master
