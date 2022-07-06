@@ -28,7 +28,7 @@
     "zod": "3.17.3"
   },
   "devDependencies": {
-    "@faker-js/faker": "7.2.0",
+    "@faker-js/faker": "7.3.0",
     "@jest/globals": "28.1.2",
     "@jest/types": "28.1.1",
     "@types/jest": "28.1.3",
