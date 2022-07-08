@@ -18,13 +18,14 @@ const zeroToOne = (faker: Faker) =>
 
 export const image = <
   Names extends string,
-  Zods extends z.ZodType<any, any, any>,
+  Zods extends z.ZodTypeAny,
   Optionals extends boolean,
   Zod extends z.ZodObject<
-    // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but FieldsArray has to be
-    FieldsZodObject<FieldsArray> &
+    Merge<
+      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but FieldsArray has to be
+      FieldsZodObject<FieldsArray>,
       // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but Hotspot has to be
-      (Hotspot extends false
+      Hotspot extends false
         ? {
             _type: z.ZodLiteral<"image">;
             asset: z.ZodObject<{
@@ -50,17 +51,21 @@ export const image = <
               x: z.ZodNumber;
               y: z.ZodNumber;
             }>;
-          })
+          }
+    >
   >,
-  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>> = never[],
+  FieldsArray extends [
+    FieldOptions<Names, Zods, Optionals>,
+    ...Array<FieldOptions<Names, Zods, Optionals>>
+  ] = [never, ...never],
   Hotspot extends boolean = false,
-  Output = z.output<Zod>
+  ParsedValue = z.output<Zod>
 >({
   hotspot,
-  fields = [] as unknown as FieldsArray,
+  fields,
   mock = (faker, path) =>
     ({
-      ...fieldsMock(fields)(faker, path),
+      ...(fields && fieldsMock(fields)(faker, path)),
       _type: "image",
       asset: {
         _type: "reference",
@@ -98,11 +103,17 @@ export const image = <
             },
           }),
     } as unknown as z.input<Zod>),
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
   Omit<
-    SanityNamedTypeDef<Schema.ImageDefinition, Zod, Output>,
+    SanityNamedTypeDef<
+      Schema.ImageDefinition,
+      z.input<Zod>,
+      ParsedValue,
+      z.output<Zod>
+    >,
     // "title" and "description" actually show up in the UI
     "name" | "preview"
   >,
@@ -115,7 +126,7 @@ export const image = <
     mock,
     zod: zodFn(
       z.object({
-        ...fieldsZodObject(fields),
+        ...(fields && fieldsZodObject(fields)),
         _type: z.literal("image"),
         asset: z.object({
           _ref: z.string(),
@@ -141,7 +152,7 @@ export const image = <
     ),
     schema: () => ({
       ...def,
-      ...(fields.length && fieldsSchema(fields)),
+      ...(fields && fieldsSchema(fields)),
       type: "image",
     }),
   });

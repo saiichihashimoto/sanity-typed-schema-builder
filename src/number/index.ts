@@ -1,14 +1,14 @@
-import { flow } from "lodash/fp";
+import { flow, map } from "lodash/fp";
 import { z } from "zod";
 
-import { listMock, listToListValues } from "../list";
+import { listMock, listValueToValue } from "../list";
 import { createType, zodUnion } from "../types";
 
 import type { WithTypedOptionsList } from "../list";
 import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const number = <Input extends number, Output = Input>({
+export const number = <TypedValue extends number, ParsedValue = TypedValue>({
   greaterThan,
   integer,
   lessThan,
@@ -19,22 +19,22 @@ export const number = <Input extends number, Output = Input>({
   positive,
   precision,
   validation,
-  options: { list = undefined } = {},
-  mock = listMock(
-    list,
-    (faker) =>
-      faker.datatype.number({
-        max,
-        min,
-        precision: 1 / 10 ** (precision ?? 0),
-      }) as Input
-  ),
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, Input>,
+  options: { list } = {},
+  mock = !list
+    ? (faker) =>
+        faker.datatype.number({
+          max,
+          min,
+          precision: 1 / 10 ** (precision ?? 0),
+        }) as TypedValue
+    : listMock<TypedValue>(list),
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<ParsedValue, any, TypedValue>,
   ...def
 }: SanityTypeDef<
-  WithTypedOptionsList<Input, Schema.NumberDefinition>,
-  z.ZodType<Input, any, Input>,
-  Output
+  WithTypedOptionsList<TypedValue, Schema.NumberDefinition>,
+  TypedValue,
+  ParsedValue
 > & {
   greaterThan?: number;
   integer?: boolean;
@@ -48,7 +48,7 @@ export const number = <Input extends number, Output = Input>({
   createType({
     mock,
     zod: zodFn(
-      !list?.length
+      !list
         ? flow(
             flow(
               (zod: z.ZodNumber) => (!min ? zod : zod.min(min)),
@@ -66,11 +66,13 @@ export const number = <Input extends number, Output = Input>({
                     (value) =>
                       Math.round(value * 10 ** precision) / 10 ** precision
                   ),
-            (zod) => zod as unknown as z.ZodType<Input, any, Input>
+            (zod) => zod as unknown as z.ZodType<TypedValue, any, TypedValue>
           )(z.number())
-        : zodUnion(
-            listToListValues<Input>(list).map((value) => z.literal(value))
-          )
+        : flow(
+            (value: typeof list) => value,
+            map(flow(listValueToValue, z.literal)),
+            zodUnion
+          )(list)
     ),
     schema: () => ({
       ...def,
@@ -78,7 +80,7 @@ export const number = <Input extends number, Output = Input>({
       type: "number",
       validation: flow(
         flow(
-          (rule: Rule<Input>) => (!min ? rule : rule.min(min)),
+          (rule: Rule<TypedValue>) => (!min ? rule : rule.min(min)),
           (rule) => (!max ? rule : rule.max(max)),
           (rule) => (!greaterThan ? rule : rule.greaterThan(greaterThan)),
           (rule) => (!lessThan ? rule : rule.lessThan(lessThan)),

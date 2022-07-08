@@ -6,7 +6,7 @@ import { mockRule } from "../test-utils";
 import { slug } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("slug", () => {
@@ -22,7 +22,7 @@ describe("slug", () => {
     const type = slug();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "slug";
         current: string;
@@ -32,7 +32,7 @@ describe("slug", () => {
       current: "foo",
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
@@ -73,7 +73,7 @@ describe("slug", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       "slug"
     > = type.parse({ _type: "slug", current: "a-slug" });
 

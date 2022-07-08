@@ -7,7 +7,7 @@ import { mockRule } from "../test-utils";
 import { date } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 
 describe("date", () => {
   it("builds a sanity config", () =>
@@ -21,9 +21,9 @@ describe("date", () => {
   it("parses into a date", () => {
     const type = date();
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "2017-02-12";
+    const value: ValidateShape<InferValue<typeof type>, string> = "2017-02-12";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
@@ -62,7 +62,7 @@ describe("date", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       number
     > = type.parse("2017-02-12");
 

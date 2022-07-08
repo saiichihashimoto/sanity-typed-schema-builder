@@ -8,7 +8,7 @@ import { mockRule } from "../test-utils";
 import { file } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("file", () => {
@@ -24,7 +24,7 @@ describe("file", () => {
     const type = file();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "file";
         asset: {
@@ -40,7 +40,7 @@ describe("file", () => {
       },
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _type: "file";
         asset: {
@@ -84,7 +84,7 @@ describe("file", () => {
     ]);
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "file";
         asset: {
@@ -103,7 +103,7 @@ describe("file", () => {
       },
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _type: "file";
         asset: {
@@ -208,12 +208,23 @@ describe("file", () => {
 
   it("allows defining the zod", () => {
     const type = file({
-      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+      zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      number
+      InferParsedValue<typeof type>,
+      Array<
+        [
+          string,
+          (
+            | "file"
+            | {
+                _ref: string;
+                _type: "reference";
+              }
+          )
+        ]
+      >
     > = type.parse({
       _type: "file",
       asset: {
@@ -222,7 +233,18 @@ describe("file", () => {
       },
     });
 
-    expect(parsedValue).toEqual(2);
+    expect(parsedValue).toEqual(
+      expect.arrayContaining([
+        ["_type", "file"],
+        [
+          "asset",
+          {
+            _type: "reference",
+            _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+          },
+        ],
+      ])
+    );
   });
 
   it("types custom validation", () => {

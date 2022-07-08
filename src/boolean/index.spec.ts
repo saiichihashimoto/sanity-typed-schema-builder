@@ -6,7 +6,7 @@ import { mockRule } from "../test-utils";
 import { boolean } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 
 describe("boolean", () => {
   it("builds a sanity config", () =>
@@ -23,9 +23,9 @@ describe("boolean", () => {
   it("parses into a boolean", () => {
     const type = boolean();
 
-    const value: ValidateShape<InferInput<typeof type>, boolean> = true;
+    const value: ValidateShape<InferValue<typeof type>, boolean> = true;
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       boolean
     > = type.parse(value);
 
@@ -58,7 +58,7 @@ describe("boolean", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(true);
 

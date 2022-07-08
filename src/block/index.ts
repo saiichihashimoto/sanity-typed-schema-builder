@@ -17,8 +17,8 @@ type DefaultPortableTextBlock = PortableTextBlock<
   string
 >;
 
-export const block = <Output = DefaultPortableTextBlock>({
-  mock = (faker): DefaultPortableTextBlock => ({
+export const block = <ParsedValue = DefaultPortableTextBlock>({
+  mock = (faker) => ({
     style: "normal",
     _type: "block",
     markDefs: [],
@@ -31,12 +31,12 @@ export const block = <Output = DefaultPortableTextBlock>({
     ],
   }),
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<Output, any, DefaultPortableTextBlock>,
+    zod as unknown as z.ZodType<ParsedValue, any, DefaultPortableTextBlock>,
   ...def
 }: SanityTypeDef<
   Schema.BlockDefinition,
-  z.ZodType<DefaultPortableTextBlock, any, DefaultPortableTextBlock>,
-  Output
+  DefaultPortableTextBlock,
+  ParsedValue
 > = {}) =>
   createType({
     mock,

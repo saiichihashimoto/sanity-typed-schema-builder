@@ -4,22 +4,23 @@ import { createType } from "../types";
 
 import type { DocumentType } from "../document";
 import type { SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { Reference, Schema } from "@sanity/types";
 import type { Merge } from "type-fest";
 
-interface SanityReference {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-}
+export type SanityReference = Merge<
+  Reference,
+  {
+    _type: "reference";
+  }
+>;
 
 export const reference = <
   DocumentName extends string,
-  ReferencesArray extends [
-    DocumentType<DocumentName, any>,
-    ...Array<DocumentType<DocumentName, any>>
+  DocumentTypes extends [
+    DocumentType<DocumentName, any, any>,
+    ...Array<DocumentType<DocumentName, any, any>>
   ],
-  Output = SanityReference
+  ParsedValue = SanityReference
 >({
   to: documents,
   mock = (faker) => ({
@@ -27,16 +28,12 @@ export const reference = <
     _type: "reference",
   }),
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<Output, any, SanityReference>,
+    zod as unknown as z.ZodType<ParsedValue, any, SanityReference>,
   ...def
 }: Merge<
-  SanityTypeDef<
-    Schema.ReferenceDefinition,
-    z.ZodType<SanityReference, any, SanityReference>,
-    Output
-  >,
+  SanityTypeDef<Schema.ReferenceDefinition, SanityReference, ParsedValue>,
   {
-    to: ReferencesArray;
+    to: DocumentTypes;
   }
 >) =>
   createType({

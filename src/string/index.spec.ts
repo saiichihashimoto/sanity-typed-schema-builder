@@ -7,7 +7,7 @@ import { mockRule } from "../test-utils";
 import { string } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 
 describe("string", () => {
   it("builds a sanity config", () =>
@@ -22,9 +22,9 @@ describe("string", () => {
   it("parses into a string", () => {
     const type = string();
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "foo";
+    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
@@ -40,9 +40,9 @@ describe("string", () => {
 
     expect(rule.min).toHaveBeenCalledWith(3);
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "foo";
+    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
@@ -62,9 +62,9 @@ describe("string", () => {
 
     expect(rule.max).toHaveBeenCalledWith(4);
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "foo";
+    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
@@ -84,9 +84,9 @@ describe("string", () => {
 
     expect(rule.length).toHaveBeenCalledWith(3);
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "foo";
+    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
@@ -106,9 +106,9 @@ describe("string", () => {
 
     expect(rule.regex).toHaveBeenCalledWith(/^foo$/);
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "foo";
+    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
@@ -158,7 +158,7 @@ describe("string", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       number
     > = type.parse("Test string");
 
@@ -189,9 +189,9 @@ describe("string", () => {
       },
     });
 
-    const value: ValidateShape<InferInput<typeof type>, "foo" | "bar"> = "foo";
+    const value: ValidateShape<InferValue<typeof type>, "foo" | "bar"> = "foo";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       "foo" | "bar"
     > = type.parse(value);
 

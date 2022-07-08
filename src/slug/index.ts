@@ -3,30 +3,23 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { Schema, Slug } from "@sanity/types";
 
-interface SanitySlug {
-  _type: "slug";
-  current: string;
-}
+export type SanitySlug = Slug;
 
-export const slug = <Output = string>({
+export const slug = <ParsedValue = string>({
   mock = (faker) => ({
     _type: "slug",
     current: faker.lorem.slug(),
   }),
   zod: zodFn = (zod) =>
     zod.transform(({ current }) => current) as unknown as z.ZodType<
-      Output,
+      ParsedValue,
       any,
       SanitySlug
     >,
   ...def
-}: SanityTypeDef<
-  Schema.SlugDefinition,
-  z.ZodType<SanitySlug, any, SanitySlug>,
-  Output
-> = {}) =>
+}: SanityTypeDef<Schema.SlugDefinition, SanitySlug, ParsedValue> = {}) =>
   createType({
     mock,
     zod: zodFn(

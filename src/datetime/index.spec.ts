@@ -6,7 +6,7 @@ import { mockRule } from "../test-utils";
 import { datetime } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 
 describe("datetime", () => {
   it("builds a sanity config", () =>
@@ -25,11 +25,11 @@ describe("datetime", () => {
     const type = datetime();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       string
     > = "2022-06-03T03:24:55.395Z";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       Date
     > = type.parse(value);
 
@@ -39,7 +39,7 @@ describe("datetime", () => {
   it("enforces a valid Date", () => {
     const type = datetime();
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "not a date";
+    const value: ValidateShape<InferValue<typeof type>, string> = "not a date";
 
     expect(() => {
       type.parse(value);
@@ -56,11 +56,11 @@ describe("datetime", () => {
     expect(rule.min).toHaveBeenCalledWith("2022-06-03T03:24:55.394Z");
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       string
     > = "2022-06-03T03:24:55.395Z";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       Date
     > = type.parse(value);
 
@@ -81,11 +81,11 @@ describe("datetime", () => {
     expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.396Z");
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       string
     > = "2022-06-03T03:24:55.395Z";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       Date
     > = type.parse(value);
 
@@ -110,11 +110,11 @@ describe("datetime", () => {
     expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.395Z");
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       string
     > = "2022-06-03T03:24:55.395Z";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       Date
     > = type.parse(value);
 
@@ -158,7 +158,7 @@ describe("datetime", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       number
     > = type.parse("2022-06-03T03:24:55.395Z");
 

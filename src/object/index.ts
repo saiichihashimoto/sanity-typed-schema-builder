@@ -10,21 +10,30 @@ import type { Merge } from "type-fest";
 
 export const object = <
   Names extends string,
-  Zods extends z.ZodType<any, any, any>,
+  Zods extends z.ZodTypeAny,
   Optionals extends boolean,
-  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>>,
+  FieldsArray extends readonly [
+    FieldOptions<Names, Zods, Optionals>,
+    ...Array<FieldOptions<Names, Zods, Optionals>>
+  ],
   Zod extends z.ZodObject<FieldsZodObject<FieldsArray>>,
-  Output = z.output<Zod>,
+  ParsedValue = z.output<Zod>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
 >({
   fields,
   preview: previewDef,
   mock = fieldsMock(fields),
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
-  SanityTypeDef<Schema.ObjectDefinition, Zod, Output>,
+  SanityTypeDef<
+    Schema.ObjectDefinition,
+    z.input<Zod>,
+    ParsedValue,
+    z.output<Zod>
+  >,
   {
     fields: FieldsArray;
     preview?: Preview<z.input<Zod>, Select>;
@@ -32,7 +41,7 @@ export const object = <
 >) =>
   createType({
     mock,
-    zod: zodFn(z.object(fieldsZodObject(fields)) as Zod),
+    zod: zodFn(z.object(fieldsZodObject(fields))),
     schema: () => ({
       ...def,
       ...fieldsSchema(fields, previewDef),

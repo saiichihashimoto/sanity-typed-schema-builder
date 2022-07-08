@@ -9,7 +9,7 @@ import { mockRule } from "../test-utils";
 import { document } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 import type { Merge, PartialDeep } from "type-fest";
 
 describe("document", () => {
@@ -62,7 +62,7 @@ describe("document", () => {
     });
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _createdAt: string;
         _id: string;
@@ -80,7 +80,7 @@ describe("document", () => {
       foo: true,
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _createdAt: Date;
         _id: string;
@@ -148,7 +148,7 @@ describe("document", () => {
     expect(barRule.required).not.toHaveBeenCalled();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _createdAt: string;
         _id: string;
@@ -167,7 +167,7 @@ describe("document", () => {
       foo: true,
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _createdAt: Date;
         _id: string;
@@ -226,7 +226,7 @@ describe("document", () => {
           name: "foo",
           type: string(),
         },
-      ],
+      ] as const,
     });
 
     expect(document(objectDef()).mock(faker)).toEqual(
@@ -373,7 +373,7 @@ describe("document", () => {
     const schema = type.schema();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _createdAt: string;
         _id: string;
@@ -405,15 +405,17 @@ describe("document", () => {
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: boolean({
+            zod: (zod) => zod.transform((value) => (value ? 1 : 0)),
+          }),
         },
       ],
-      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+      zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      number
+      InferParsedValue<typeof type>,
+      Array<[string, 0 | 1 | string | Date]>
     > = type.parse({
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
@@ -423,7 +425,16 @@ describe("document", () => {
       foo: true,
     });
 
-    expect(parsedValue).toEqual(6);
+    expect(parsedValue).toEqual(
+      expect.arrayContaining([
+        ["_createdAt", new Date("2022-06-03T03:24:55.395Z")],
+        ["_id", "2106a34f-315f-44bc-929b-bf8e9a3eba0d"],
+        ["_rev", "somerevstring"],
+        ["_type", "foo"],
+        ["_updatedAt", new Date("2022-06-03T03:24:55.395Z")],
+        ["foo", 1],
+      ])
+    );
   });
 
   it("types custom validation", () => {

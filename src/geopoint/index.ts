@@ -5,14 +5,14 @@ import { createType } from "../types";
 import type { SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-interface SanityGeopoint {
+export interface SanityGeopoint {
   _type: "geopoint";
   alt: number;
   lat: number;
   lng: number;
 }
 
-export const geopoint = <Output = SanityGeopoint>({
+export const geopoint = <ParsedValue = SanityGeopoint>({
   mock = (faker) => ({
     _type: "geopoint",
     alt: faker.datatype.number({ min: 0, max: 1000 }),
@@ -20,12 +20,12 @@ export const geopoint = <Output = SanityGeopoint>({
     lng: parseFloat(faker.address.longitude()),
   }),
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<Output, any, SanityGeopoint>,
+    zod as unknown as z.ZodType<ParsedValue, any, SanityGeopoint>,
   ...def
 }: SanityTypeDef<
   Schema.GeopointDefinition,
-  z.ZodType<SanityGeopoint, any, SanityGeopoint>,
-  Output
+  SanityGeopoint,
+  ParsedValue
 > = {}) =>
   createType({
     mock,

@@ -18,7 +18,9 @@ export { text } from "./text";
 export { url } from "./url";
 
 export type {
-  InferInput as infer,
-  InferInput as input,
-  InferOutput as output,
+  InferValue as infer,
+  InferValue as input,
+  InferValue as value,
+  InferParsedValue as output,
+  InferParsedValue as parsed,
 } from "./types";

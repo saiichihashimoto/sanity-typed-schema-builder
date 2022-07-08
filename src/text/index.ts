@@ -6,16 +6,16 @@ import { createType } from "../types";
 import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const text = <Output = string>({
+export const text = <ParsedValue = string>({
   length,
   max,
   min,
   mock = (faker) => faker.lorem.paragraphs(),
   regex,
   validation,
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, string>,
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<ParsedValue, any, string>,
   ...def
-}: SanityTypeDef<Schema.TextDefinition, z.ZodString, Output> & {
+}: SanityTypeDef<Schema.TextDefinition, string, ParsedValue> & {
   length?: number;
   max?: number;
   min?: number;

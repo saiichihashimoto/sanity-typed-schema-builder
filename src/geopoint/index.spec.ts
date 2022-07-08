@@ -6,7 +6,7 @@ import { mockRule } from "../test-utils";
 import { geopoint } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 import type { PartialDeep } from "type-fest";
 
 interface SanityGeopoint {
@@ -31,14 +31,14 @@ describe("geopoint", () => {
   it("parses into a geopoint", () => {
     const type = geopoint();
 
-    const value: ValidateShape<InferInput<typeof type>, SanityGeopoint> = {
+    const value: ValidateShape<InferValue<typeof type>, SanityGeopoint> = {
       _type: "geopoint",
       lat: 58.63169011423141,
       lng: 9.089101352587932,
       alt: 13.37,
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       SanityGeopoint
     > = type.parse(value);
 
@@ -103,7 +103,7 @@ describe("geopoint", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       number
     > = type.parse({
       _type: "geopoint",

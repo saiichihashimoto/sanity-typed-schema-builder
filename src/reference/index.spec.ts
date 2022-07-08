@@ -7,15 +7,10 @@ import { mockRule } from "../test-utils";
 
 import { reference } from ".";
 
+import type { SanityReference } from ".";
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 import type { PartialDeep } from "type-fest";
-
-interface SanityReference {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean | undefined;
-}
 
 describe("reference", () => {
   it("builds a sanity config", () =>
@@ -71,12 +66,12 @@ describe("reference", () => {
       ],
     });
 
-    const value: ValidateShape<InferInput<typeof type>, SanityReference> = {
+    const value: ValidateShape<InferValue<typeof type>, SanityReference> = {
       _type: "reference",
       _ref: "somereference",
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       SanityReference
     > = type.parse(value);
 
@@ -189,7 +184,7 @@ describe("reference", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse({
       _ref: "ffda9bed-b959-4100-abeb-9f1e241e9445",

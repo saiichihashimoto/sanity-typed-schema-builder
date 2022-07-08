@@ -11,15 +11,21 @@ import type { Merge } from "type-fest";
 export const objectNamed = <
   ObjectNames extends string,
   Names extends string,
-  Zods extends z.ZodType<any, any, any>,
+  Zods extends z.ZodTypeAny,
   Optionals extends boolean,
-  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>>,
+  FieldsArray extends readonly [
+    FieldOptions<Names, Zods, Optionals>,
+    ...Array<FieldOptions<Names, Zods, Optionals>>
+  ],
   Zod extends z.ZodObject<
-    FieldsZodObject<FieldsArray> & {
-      _type: z.ZodLiteral<ObjectNames>;
-    }
+    Merge<
+      FieldsZodObject<FieldsArray>,
+      {
+        _type: z.ZodLiteral<ObjectNames>;
+      }
+    >
   >,
-  Output = z.output<Zod>,
+  ParsedValue = z.output<Zod>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
 >({
@@ -31,10 +37,16 @@ export const objectNamed = <
       ...fieldsMock(fields)(faker, `${path}.${name}`),
       _type: name,
     } as unknown as z.input<Zod>),
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
-  SanityNamedTypeDef<Schema.ObjectDefinition, Zod, Output>,
+  SanityNamedTypeDef<
+    Schema.ObjectDefinition,
+    z.input<Zod>,
+    ParsedValue,
+    z.output<Zod>
+  >,
   {
     fields: FieldsArray;
     name: ObjectNames;

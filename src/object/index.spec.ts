@@ -8,7 +8,7 @@ import { mockRule } from "../test-utils";
 import { object } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 import type { Merge, PartialDeep } from "type-fest";
 
 describe("object", () => {
@@ -56,11 +56,11 @@ describe("object", () => {
       ],
     });
 
-    const value: ValidateShape<InferInput<typeof type>, { foo: boolean }> = {
+    const value: ValidateShape<InferValue<typeof type>, { foo: boolean }> = {
       foo: true,
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       { foo: boolean }
     > = type.parse(value);
 
@@ -110,14 +110,14 @@ describe("object", () => {
     expect(barRule.required).not.toHaveBeenCalled();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         bar?: string;
         foo: boolean;
       }
     > = { foo: true };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         bar?: string;
         foo: boolean;
@@ -153,7 +153,7 @@ describe("object", () => {
           name: "foo",
           type: string(),
         },
-      ],
+      ] as const,
     });
 
     expect(object(objectDef()).mock(faker)).toEqual(
@@ -260,7 +260,7 @@ describe("object", () => {
     const schema = type.schema();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         bar?: string;
         foo: string;
@@ -281,18 +281,20 @@ describe("object", () => {
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: boolean({
+            zod: (zod) => zod.transform((value) => (value ? 1 : 0)),
+          }),
         },
       ],
-      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+      zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      number
+      InferParsedValue<typeof type>,
+      Array<[string, 0 | 1]>
     > = type.parse({ foo: true });
 
-    expect(parsedValue).toEqual(1);
+    expect(parsedValue).toEqual([["foo", 1]]);
   });
 
   it("types custom validation", () => {

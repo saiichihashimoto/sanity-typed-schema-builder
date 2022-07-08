@@ -5,11 +5,11 @@ import { createType } from "../types";
 import type { SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const boolean = <Output = boolean>({
+export const boolean = <ParsedValue = boolean>({
   mock = (faker) => faker.datatype.boolean(),
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, boolean>,
+  zod: zodFn = (zod) => zod as unknown as z.ZodType<ParsedValue, any, boolean>,
   ...def
-}: SanityTypeDef<Schema.BooleanDefinition, z.ZodBoolean, Output> = {}) =>
+}: SanityTypeDef<Schema.BooleanDefinition, boolean, ParsedValue> = {}) =>
   createType({
     mock,
     zod: zodFn(z.boolean()),

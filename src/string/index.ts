@@ -1,28 +1,31 @@
-import { flow } from "lodash/fp";
+import { flow, map } from "lodash/fp";
 import { z } from "zod";
 
-import { listMock, listToListValues } from "../list";
+import { listMock, listValueToValue } from "../list";
 import { createType, zodUnion } from "../types";
 
 import type { WithTypedOptionsList } from "../list";
 import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const string = <Input extends string, Output = Input>({
+export const string = <TypedValue extends string, ParsedValue = TypedValue>({
   length,
   max,
   min,
   options,
   regex,
   validation,
-  options: { list = undefined } = {},
-  mock = listMock(list, (faker) => faker.random.word() as Input),
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, Input>,
+  options: { list } = {},
+  mock = !list
+    ? (faker) => faker.random.word() as TypedValue
+    : listMock<TypedValue>(list),
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<ParsedValue, any, TypedValue>,
   ...def
 }: SanityTypeDef<
-  WithTypedOptionsList<Input, Schema.StringDefinition>,
-  z.ZodType<Input, any, Input>,
-  Output
+  WithTypedOptionsList<TypedValue, Schema.StringDefinition>,
+  TypedValue,
+  ParsedValue
 > & {
   length?: number;
   max?: number;
@@ -32,24 +35,26 @@ export const string = <Input extends string, Output = Input>({
   createType({
     mock,
     zod: zodFn(
-      !list?.length
+      !list
         ? flow(
             (zod: z.ZodString) => (!min ? zod : zod.min(min)),
             (zod) => (!max ? zod : zod.max(max)),
             (zod) => (!length ? zod : zod.length(length)),
             (zod) => (!regex ? zod : zod.regex(regex)),
-            (zod) => zod as unknown as z.ZodType<Input, any, Input>
+            (zod) => zod as unknown as z.ZodType<TypedValue, any, TypedValue>
           )(z.string())
-        : zodUnion(
-            listToListValues<Input>(list).map((value) => z.literal(value))
-          )
+        : flow(
+            (value: typeof list) => value,
+            map(flow(listValueToValue, z.literal)),
+            zodUnion
+          )(list)
     ),
     schema: () => ({
       ...def,
       options,
       type: "string",
       validation: flow(
-        (rule: Rule<Input>) => (!min ? rule : rule.min(min)),
+        (rule: Rule<TypedValue>) => (!min ? rule : rule.min(min)),
         (rule) => (!max ? rule : rule.max(max)),
         (rule) => (!length ? rule : rule.length(length)),
         (rule) => (!regex ? rule : rule.regex(regex)),

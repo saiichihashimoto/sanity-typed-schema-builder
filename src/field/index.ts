@@ -2,7 +2,6 @@ import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
 import type {
-  AnyObject,
   NamedSchemaFields,
   SanityType,
   WithTypedValidation,
@@ -19,7 +18,7 @@ import type { Merge } from "type-fest";
 
 export type FieldOptions<
   Name extends string,
-  Zod extends z.ZodType<any, any, any>,
+  Zod extends z.ZodTypeAny,
   Optional extends boolean
 > = Pick<
   Schema.FieldDefinition,
@@ -30,14 +29,18 @@ export type FieldOptions<
   type: SanityType<
     WithTypedValidation<
       Omit<Schema.FieldDefinition<any>, NamedSchemaFields>,
-      Zod
+      z.input<Zod>
     >,
-    Zod
+    z.input<Zod>,
+    z.output<Zod>
   >;
 };
 
 export type FieldsZodObject<
-  FieldsArray extends Array<FieldOptions<any, z.ZodType<any, any, any>, any>>
+  FieldsArray extends readonly [
+    FieldOptions<any, z.ZodTypeAny, any>,
+    ...Array<FieldOptions<any, z.ZodTypeAny, any>>
+  ]
 > = {
   [Name in FieldsArray[number]["name"]]: Extract<
     FieldsArray[number],
@@ -48,7 +51,10 @@ export type FieldsZodObject<
 };
 
 export const fieldsZodObject = <
-  FieldsArray extends Array<FieldOptions<any, z.ZodType<any, any, any>, any>>
+  FieldsArray extends readonly [
+    FieldOptions<any, z.ZodTypeAny, any>,
+    ...Array<FieldOptions<any, z.ZodTypeAny, any>>
+  ]
 >(
   fields: FieldsArray
 ) =>
@@ -62,9 +68,10 @@ export const fieldsZodObject = <
 export const fieldsMock =
   <
     Names extends string,
-    FieldsArray extends Array<
-      FieldOptions<Names, z.ZodType<any, any, any>, any>
-    >
+    FieldsArray extends readonly [
+      FieldOptions<Names, z.ZodTypeAny, any>,
+      ...Array<FieldOptions<Names, z.ZodTypeAny, any>>
+    ]
   >(
     fields: FieldsArray
   ) =>
@@ -77,7 +84,7 @@ export const fieldsMock =
     ) as z.input<z.ZodObject<FieldsZodObject<FieldsArray>>>;
 
 export type Preview<
-  Value extends AnyObject,
+  Value extends Record<string, unknown>,
   Select extends NonNullable<PreviewConfig["select"]>
 > =
   | {
@@ -98,8 +105,11 @@ export type Preview<
 
 export const fieldsSchema = <
   Names extends string,
-  FieldsArray extends Array<FieldOptions<Names, any, any>>,
-  Value extends AnyObject,
+  FieldsArray extends readonly [
+    FieldOptions<Names, z.ZodTypeAny, any>,
+    ...Array<FieldOptions<Names, z.ZodTypeAny, any>>
+  ],
+  Value extends Record<string, unknown>,
   Select extends NonNullable<PreviewConfig["select"]>
 >(
   fields: FieldsArray,

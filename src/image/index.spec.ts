@@ -8,7 +8,7 @@ import { mockRule } from "../test-utils";
 import { image } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type { InferParsedValue, InferValue } from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("image", () => {
@@ -24,7 +24,7 @@ describe("image", () => {
     const type = image();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "image";
         asset: {
@@ -40,7 +40,7 @@ describe("image", () => {
       },
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _type: "image";
         asset: {
@@ -57,7 +57,7 @@ describe("image", () => {
     const type = image({ hotspot: true });
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "image";
         asset: {
@@ -97,7 +97,7 @@ describe("image", () => {
       },
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _type: "image";
         asset: {
@@ -153,7 +153,7 @@ describe("image", () => {
     ]);
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "image";
         asset: {
@@ -172,7 +172,7 @@ describe("image", () => {
       },
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _type: "image";
         asset: {
@@ -277,12 +277,23 @@ describe("image", () => {
 
   it("allows defining the zod", () => {
     const type = image({
-      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+      zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      number
+      InferParsedValue<typeof type>,
+      Array<
+        [
+          string,
+          (
+            | "image"
+            | {
+                _ref: string;
+                _type: "reference";
+              }
+          )
+        ]
+      >
     > = type.parse({
       _type: "image",
       asset: {
@@ -291,7 +302,18 @@ describe("image", () => {
       },
     });
 
-    expect(parsedValue).toEqual(2);
+    expect(parsedValue).toEqual(
+      expect.arrayContaining([
+        ["_type", "image"],
+        [
+          "asset",
+          {
+            _type: "reference",
+            _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+          },
+        ],
+      ])
+    );
   });
 
   it("types custom validation", () => {

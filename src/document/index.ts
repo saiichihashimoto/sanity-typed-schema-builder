@@ -14,12 +14,17 @@ import type { Merge } from "type-fest";
 
 export interface DocumentType<
   DocumentNames extends string,
-  Zod extends z.ZodType<any, any, any>
+  Value,
+  ParsedValue
 > extends SanityType<
-    WithTypedValidation<Schema.DocumentDefinition, Zod> & {
-      name: DocumentNames;
-    },
-    Zod
+    Merge<
+      WithTypedValidation<Schema.DocumentDefinition, Value>,
+      {
+        name: DocumentNames;
+      }
+    >,
+    Value,
+    ParsedValue
   > {
   name: DocumentNames;
 }
@@ -27,19 +32,25 @@ export interface DocumentType<
 export const document = <
   DocumentNames extends string,
   Names extends string,
-  Zods extends z.ZodType<any, any, any>,
+  Zods extends z.ZodTypeAny,
   Optionals extends boolean,
-  FieldsArray extends Array<FieldOptions<Names, Zods, Optionals>>,
+  FieldsArray extends readonly [
+    FieldOptions<Names, Zods, Optionals>,
+    ...Array<FieldOptions<Names, Zods, Optionals>>
+  ],
   Zod extends z.ZodObject<
-    FieldsZodObject<FieldsArray> & {
-      _createdAt: z.ZodType<Date, any, string>;
-      _id: z.ZodString;
-      _rev: z.ZodString;
-      _type: z.ZodLiteral<DocumentNames>;
-      _updatedAt: z.ZodType<Date, any, string>;
-    }
+    Merge<
+      FieldsZodObject<FieldsArray>,
+      {
+        _createdAt: z.ZodType<Date, any, string>;
+        _id: z.ZodString;
+        _rev: z.ZodString;
+        _type: z.ZodLiteral<DocumentNames>;
+        _updatedAt: z.ZodType<Date, any, string>;
+      }
+    >
   >,
-  Output = z.output<Zod>,
+  ParsedValue = z.output<Zod>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
 >({
@@ -62,16 +73,22 @@ export const document = <
         .toISOString(),
     } as unknown as z.input<Zod>;
   },
-  zod: zodFn = (zod) => zod as unknown as z.ZodType<Output, any, z.input<Zod>>,
+  zod: zodFn = (zod) =>
+    zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
-  SanityNamedTypeDef<Schema.DocumentDefinition, Zod, Output>,
+  SanityNamedTypeDef<
+    Schema.DocumentDefinition,
+    z.input<Zod>,
+    ParsedValue,
+    z.output<Zod>
+  >,
   {
     fields: FieldsArray;
     name: DocumentNames;
     preview?: Preview<z.input<Zod>, Select>;
   }
->): DocumentType<DocumentNames, z.ZodType<Output, any, z.input<Zod>>> => ({
+>): DocumentType<DocumentNames, z.input<Zod>, ParsedValue> => ({
   name,
   ...createType({
     mock,
