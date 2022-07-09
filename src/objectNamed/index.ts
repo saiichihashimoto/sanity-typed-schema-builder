@@ -35,12 +35,11 @@ export const objectNamed = <
   Zod extends z.ZodObject<
     Merge<FieldsZodObject<FieldsArray>, ExtraZodFields<ObjectNames>>
   >,
-  ParsedValue = z.output<Zod>,
-  ResolvedValue = z.output<
-    z.ZodObject<
-      Merge<FieldsZodResolvedObject<FieldsArray>, ExtraZodFields<ObjectNames>>
-    >
+  ZodResolved extends z.ZodObject<
+    Merge<FieldsZodResolvedObject<FieldsArray>, ExtraZodFields<ObjectNames>>
   >,
+  ParsedValue = z.output<Zod>,
+  ResolvedValue = z.output<ZodResolved>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
 >({
@@ -54,11 +53,8 @@ export const objectNamed = <
     } as unknown as z.input<Zod>),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
-  zodResolved = () =>
-    z.object({
-      ...fieldsZodResolvedObject(fields),
-      _type: z.literal(name),
-    }) as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
+  zodResolved = (zod) =>
+    zod as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
   SanityNamedTypeDef<
@@ -66,7 +62,8 @@ export const objectNamed = <
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,
-    z.output<Zod>
+    z.output<Zod>,
+    z.output<ZodResolved>
   >,
   {
     fields: FieldsArray;
@@ -74,15 +71,20 @@ export const objectNamed = <
     preview?: Preview<z.input<Zod>, Select>;
   }
 >) => {
-  const zod = z.object({
-    ...fieldsZodObject(fields),
-    _type: z.literal(name),
-  }) as unknown as Zod;
-
   const typeDef = {
     mock,
-    zod: zodFn(zod),
-    zodResolved: zodResolved(zod),
+    zod: zodFn(
+      z.object({
+        ...fieldsZodObject(fields),
+        _type: z.literal(name),
+      }) as unknown as Zod
+    ),
+    zodResolved: zodResolved(
+      z.object({
+        ...fieldsZodResolvedObject(fields),
+        _type: z.literal(name),
+      }) as unknown as z.ZodType<z.output<ZodResolved>, any, z.input<Zod>>
+    ),
   };
 
   return {

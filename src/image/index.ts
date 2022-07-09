@@ -102,17 +102,21 @@ export const image = <
       ExtraZodFields<Hotspot>
     >
   >,
+  ZodResolved extends z.ZodObject<
+    Merge<
+      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but FieldsArray has to be
+      FieldsZodResolvedObject<FieldsArray>,
+      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but Hotspot has to be
+      ExtraZodFields<Hotspot>
+    >
+  >,
   FieldsArray extends readonly [
     FieldOptions<Names, Zods, ResolvedValues, Optionals>,
     ...Array<FieldOptions<Names, Zods, ResolvedValues, Optionals>>
   ] = [never, ...never],
   Hotspot extends boolean = false,
   ParsedValue = z.output<Zod>,
-  ResolvedValue = z.output<
-    z.ZodObject<
-      Merge<FieldsZodResolvedObject<FieldsArray>, ExtraZodFields<Hotspot>>
-    >
-  >
+  ResolvedValue = z.output<ZodResolved>
 >({
   hotspot,
   fields,
@@ -158,11 +162,8 @@ export const image = <
     } as unknown as z.input<Zod>),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
-  zodResolved = () =>
-    z.object({
-      ...(fields && fieldsZodResolvedObject(fields)),
-      ...extraZodFields(hotspot),
-    }) as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
+  zodResolved = (zod) =>
+    zod as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
   Omit<
@@ -171,7 +172,8 @@ export const image = <
       z.input<Zod>,
       ParsedValue,
       ResolvedValue,
-      z.output<Zod>
+      z.output<Zod>,
+      z.output<ZodResolved>
     >,
     // "title" and "description" actually show up in the UI
     "name" | "preview"
@@ -180,20 +182,24 @@ export const image = <
     fields?: FieldsArray;
     hotspot?: Hotspot;
   }
-> = {}) => {
-  const zod = z.object({
-    ...(fields && fieldsZodObject(fields)),
-    ...extraZodFields(hotspot),
-  }) as unknown as Zod;
-
-  return createType({
+> = {}) =>
+  createType({
     mock,
     schema: () => ({
       ...def,
       ...(fields && fieldsSchema(fields)),
       type: "image",
     }),
-    zod: zodFn(zod),
-    zodResolved: zodResolved(zod),
+    zod: zodFn(
+      z.object({
+        ...(fields && fieldsZodObject(fields)),
+        ...extraZodFields(hotspot),
+      }) as unknown as Zod
+    ),
+    zodResolved: zodResolved(
+      z.object({
+        ...(fields && fieldsZodResolvedObject(fields)),
+        ...extraZodFields(hotspot),
+      }) as unknown as z.ZodType<z.output<ZodResolved>, any, z.input<Zod>>
+    ),
   });
-};
