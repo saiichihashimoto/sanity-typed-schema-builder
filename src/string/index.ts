@@ -8,7 +8,11 @@ import type { WithTypedOptionsList } from "../list";
 import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const string = <TypedValue extends string, ParsedValue = TypedValue>({
+export const string = <
+  TypedValue extends string,
+  ParsedValue = TypedValue,
+  ResolvedValue = TypedValue
+>({
   length,
   max,
   min,
@@ -21,34 +25,35 @@ export const string = <TypedValue extends string, ParsedValue = TypedValue>({
     : listMock<TypedValue>(list),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, TypedValue>,
+  zodResolved,
   ...def
 }: SanityTypeDef<
   WithTypedOptionsList<TypedValue, Schema.StringDefinition>,
   TypedValue,
-  ParsedValue
+  ParsedValue,
+  ResolvedValue
 > & {
   length?: number;
   max?: number;
   min?: number;
   regex?: RegExp;
-} = {}) =>
-  createType({
+} = {}) => {
+  const zod = !list
+    ? flow(
+        (zod: z.ZodString) => (!min ? zod : zod.min(min)),
+        (zod) => (!max ? zod : zod.max(max)),
+        (zod) => (!length ? zod : zod.length(length)),
+        (zod) => (!regex ? zod : zod.regex(regex)),
+        (zod) => zod as unknown as z.ZodType<TypedValue, any, TypedValue>
+      )(z.string())
+    : flow(
+        (value: typeof list) => value,
+        map(flow(listValueToValue, z.literal)),
+        zodUnion
+      )(list);
+
+  return createType({
     mock,
-    zod: zodFn(
-      !list
-        ? flow(
-            (zod: z.ZodString) => (!min ? zod : zod.min(min)),
-            (zod) => (!max ? zod : zod.max(max)),
-            (zod) => (!length ? zod : zod.length(length)),
-            (zod) => (!regex ? zod : zod.regex(regex)),
-            (zod) => zod as unknown as z.ZodType<TypedValue, any, TypedValue>
-          )(z.string())
-        : flow(
-            (value: typeof list) => value,
-            map(flow(listValueToValue, z.literal)),
-            zodUnion
-          )(list)
-    ),
     schema: () => ({
       ...def,
       options,
@@ -61,4 +66,7 @@ export const string = <TypedValue extends string, ParsedValue = TypedValue>({
         (rule) => validation?.(rule) ?? rule
       ),
     }),
+    zod: zodFn(zod),
+    zodResolved: zodResolved?.(zod),
   });
+};

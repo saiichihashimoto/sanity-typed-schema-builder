@@ -8,7 +8,11 @@ import { mockRule } from "../test-utils";
 import { object } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 import type { Merge, PartialDeep } from "type-fest";
 
 describe("object", () => {
@@ -65,6 +69,29 @@ describe("object", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into an object", () => {
+    const type = object({
+      fields: [
+        {
+          name: "foo",
+          type: boolean({
+            zodResolved: (zod) => zod.transform(() => "foo"),
+          }),
+        },
+      ],
+    });
+
+    const value: ValidateShape<InferValue<typeof type>, { foo: boolean }> = {
+      foo: true,
+    };
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      { foo: string }
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual({ foo: "foo" });
   });
 
   it("allows optional fields", () => {

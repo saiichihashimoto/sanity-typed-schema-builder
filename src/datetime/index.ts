@@ -6,7 +6,7 @@ import { createType } from "../types";
 import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const datetime = <ParsedValue = Date>({
+export const datetime = <ParsedValue = Date, ResolvedValue = Date>({
   max,
   min,
   validation,
@@ -23,28 +23,34 @@ export const datetime = <ParsedValue = Date>({
       .refine((date) => date.toString() !== "Invalid Date", {
         message: "Invalid Date",
       }) as unknown as z.ZodType<ParsedValue, any, string>,
+  zodResolved,
   ...def
-}: SanityTypeDef<Schema.DatetimeDefinition, string, ParsedValue> & {
+}: SanityTypeDef<
+  Schema.DatetimeDefinition,
+  string,
+  ParsedValue,
+  ResolvedValue
+> & {
   max?: string;
   min?: string;
-} = {}) =>
-  createType({
+} = {}) => {
+  const zod = flow(
+    (zod: z.ZodType<string, any, string>) =>
+      !min
+        ? zod
+        : zod.refine((date) => new Date(min) <= new Date(date), {
+            message: `Greater than ${min}`,
+          }),
+    (zod) =>
+      !max
+        ? zod
+        : zod.refine((date) => new Date(date) <= new Date(max), {
+            message: `Less than ${max}`,
+          })
+  )(z.string());
+
+  return createType({
     mock,
-    zod: flow(
-      (zod: z.ZodType<string, any, string>) =>
-        !min
-          ? zod
-          : zod.refine((date) => new Date(min) <= new Date(date), {
-              message: `Greater than ${min}`,
-            }),
-      (zod) =>
-        !max
-          ? zod
-          : zod.refine((date) => new Date(date) <= new Date(max), {
-              message: `Less than ${max}`,
-            }),
-      zodFn
-    )(z.string()),
     schema: () => ({
       ...def,
       type: "datetime",
@@ -55,4 +61,7 @@ export const datetime = <ParsedValue = Date>({
         (rule) => validation?.(rule) ?? rule
       ),
     }),
+    zod: zodFn(zod),
+    zodResolved: zodResolved?.(zod),
   });
+};

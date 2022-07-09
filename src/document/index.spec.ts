@@ -8,8 +8,13 @@ import { mockRule } from "../test-utils";
 
 import { document } from ".";
 
+import type { ParsedSanityDocument, SanityDocument } from ".";
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 import type { Merge, PartialDeep } from "type-fest";
 
 describe("document", () => {
@@ -63,14 +68,7 @@ describe("document", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      {
-        _createdAt: string;
-        _id: string;
-        _rev: string;
-        _type: "foo";
-        _updatedAt: string;
-        foo: boolean;
-      }
+      Merge<SanityDocument<"foo">, { foo: boolean }>
     > = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
@@ -81,20 +79,50 @@ describe("document", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      {
-        _createdAt: Date;
-        _id: string;
-        _rev: string;
-        _type: "foo";
-        _updatedAt: Date;
-        foo: boolean;
-      }
+      Merge<ParsedSanityDocument<"foo">, { foo: boolean }>
     > = type.parse(value);
 
     expect(parsedValue).toEqual({
       ...value,
       _createdAt: new Date("2022-06-03T03:24:55.395Z"),
       _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
+    });
+  });
+
+  it("resolves into an object", () => {
+    const type = document({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: boolean({
+            zodResolved: (zod) => zod.transform(() => "foo"),
+          }),
+        },
+      ],
+    });
+
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      Merge<SanityDocument<"foo">, { foo: boolean }>
+    > = {
+      _createdAt: "2022-06-03T03:24:55.395Z",
+      _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
+      _rev: "somerevstring",
+      _type: "foo",
+      _updatedAt: "2022-06-03T03:24:55.395Z",
+      foo: true,
+    };
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      Merge<ParsedSanityDocument<"foo">, { foo: string }>
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual({
+      ...value,
+      _createdAt: new Date("2022-06-03T03:24:55.395Z"),
+      _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
+      foo: "foo",
     });
   });
 
@@ -149,15 +177,13 @@ describe("document", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      {
-        _createdAt: string;
-        _id: string;
-        _rev: string;
-        _type: "foo";
-        _updatedAt: string;
-        bar?: string;
-        foo: boolean;
-      }
+      Merge<
+        SanityDocument<"foo">,
+        {
+          bar?: string;
+          foo: boolean;
+        }
+      >
     > = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
@@ -168,15 +194,13 @@ describe("document", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      {
-        _createdAt: Date;
-        _id: string;
-        _rev: string;
-        _type: "foo";
-        _updatedAt: Date;
-        bar?: string;
-        foo: boolean;
-      }
+      Merge<
+        ParsedSanityDocument<"foo">,
+        {
+          bar?: string;
+          foo: boolean;
+        }
+      >
     > = type.parse(value);
 
     expect(parsedValue).toEqual({
@@ -216,32 +240,6 @@ describe("document", () => {
     expect(new Date(value._updatedAt).toString()).not.toEqual("Invalid Date");
     z.string().uuid().parse(value._id);
     /* eslint-enable no-underscore-dangle */
-  });
-
-  it("mocks the same value with the same path", () => {
-    const objectDef = () => ({
-      name: "foo",
-      fields: [
-        {
-          name: "foo",
-          type: string(),
-        },
-      ] as const,
-    });
-
-    expect(document(objectDef()).mock(faker)).toEqual(
-      document(objectDef()).mock(faker)
-    );
-    expect(document(objectDef()).mock(faker, ".foo")).toEqual(
-      document(objectDef()).mock(faker, ".foo")
-    );
-
-    expect(document(objectDef()).mock(faker, ".foo")).not.toEqual(
-      document(objectDef()).mock(faker)
-    );
-    expect(document(objectDef()).mock(faker)).not.toEqual(
-      document(objectDef()).mock(faker, ".foo")
-    );
   });
 
   it("allows defining the mocks", () =>
@@ -347,16 +345,12 @@ describe("document", () => {
           const value: ValidateShape<
             typeof selection,
             Merge<
+              SanityDocument<"foo">,
               {
-                _createdAt: string;
-                _id: string;
-                _rev: string;
-                _type: "foo";
-                _updatedAt: string;
                 bar?: string;
+                bleh: unknown;
                 foo: string;
-              },
-              { bleh: unknown }
+              }
             >
           > = selection;
 
@@ -374,15 +368,13 @@ describe("document", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      {
-        _createdAt: string;
-        _id: string;
-        _rev: string;
-        _type: "foo";
-        _updatedAt: string;
-        bar?: string;
-        foo: string;
-      }
+      Merge<
+        SanityDocument<"foo">,
+        {
+          bar?: string;
+          foo: string;
+        }
+      >
     > = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",

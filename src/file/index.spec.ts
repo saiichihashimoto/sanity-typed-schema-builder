@@ -7,9 +7,15 @@ import { mockRule } from "../test-utils";
 
 import { file } from ".";
 
+import type { SanityFile } from ".";
+import type { SanityReference } from "../reference";
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
-import type { PartialDeep } from "type-fest";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
+import type { Merge, PartialDeep } from "type-fest";
 
 describe("file", () => {
   it("builds a sanity config", () =>
@@ -23,16 +29,7 @@ describe("file", () => {
   it("parses into an file", () => {
     const type = file();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _type: "file";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-      }
-    > = {
+    const value: ValidateShape<InferValue<typeof type>, SanityFile> = {
       _type: "file",
       asset: {
         _type: "reference",
@@ -41,16 +38,28 @@ describe("file", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      {
-        _type: "file";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-      }
+      SanityFile
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into an file", () => {
+    const type = file();
+
+    const value: ValidateShape<InferValue<typeof type>, SanityFile> = {
+      _type: "file",
+      asset: {
+        _type: "reference",
+        _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+      },
+    };
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      SanityFile
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
   });
 
   it("adds fields", () => {
@@ -85,15 +94,13 @@ describe("file", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      {
-        _type: "file";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        bar?: boolean;
-        foo: boolean;
-      }
+      Merge<
+        SanityFile,
+        {
+          bar?: boolean;
+          foo: boolean;
+        }
+      >
     > = {
       foo: true,
       _type: "file",
@@ -104,15 +111,13 @@ describe("file", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      {
-        _type: "file";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        bar?: boolean;
-        foo: boolean;
-      }
+      Merge<
+        SanityFile,
+        {
+          bar?: boolean;
+          foo: boolean;
+        }
+      >
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -213,18 +218,7 @@ describe("file", () => {
 
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<
-        [
-          string,
-          (
-            | "file"
-            | {
-                _ref: string;
-                _type: "reference";
-              }
-          )
-        ]
-      >
+      Array<[string, "file" | SanityReference]>
     > = type.parse({
       _type: "file",
       asset: {
@@ -266,15 +260,15 @@ describe("file", () => {
             bar,
           }: ValidateShape<
             typeof value,
-            PartialDeep<{
-              _type: "file";
-              asset: {
-                _ref: string;
-                _type: "reference";
-              };
-              bar: string;
-              foo?: boolean;
-            }>
+            PartialDeep<
+              Merge<
+                SanityFile,
+                {
+                  bar: string;
+                  foo?: boolean;
+                }
+              >
+            >
           > = value;
 
           return !bar || "Needs an empty bar";

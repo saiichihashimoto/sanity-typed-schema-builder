@@ -8,7 +8,11 @@ import { mockRule } from "../test-utils";
 import { array } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("array", () => {
@@ -165,6 +169,24 @@ describe("array", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into an array", () => {
+    const type = array({
+      of: [
+        boolean({
+          zodResolved: (zod) => zod.transform(() => "foo"),
+        }),
+      ],
+    });
+
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      string[]
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(["foo"]);
   });
 
   it("sets min", () => {

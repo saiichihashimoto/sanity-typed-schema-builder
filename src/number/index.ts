@@ -8,7 +8,11 @@ import type { WithTypedOptionsList } from "../list";
 import type { Rule, SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const number = <TypedValue extends number, ParsedValue = TypedValue>({
+export const number = <
+  TypedValue extends number,
+  ParsedValue = TypedValue,
+  ResolvedValue = TypedValue
+>({
   greaterThan,
   integer,
   lessThan,
@@ -30,11 +34,13 @@ export const number = <TypedValue extends number, ParsedValue = TypedValue>({
     : listMock<TypedValue>(list),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, TypedValue>,
+  zodResolved,
   ...def
 }: SanityTypeDef<
   WithTypedOptionsList<TypedValue, Schema.NumberDefinition>,
   TypedValue,
-  ParsedValue
+  ParsedValue,
+  ResolvedValue
 > & {
   greaterThan?: number;
   integer?: boolean;
@@ -44,36 +50,34 @@ export const number = <TypedValue extends number, ParsedValue = TypedValue>({
   negative?: boolean;
   positive?: boolean;
   precision?: number;
-} = {}) =>
-  createType({
+} = {}) => {
+  const zod = !list
+    ? flow(
+        flow(
+          (zod: z.ZodNumber) => (!min ? zod : zod.min(min)),
+          (zod) => (!max ? zod : zod.max(max)),
+          (zod) => (!greaterThan ? zod : zod.gt(greaterThan)),
+          (zod) => (!lessThan ? zod : zod.lt(lessThan)),
+          (zod) => (!integer ? zod : zod.int()),
+          (zod) => (!positive ? zod : zod.nonnegative()),
+          (zod) => (!negative ? zod : zod.negative())
+        ),
+        (zod) =>
+          !precision
+            ? zod
+            : zod.transform(
+                (value) => Math.round(value * 10 ** precision) / 10 ** precision
+              ),
+        (zod) => zod as unknown as z.ZodType<TypedValue, any, TypedValue>
+      )(z.number())
+    : flow(
+        (value: typeof list) => value,
+        map(flow(listValueToValue, z.literal)),
+        zodUnion
+      )(list);
+
+  return createType({
     mock,
-    zod: zodFn(
-      !list
-        ? flow(
-            flow(
-              (zod: z.ZodNumber) => (!min ? zod : zod.min(min)),
-              (zod) => (!max ? zod : zod.max(max)),
-              (zod) => (!greaterThan ? zod : zod.gt(greaterThan)),
-              (zod) => (!lessThan ? zod : zod.lt(lessThan)),
-              (zod) => (!integer ? zod : zod.int()),
-              (zod) => (!positive ? zod : zod.nonnegative()),
-              (zod) => (!negative ? zod : zod.negative())
-            ),
-            (zod) =>
-              !precision
-                ? zod
-                : zod.transform(
-                    (value) =>
-                      Math.round(value * 10 ** precision) / 10 ** precision
-                  ),
-            (zod) => zod as unknown as z.ZodType<TypedValue, any, TypedValue>
-          )(z.number())
-        : flow(
-            (value: typeof list) => value,
-            map(flow(listValueToValue, z.literal)),
-            zodUnion
-          )(list)
-    ),
     schema: () => ({
       ...def,
       options,
@@ -92,4 +96,7 @@ export const number = <TypedValue extends number, ParsedValue = TypedValue>({
         (rule) => validation?.(rule) ?? rule
       ),
     }),
+    zod: zodFn(zod),
+    zodResolved: zodResolved?.(zod),
   });
+};

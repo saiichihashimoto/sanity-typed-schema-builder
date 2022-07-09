@@ -7,9 +7,11 @@ import { mockRule } from "../test-utils";
 
 import { image } from ".";
 
+import type { SanityImage } from ".";
+import type { SanityReference } from "../reference";
 import type { ValidateShape } from "../test-utils";
 import type { InferParsedValue, InferValue } from "../types";
-import type { PartialDeep } from "type-fest";
+import type { Merge, PartialDeep } from "type-fest";
 
 describe("image", () => {
   it("builds a sanity config", () =>
@@ -23,16 +25,7 @@ describe("image", () => {
   it("parses into an image", () => {
     const type = image();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-      }
-    > = {
+    const value: ValidateShape<InferValue<typeof type>, SanityImage<false>> = {
       _type: "image",
       asset: {
         _type: "reference",
@@ -41,13 +34,7 @@ describe("image", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-      }
+      SanityImage<false>
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -56,28 +43,7 @@ describe("image", () => {
   it("adds hotspot", () => {
     const type = image({ hotspot: true });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        crop: {
-          bottom: number;
-          left: number;
-          right: number;
-          top: number;
-        };
-        hotspot: {
-          height: number;
-          width: number;
-          x: number;
-          y: number;
-        };
-      }
-    > = {
+    const value: ValidateShape<InferValue<typeof type>, SanityImage<true>> = {
       _type: "image",
       asset: {
         _type: "reference",
@@ -98,25 +64,7 @@ describe("image", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        crop: {
-          bottom: number;
-          left: number;
-          right: number;
-          top: number;
-        };
-        hotspot: {
-          height: number;
-          width: number;
-          x: number;
-          y: number;
-        };
-      }
+      SanityImage<true>
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -154,15 +102,13 @@ describe("image", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        bar?: boolean;
-        foo: boolean;
-      }
+      Merge<
+        SanityImage<false>,
+        {
+          bar?: boolean;
+          foo: boolean;
+        }
+      >
     > = {
       foo: true,
       _type: "image",
@@ -173,15 +119,13 @@ describe("image", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      {
-        _type: "image";
-        asset: {
-          _ref: string;
-          _type: "reference";
-        };
-        bar?: boolean;
-        foo: boolean;
-      }
+      Merge<
+        SanityImage<false>,
+        {
+          bar?: boolean;
+          foo: boolean;
+        }
+      >
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -282,18 +226,7 @@ describe("image", () => {
 
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<
-        [
-          string,
-          (
-            | "image"
-            | {
-                _ref: string;
-                _type: "reference";
-              }
-          )
-        ]
-      >
+      Array<[string, "image" | SanityReference]>
     > = type.parse({
       _type: "image",
       asset: {
@@ -335,15 +268,15 @@ describe("image", () => {
             bar,
           }: ValidateShape<
             typeof value,
-            PartialDeep<{
-              _type: "image";
-              asset: {
-                _ref: string;
-                _type: "reference";
-              };
-              bar: string;
-              foo?: boolean;
-            }>
+            PartialDeep<
+              Merge<
+                SanityImage<false>,
+                {
+                  bar: string;
+                  foo?: boolean;
+                }
+              >
+            >
           > = value;
 
           return !bar || "Needs an empty bar";

@@ -7,7 +7,11 @@ import { mockRule } from "../test-utils";
 import { text } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 
 describe("text", () => {
   it("builds a sanity config", () =>
@@ -19,7 +23,7 @@ describe("text", () => {
   it("passes through schema values", () =>
     expect(text({ hidden: false }).schema()).toHaveProperty("hidden", false));
 
-  it("parses into a text", () => {
+  it("parses into a string", () => {
     const type = text();
 
     const value: ValidateShape<InferValue<typeof type>, string> = "foo";
@@ -29,6 +33,18 @@ describe("text", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into a string", () => {
+    const type = text();
+
+    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      string
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
   });
 
   it("sets min", () => {

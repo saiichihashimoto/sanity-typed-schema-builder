@@ -6,7 +6,11 @@ import { mockRule } from "../test-utils";
 import { datetime } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 
 describe("datetime", () => {
   it("builds a sanity config", () =>
@@ -34,6 +38,21 @@ describe("datetime", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(new Date(value));
+  });
+
+  it("resolves into a Date", () => {
+    const type = datetime();
+
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      string
+    > = "2022-06-03T03:24:55.395Z";
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      Date
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(new Date(value));
   });
 
   it("enforces a valid Date", () => {

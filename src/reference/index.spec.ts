@@ -9,7 +9,11 @@ import { reference } from ".";
 
 import type { SanityReference } from ".";
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("reference", () => {
@@ -78,54 +82,57 @@ describe("reference", () => {
     expect(parsedValue).toEqual(value);
   });
 
-  it("mocks a reference", () =>
-    expect(
-      reference({
-        to: [
-          document({
-            name: "foo",
-            fields: [
-              {
-                name: "foo",
-                type: boolean(),
-              },
-            ],
-          }),
-        ],
-      }).mock(faker)
-    ).toEqual({
-      _ref: expect.any(String),
-      _type: "reference",
-    }));
-
-  it("mocks the same value with the same path", () => {
-    const referenceDef: Parameters<typeof reference>[0] = {
-      to: [
-        document({
+  it("resolves into a document mock", () => {
+    const docType = document({
+      name: "foo",
+      fields: [
+        {
           name: "foo",
-          fields: [
-            {
-              name: "foo",
-              type: boolean(),
-            },
-          ],
-        }),
+          type: boolean({}),
+        },
       ],
+    });
+
+    const type = reference({
+      to: [docType],
+    });
+
+    const docMock = docType.resolve(docType.mock(faker));
+
+    const value: ValidateShape<InferValue<typeof type>, SanityReference> = {
+      _type: "reference",
+      _ref: docMock._id,
     };
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      InferResolvedValue<typeof docType>
+    > = type.resolve(value);
 
-    expect(reference(referenceDef).mock(faker)).toEqual(
-      reference(referenceDef).mock(faker)
-    );
-    expect(reference(referenceDef).mock(faker, ".foo")).toEqual(
-      reference(referenceDef).mock(faker, ".foo")
-    );
+    expect(resolvedValue).toEqual(docMock);
+  });
 
-    expect(reference(referenceDef).mock(faker, ".foo")).not.toEqual(
-      reference(referenceDef).mock(faker)
-    );
-    expect(reference(referenceDef).mock(faker)).not.toEqual(
-      reference(referenceDef).mock(faker, ".foo")
-    );
+  it("mocks a reference to a document mock", () => {
+    const docType = document({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+      ],
+    });
+
+    const type = reference({
+      to: [docType],
+    });
+
+    expect(type.mock(faker)).toEqual({
+      _ref: docType.mock(faker)._id,
+      _type: "reference",
+    });
+
+    // eslint-disable-next-line no-underscore-dangle -- references have a _ref property
+    expect(docType.mock(faker)._id).toEqual(type.mock(faker)._ref);
   });
 
   it("allows defining the mocks", () =>

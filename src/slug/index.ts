@@ -7,7 +7,12 @@ import type { Schema, Slug } from "@sanity/types";
 
 export type SanitySlug = Slug;
 
-export const slug = <ParsedValue = string>({
+const zod: z.ZodType<SanitySlug, any, SanitySlug> = z.object({
+  _type: z.literal("slug"),
+  current: z.string(),
+});
+
+export const slug = <ParsedValue = string, ResolvedValue = string>({
   mock = (faker) => ({
     _type: "slug",
     current: faker.lorem.slug(),
@@ -18,18 +23,20 @@ export const slug = <ParsedValue = string>({
       any,
       SanitySlug
     >,
+  zodResolved,
   ...def
-}: SanityTypeDef<Schema.SlugDefinition, SanitySlug, ParsedValue> = {}) =>
+}: SanityTypeDef<
+  Schema.SlugDefinition,
+  SanitySlug,
+  ParsedValue,
+  ResolvedValue
+> = {}) =>
   createType({
     mock,
-    zod: zodFn(
-      z.object({
-        _type: z.literal("slug"),
-        current: z.string(),
-      })
-    ),
     schema: () => ({
       ...def,
       type: "slug",
     }),
+    zod: zodFn(zod),
+    zodResolved: zodResolved?.(zod),
   });

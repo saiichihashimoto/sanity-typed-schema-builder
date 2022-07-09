@@ -46,6 +46,31 @@ describe("block", () => {
     expect(parsedValue).toEqual(value);
   });
 
+  it("resolves into a block", () => {
+    const type = block();
+
+    const value: InferValue<typeof type> = {
+      style: "normal",
+      _type: "block",
+      markDefs: [],
+      children: [
+        {
+          _type: "span",
+          text: "Amazing, actually.",
+          marks: [],
+        },
+      ],
+    };
+    const resolvedValue: PortableTextBlock<
+      PortableTextMarkDefinition,
+      TypedObject,
+      string,
+      string
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
+  });
+
   it("mocks block content", () =>
     expect(block().mock(faker)).toEqual({
       style: "normal",

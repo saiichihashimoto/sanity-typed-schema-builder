@@ -5,8 +5,13 @@ import { mockRule } from "../test-utils";
 
 import { slug } from ".";
 
+import type { SanitySlug } from ".";
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("slug", () => {
@@ -21,13 +26,7 @@ describe("slug", () => {
   it("parses into a string", () => {
     const type = slug();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _type: "slug";
-        current: string;
-      }
-    > = {
+    const value: ValidateShape<InferValue<typeof type>, SanitySlug> = {
       _type: "slug",
       current: "foo",
     };
@@ -37,6 +36,21 @@ describe("slug", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual("foo");
+  });
+
+  it("resolves into a string", () => {
+    const type = slug();
+
+    const value: ValidateShape<InferValue<typeof type>, SanitySlug> = {
+      _type: "slug",
+      current: "foo",
+    };
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      string
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual("foo");
   });
 
   it("mocks a slug", () =>
@@ -86,13 +100,7 @@ describe("slug", () => {
         Rule.custom((value) => {
           const {
             current: slug,
-          }: ValidateShape<
-            typeof value,
-            PartialDeep<{
-              _type: "slug";
-              current: string;
-            }>
-          > = value;
+          }: ValidateShape<typeof value, PartialDeep<SanitySlug>> = value;
 
           return (slug?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),

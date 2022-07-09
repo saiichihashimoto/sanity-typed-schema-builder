@@ -5,7 +5,7 @@ import { createType } from "../types";
 import type { SanityTypeDef } from "../types";
 import type { Schema } from "@sanity/types";
 
-export const date = <ParsedValue = string>({
+export const date = <ParsedValue = string, ResolvedValue = string>({
   mock = (faker) =>
     `${`${faker.datatype.number({
       min: 1990,
@@ -18,14 +18,21 @@ export const date = <ParsedValue = string>({
       max: 28,
     })}`.padStart(2, "0")}`,
   zod: zodFn = (zod) => zod as unknown as z.ZodType<ParsedValue, any, string>,
+  zodResolved,
   ...def
-}: SanityTypeDef<Schema.DateDefinition, string, ParsedValue> = {}) =>
+}: SanityTypeDef<
+  Schema.DateDefinition,
+  string,
+  ParsedValue,
+  ResolvedValue
+> = {}) =>
   createType({
     mock,
-    // TODO Check date validity against dateFormat with something like moment (moment is too big)
-    zod: zodFn(z.string()),
     schema: () => ({
       ...def,
       type: "date",
     }),
+    // TODO Check date validity against dateFormat with something like moment (moment is too big)
+    zod: zodFn(z.string()),
+    zodResolved: zodResolved?.(z.string()),
   });

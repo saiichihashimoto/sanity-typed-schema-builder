@@ -7,7 +7,11 @@ import { mockRule } from "../test-utils";
 import { number } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 
 describe("number", () => {
   it("builds a sanity config", () =>
@@ -29,6 +33,18 @@ describe("number", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into a number", () => {
+    const type = number();
+
+    const value: ValidateShape<InferValue<typeof type>, number> = 5;
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      number
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
   });
 
   it("sets min", () => {

@@ -7,7 +7,11 @@ import { mockRule } from "../test-utils";
 import { url } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 
 describe("url", () => {
   it("builds a sanity config", () =>
@@ -31,6 +35,21 @@ describe("url", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into a string", () => {
+    const type = url();
+
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      string
+    > = "https://example.com/img.jpg";
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      string
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
   });
 
   it("enforces a url", () => {

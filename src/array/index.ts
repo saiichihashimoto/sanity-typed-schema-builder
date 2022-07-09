@@ -28,10 +28,13 @@ const addKeyToZod = <Input, Output>(zod: z.ZodType<Output, any, Input>) =>
       }) as unknown as z.ZodType<AddKey<Output>, any, AddKey<Input>>);
 
 export const array = <
+  ResolvedValues,
   Zods extends z.ZodTypeAny,
   ItemsArray extends [
-    SanityType<ItemDefinitions, z.input<Zods>, z.output<Zods>>,
-    ...Array<SanityType<ItemDefinitions, z.input<Zods>, z.output<Zods>>>
+    SanityType<ItemDefinitions, z.input<Zods>, z.output<Zods>, ResolvedValues>,
+    ...Array<
+      SanityType<ItemDefinitions, z.input<Zods>, z.output<Zods>, ResolvedValues>
+    >
   ],
   Zod extends z.ZodArray<
     z.ZodType<
@@ -42,8 +45,18 @@ export const array = <
     // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but NonEmpty has to be
     NonEmpty extends true ? "atleastone" : "many"
   >,
+  ZodResolved extends z.ZodArray<
+    z.ZodType<
+      AddKey<z.output<ItemsArray[number]["zodResolved"]>>,
+      any,
+      AddKey<z.input<ItemsArray[number]["zodResolved"]>>
+    >,
+    // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but NonEmpty has to be
+    NonEmpty extends true ? "atleastone" : "many"
+  >,
   NonEmpty extends boolean = false,
-  ParsedValue = z.output<Zod>
+  ParsedValue = z.output<Zod>,
+  ResolvedValue = z.output<ZodResolved>
 >({
   length,
   max,
@@ -55,12 +68,28 @@ export const array = <
   mock = () => [] as unknown as z.input<Zod>,
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
+  zodResolved = () =>
+    flow(
+      flow(
+        (value: typeof items) => value,
+        map(flow(({ zodResolved }) => zodResolved, addKeyToZod)),
+        zodUnion,
+        z.array,
+        (zod) => (!nonempty ? zod : zod.nonempty()),
+        (zod) => (!min ? zod : zod.min(min)),
+        (zod) => (!max ? zod : zod.max(max))
+      ),
+      (zod) => (length === undefined ? zod : zod.length(length)),
+      (zod) =>
+        zod as unknown as z.ZodType<ResolvedValue, any, z.input<ZodResolved>>
+    )(items),
   ...def
 }: Merge<
   SanityTypeDef<
     Schema.ArrayDefinition<z.input<Zod>[number]>,
     z.input<Zod>,
     ParsedValue,
+    ResolvedValue,
     z.output<Zod>
   >,
   {
@@ -70,22 +99,25 @@ export const array = <
     nonempty?: NonEmpty;
     of: ItemsArray;
   }
->) =>
-  createType({
+>) => {
+  const zod = flow(
+    flow(
+      (value: typeof items) => value,
+      map(flow(({ zod }) => zod, addKeyToZod)),
+      zodUnion,
+      z.array,
+      (zod) => (!nonempty ? zod : zod.nonempty()),
+      (zod) => (!min ? zod : zod.min(min)),
+      (zod) => (!max ? zod : zod.max(max))
+    ),
+    (zod) => (length === undefined ? zod : zod.length(length)),
+    (zod) => zod as z.ZodType<z.output<Zod>, any, z.input<Zod>>
+  )(items);
+
+  return createType({
     mock,
-    zod: flow(
-      flow(
-        (value: typeof items) => value,
-        map(flow(({ zod }) => zod, addKeyToZod)),
-        zodUnion,
-        z.array,
-        (zod) => (!nonempty ? zod : zod.nonempty()),
-        (zod) => (!min ? zod : zod.min(min)),
-        (zod) => (!max ? zod : zod.max(max))
-      ),
-      (zod) => (length === undefined ? zod : zod.length(length)),
-      (zod) => zodFn(zod as z.ZodType<z.output<Zod>, any, z.input<Zod>>)
-    )(items),
+    zod: zodFn(zod),
+    zodResolved: zodResolved(zod),
     schema: () => ({
       ...def,
       type: "array",
@@ -99,3 +131,4 @@ export const array = <
       ),
     }),
   });
+};

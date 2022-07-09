@@ -12,7 +12,17 @@ export interface SanityGeopoint {
   lng: number;
 }
 
-export const geopoint = <ParsedValue = SanityGeopoint>({
+const zod: z.ZodType<SanityGeopoint, any, SanityGeopoint> = z.object({
+  _type: z.literal("geopoint"),
+  alt: z.number(),
+  lat: z.number(),
+  lng: z.number(),
+});
+
+export const geopoint = <
+  ParsedValue = SanityGeopoint,
+  ResolvedValue = SanityGeopoint
+>({
   mock = (faker) => ({
     _type: "geopoint",
     alt: faker.datatype.number({ min: 0, max: 1000 }),
@@ -21,24 +31,20 @@ export const geopoint = <ParsedValue = SanityGeopoint>({
   }),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, SanityGeopoint>,
+  zodResolved,
   ...def
 }: SanityTypeDef<
   Schema.GeopointDefinition,
   SanityGeopoint,
-  ParsedValue
+  ParsedValue,
+  ResolvedValue
 > = {}) =>
   createType({
     mock,
-    zod: zodFn(
-      z.object({
-        _type: z.literal("geopoint"),
-        alt: z.number(),
-        lat: z.number(),
-        lng: z.number(),
-      })
-    ),
     schema: () => ({
       ...def,
       type: "geopoint",
     }),
+    zod: zodFn(zod),
+    zodResolved: zodResolved?.(zod),
   });

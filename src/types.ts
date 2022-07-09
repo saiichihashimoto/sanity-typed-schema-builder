@@ -14,18 +14,25 @@ export const zodUnion = <Zods extends z.ZodTypeAny>(zods: Zods[]): Zods =>
     ? zods[0]!
     : (z.union([zods[0]!, zods[1]!, ...zods.slice(2)]) as unknown as Zods);
 
-export interface SanityType<Definition, Value, ParsedValue> {
+export interface SanityType<Definition, Value, ParsedValue, ResolvedValue> {
   mock: (faker: Faker, path?: string) => Value;
   parse: (data: unknown) => ParsedValue;
+  resolve: (data: unknown) => ResolvedValue;
   schema: () => Definition;
   zod: z.ZodType<ParsedValue, any, Value>;
+  zodResolved: z.ZodType<ResolvedValue, any, Value>;
 }
 
-export type InferValue<T extends SanityType<any, any, any>> =
-  T extends SanityType<any, infer Value, any> ? Value : never;
+export type InferValue<T extends SanityType<any, any, any, any>> =
+  T extends SanityType<any, infer Value, any, any> ? Value : never;
 
-export type InferParsedValue<T extends SanityType<any, any, any>> =
-  T extends SanityType<any, any, infer ParsedValue> ? ParsedValue : never;
+export type InferParsedValue<T extends SanityType<any, any, any, any>> =
+  T extends SanityType<any, any, infer ParsedValue, any> ? ParsedValue : never;
+
+export type InferResolvedValue<T extends SanityType<any, any, any, any>> =
+  T extends SanityType<any, any, any, infer ResolvedValue>
+    ? ResolvedValue
+    : never;
 
 const createMocker = <MockType>(
   mockFn: (faker: Faker, path: string) => MockType
@@ -53,19 +60,28 @@ const createMocker = <MockType>(
 };
 
 // TODO createType tests
-export const createType = <Definition, Value, ParsedValue>({
+export const createType = <Definition, Value, ParsedValue, ResolvedValue>({
   mock,
   zod,
+  zodResolved = zod as unknown as z.ZodType<ResolvedValue, any, Value>,
   parse = zod.parse.bind(zod),
+  resolve = zodResolved.parse.bind(zodResolved),
   ...def
 }: Merge<
-  SetOptional<SanityType<Definition, Value, ParsedValue>, "parse">,
-  { mock: (faker: Faker, path: string) => Value }
->): SanityType<Definition, Value, ParsedValue> => ({
+  SetOptional<
+    SanityType<Definition, Value, ParsedValue, ResolvedValue>,
+    "parse" | "resolve" | "zodResolved"
+  >,
+  {
+    mock: (faker: Faker, path: string) => Value;
+  }
+>): SanityType<Definition, Value, ParsedValue, ResolvedValue> => ({
   ...def,
   mock: createMocker(mock),
   parse,
+  resolve,
   zod,
+  zodResolved,
 });
 
 // Don't use Merge, because it creates a deep recursive type
@@ -84,6 +100,7 @@ export type SanityNamedTypeDef<
   Definition,
   Value,
   ParsedValue,
+  ResolvedValue,
   IntermediateValue = Value
 > = Merge<
   WithTypedValidation<Omit<Definition, "type">, Value>,
@@ -93,6 +110,9 @@ export type SanityNamedTypeDef<
     zod?: (
       zod: z.ZodType<IntermediateValue, any, Value>
     ) => z.ZodType<ParsedValue, any, Value>;
+    zodResolved?: (
+      zod: z.ZodType<IntermediateValue, any, Value>
+    ) => z.ZodType<ResolvedValue, any, Value>;
   }
 >;
 
@@ -100,10 +120,12 @@ export type SanityTypeDef<
   Definition,
   Value,
   ParsedValue,
+  ResolvedValue,
   IntermediateValue = Value
 > = SanityNamedTypeDef<
   Omit<Definition, NamedSchemaFields>,
   Value,
   ParsedValue,
+  ResolvedValue,
   IntermediateValue
 >;
