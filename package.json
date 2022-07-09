@@ -24,7 +24,7 @@
     "@sanity/types": "3.0.0-dev-preview.9",
     "@types/lodash": "4.14.182",
     "lodash": "4.17.21",
-    "type-fest": "2.15.1",
+    "type-fest": "2.16.0",
     "zod": "3.17.3"
   },
   "devDependencies": {
@@ -33,8 +33,8 @@
     "@jest/types": "28.1.1",
     "@types/jest": "28.1.4",
     "@typescript-eslint/eslint-plugin": "5.30.5",
-    "@typescript-eslint/parser": "5.30.0",
-    "eslint": "8.18.0",
+    "@typescript-eslint/parser": "5.30.5",
+    "eslint": "8.19.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-eslint-comments": "3.2.0",
@@ -45,10 +45,10 @@
     "eslint-plugin-lodash-fp": "2.2.0-a1",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "6.0.0",
-    "eslint-plugin-react": "7.30.0",
+    "eslint-plugin-react": "7.30.1",
     "eslint-plugin-sort-keys-fix": "1.1.2",
     "eslint-plugin-typescript-sort-keys": "2.1.0",
-    "eslint-plugin-unicorn": "42.0.0",
+    "eslint-plugin-unicorn": "43.0.1",
     "husky": "8.0.1",
     "imagemin-lint-staged": "0.5.1",
     "is-ci": "3.0.1",
@@ -59,7 +59,7 @@
     "semantic-release": "19.0.3",
     "sort-package-json": "1.48.1",
     "ts-jest": "28.0.5",
-    "ts-node": "10.8.1",
+    "ts-node": "10.8.2",
     "typescript": "4.7.4"
   }
 }
