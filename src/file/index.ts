@@ -41,16 +41,16 @@ export const file = <
       typeof extraZodFields
     >
   >,
+  ZodResolved extends z.ZodObject<
+    // eslint-disable-next-line no-use-before-define -- ZodResolved can't be optional, but FieldsArray has to be
+    Merge<FieldsZodResolvedObject<FieldsArray>, typeof extraZodFields>
+  >,
   FieldsArray extends readonly [
     FieldOptions<Names, Zods, ResolvedValues, Optionals>,
     ...Array<FieldOptions<Names, Zods, ResolvedValues, Optionals>>
   ] = [never, ...never],
   ParsedValue = z.output<Zod>,
-  ResolvedValue = z.output<
-    z.ZodObject<
-      Merge<FieldsZodResolvedObject<FieldsArray>, typeof extraZodFields>
-    >
-  >
+  ResolvedValue = z.output<ZodResolved>
 >({
   fields,
   mock = (faker, path) =>
@@ -64,11 +64,8 @@ export const file = <
     } as unknown as z.input<Zod>),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
-  zodResolved = () =>
-    z.object({
-      ...(fields && fieldsZodResolvedObject(fields)),
-      ...extraZodFields,
-    }) as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
+  zodResolved = (zod) =>
+    zod as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
   SanityTypeDef<
@@ -76,25 +73,30 @@ export const file = <
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,
-    z.output<Zod>
+    z.output<Zod>,
+    z.output<ZodResolved>
   >,
   {
     fields?: FieldsArray;
   }
-> = {}) => {
-  const zod = z.object({
-    ...(fields && fieldsZodObject(fields)),
-    ...extraZodFields,
-  }) as unknown as Zod;
-
-  return createType({
+> = {}) =>
+  createType({
     mock,
     schema: () => ({
       ...def,
       ...(fields && fieldsSchema(fields)),
       type: "file",
     }),
-    zod: zodFn(zod),
-    zodResolved: zodResolved(zod),
+    zod: zodFn(
+      z.object({
+        ...(fields && fieldsZodObject(fields)),
+        ...extraZodFields,
+      }) as unknown as Zod
+    ),
+    zodResolved: zodResolved(
+      z.object({
+        ...(fields && fieldsZodResolvedObject(fields)),
+        ...extraZodFields,
+      }) as unknown as z.ZodType<z.output<ZodResolved>, any, z.input<Zod>>
+    ),
   });
-};

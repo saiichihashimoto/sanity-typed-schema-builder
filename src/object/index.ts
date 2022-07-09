@@ -28,8 +28,9 @@ export const object = <
     ...Array<FieldOptions<Names, Zods, ResolvedValues, Optionals>>
   ],
   Zod extends z.ZodObject<FieldsZodObject<FieldsArray>>,
+  ZodResolved extends z.ZodObject<FieldsZodResolvedObject<FieldsArray>>,
   ParsedValue = z.output<Zod>,
-  ResolvedValue = z.output<z.ZodObject<FieldsZodResolvedObject<FieldsArray>>>,
+  ResolvedValue = z.output<ZodResolved>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
 >({
@@ -38,12 +39,8 @@ export const object = <
   mock = fieldsMock(fields),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
-  zodResolved = () =>
-    z.object(fieldsZodResolvedObject(fields)) as unknown as z.ZodType<
-      ResolvedValue,
-      any,
-      z.input<Zod>
-    >,
+  zodResolved = (zod) =>
+    zod as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
   SanityTypeDef<
@@ -51,23 +48,27 @@ export const object = <
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,
-    z.output<Zod>
+    z.output<Zod>,
+    z.output<ZodResolved>
   >,
   {
     fields: FieldsArray;
     preview?: Preview<z.input<Zod>, Select>;
   }
->) => {
-  const zod = z.object(fieldsZodObject(fields)) as Zod;
-
-  return createType({
+>) =>
+  createType({
     mock,
     schema: () => ({
       ...def,
       ...fieldsSchema(fields, previewDef),
       type: "object",
     }),
-    zod: zodFn(zod),
-    zodResolved: zodResolved(zod),
+    zod: zodFn(z.object(fieldsZodObject(fields)) as Zod),
+    zodResolved: zodResolved(
+      z.object(fieldsZodResolvedObject(fields)) as unknown as z.ZodType<
+        z.output<ZodResolved>,
+        any,
+        z.input<Zod>
+      >
+    ),
   });
-};

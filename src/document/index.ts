@@ -92,12 +92,11 @@ export const document = <
   Zod extends z.ZodObject<
     Merge<FieldsZodObject<FieldsArray>, ExtraZodFields<DocumentName>>
   >,
-  ParsedValue = z.output<Zod>,
-  ResolvedValue = z.output<
-    z.ZodObject<
-      Merge<FieldsZodResolvedObject<FieldsArray>, ExtraZodFields<DocumentName>>
-    >
+  ZodResolved extends z.ZodObject<
+    Merge<FieldsZodResolvedObject<FieldsArray>, ExtraZodFields<DocumentName>>
   >,
+  ParsedValue = z.output<Zod>,
+  ResolvedValue = z.output<ZodResolved>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
   Select extends Record<string, string> = {}
 >({
@@ -122,11 +121,8 @@ export const document = <
   },
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
-  zodResolved = () =>
-    z.object({
-      ...fieldsZodResolvedObject(fields),
-      ...extraZodFields(name),
-    }) as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
+  zodResolved = (zod) =>
+    zod as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
   ...def
 }: Merge<
   SanityNamedTypeDef<
@@ -134,7 +130,8 @@ export const document = <
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,
-    z.output<Zod>
+    z.output<Zod>,
+    z.output<ZodResolved>
   >,
   {
     fields: FieldsArray;
@@ -142,11 +139,6 @@ export const document = <
     preview?: Preview<z.input<Zod>, Select>;
   }
 >): DocumentType<DocumentName, z.input<Zod>, ParsedValue, ResolvedValue> => {
-  const zod = z.object({
-    ...fieldsZodObject(fields),
-    ...extraZodFields(name),
-  }) as unknown as Zod;
-
   /* eslint-disable fp/no-let -- Need side effects */
   let counter = 0;
   let mocks: Array<z.input<Zod>> = [];
@@ -184,8 +176,18 @@ export const document = <
         name,
         type: "document",
       }),
-      zod: zodFn(zod),
-      zodResolved: zodResolved(zod),
+      zod: zodFn(
+        z.object({
+          ...fieldsZodObject(fields),
+          ...extraZodFields(name),
+        }) as unknown as Zod
+      ),
+      zodResolved: zodResolved(
+        z.object({
+          ...fieldsZodResolvedObject(fields),
+          ...extraZodFields(name),
+        }) as unknown as z.ZodType<z.output<ZodResolved>, any, z.input<Zod>>
+      ),
     }),
   };
 };

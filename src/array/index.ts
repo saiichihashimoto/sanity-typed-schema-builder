@@ -90,7 +90,8 @@ export const array = <
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,
-    z.output<Zod>
+    z.output<Zod>,
+    z.output<ZodResolved>
   >,
   {
     length?: number;

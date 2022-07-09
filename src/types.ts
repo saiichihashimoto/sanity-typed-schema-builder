@@ -101,17 +101,18 @@ export type SanityNamedTypeDef<
   Value,
   ParsedValue,
   ResolvedValue,
-  IntermediateValue = Value
+  PreParsedValue = Value,
+  PreResolvedValue = Value
 > = Merge<
   WithTypedValidation<Omit<Definition, "type">, Value>,
   {
     initialValue?: Value | (() => Promisable<Value>);
     mock?: (faker: Faker, path: string) => Value;
     zod?: (
-      zod: z.ZodType<IntermediateValue, any, Value>
+      zod: z.ZodType<PreParsedValue, any, Value>
     ) => z.ZodType<ParsedValue, any, Value>;
     zodResolved?: (
-      zod: z.ZodType<IntermediateValue, any, Value>
+      zod: z.ZodType<PreResolvedValue, any, Value>
     ) => z.ZodType<ResolvedValue, any, Value>;
   }
 >;
@@ -121,11 +122,13 @@ export type SanityTypeDef<
   Value,
   ParsedValue,
   ResolvedValue,
-  IntermediateValue = Value
+  PreParsedValue = Value,
+  PreResolvedValue = Value
 > = SanityNamedTypeDef<
   Omit<Definition, NamedSchemaFields>,
   Value,
   ParsedValue,
   ResolvedValue,
-  IntermediateValue
+  PreParsedValue,
+  PreResolvedValue
 >;
