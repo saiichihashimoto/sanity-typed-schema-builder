@@ -17,8 +17,38 @@ type DefaultPortableTextBlock = PortableTextBlock<
   string
 >;
 
-export const block = <Output = DefaultPortableTextBlock>({
-  mock = (faker): DefaultPortableTextBlock => ({
+const zod: z.ZodType<DefaultPortableTextBlock, any, DefaultPortableTextBlock> =
+  z.object({
+    _key: z.optional(z.string()),
+    _type: z.string(),
+    level: z.optional(z.number()),
+    listItem: z.optional(z.string()),
+    style: z.optional(z.string()),
+    children: z.array(
+      z
+        .object({
+          _type: z.string(),
+          _key: z.optional(z.string()),
+        })
+        .catchall(z.unknown())
+    ),
+    markDefs: z.optional(
+      z.array(
+        z
+          .object({
+            _type: z.string(),
+            _key: z.string(),
+          })
+          .catchall(z.unknown())
+      )
+    ),
+  });
+
+export const block = <
+  ParsedValue = DefaultPortableTextBlock,
+  ResolvedValue = DefaultPortableTextBlock
+>({
+  mock = (faker) => ({
     style: "normal",
     _type: "block",
     markDefs: [],
@@ -31,44 +61,21 @@ export const block = <Output = DefaultPortableTextBlock>({
     ],
   }),
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<Output, any, DefaultPortableTextBlock>,
+    zod as unknown as z.ZodType<ParsedValue, any, DefaultPortableTextBlock>,
+  zodResolved,
   ...def
 }: SanityTypeDef<
   Schema.BlockDefinition,
-  z.ZodType<DefaultPortableTextBlock, any, DefaultPortableTextBlock>,
-  Output
+  DefaultPortableTextBlock,
+  ParsedValue,
+  ResolvedValue
 > = {}) =>
   createType({
     mock,
-    zod: zodFn(
-      z.object({
-        _key: z.optional(z.string()),
-        _type: z.string(),
-        level: z.optional(z.number()),
-        listItem: z.optional(z.string()),
-        style: z.optional(z.string()),
-        children: z.array(
-          z
-            .object({
-              _type: z.string(),
-              _key: z.optional(z.string()),
-            })
-            .catchall(z.unknown())
-        ),
-        markDefs: z.optional(
-          z.array(
-            z
-              .object({
-                _type: z.string(),
-                _key: z.string(),
-              })
-              .catchall(z.unknown())
-          )
-        ),
-      })
-    ),
     schema: () => ({
       ...def,
       type: "block",
     }),
+    zod: zodFn(zod),
+    zodResolved: zodResolved?.(zod),
   });

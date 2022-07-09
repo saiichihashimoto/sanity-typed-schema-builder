@@ -6,7 +6,7 @@ import { mockRule } from "../test-utils";
 import { block } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput } from "../types";
+import type { InferValue } from "../types";
 import type {
   PortableTextBlock,
   PortableTextMarkDefinition,
@@ -24,7 +24,7 @@ describe("block", () => {
   it("parses into a block", () => {
     const type = block();
 
-    const value: InferInput<typeof type> = {
+    const value: InferValue<typeof type> = {
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -44,6 +44,31 @@ describe("block", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into a block", () => {
+    const type = block();
+
+    const value: InferValue<typeof type> = {
+      style: "normal",
+      _type: "block",
+      markDefs: [],
+      children: [
+        {
+          _type: "span",
+          text: "Amazing, actually.",
+          marks: [],
+        },
+      ],
+    };
+    const resolvedValue: PortableTextBlock<
+      PortableTextMarkDefinition,
+      TypedObject,
+      string,
+      string
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
   });
 
   it("mocks block content", () =>

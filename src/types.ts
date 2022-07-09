@@ -7,44 +7,39 @@ import type {
 } from "@sanity/types";
 import type { Merge, PartialDeep, Promisable, SetOptional } from "type-fest";
 
-export type AnyObject = Record<string, unknown>;
-
-export const zodUnion = <Zods extends z.ZodType<any, any, any>>(zods: Zods[]) =>
+export const zodUnion = <Zods extends z.ZodTypeAny>(zods: Zods[]): Zods =>
   zods.length === 0
     ? (z.never() as unknown as Zods)
     : zods.length === 1
-    ? (zods[0]! as Zods)
-    : (z.union([
-        zods[0]! as Zods,
-        zods[1]! as Zods,
-        ...zods.slice(2),
-      ]) as unknown as Zods);
+    ? zods[0]!
+    : (z.union([zods[0]!, zods[1]!, ...zods.slice(2)]) as unknown as Zods);
 
-// TODO Type Definition across the board
-export interface SanityType<
-  Definition,
-  // Need to union with ZodObject, not clear why
-  Zod extends z.ZodType<any, any, any> | z.ZodObject<any>
-> {
-  mock: (faker: Faker, path?: string) => z.input<Zod>;
-  parse: (data: unknown) => z.output<Zod>;
+export interface SanityType<Definition, Value, ParsedValue, ResolvedValue> {
+  mock: (faker: Faker, path?: string) => Value;
+  parse: (data: unknown) => ParsedValue;
+  resolve: (data: unknown) => ResolvedValue;
   schema: () => Definition;
-  zod: Zod;
+  zod: z.ZodType<ParsedValue, any, Value>;
+  zodResolved: z.ZodType<ResolvedValue, any, Value>;
 }
 
-export type InferInput<T extends SanityType<any, any>> = z.input<T["zod"]>;
+export type InferValue<T extends SanityType<any, any, any, any>> =
+  T extends SanityType<any, infer Value, any, any> ? Value : never;
 
-export type InferOutput<T extends SanityType<any, any>> = z.output<T["zod"]>;
+export type InferParsedValue<T extends SanityType<any, any, any, any>> =
+  T extends SanityType<any, any, infer ParsedValue, any> ? ParsedValue : never;
 
-const createMocker = <
-  Input,
-  Zod extends z.ZodType<any, any, Input> | z.ZodObject<any>
->(
-  mockFn: (faker: Faker, path: string) => z.input<Zod>
+export type InferResolvedValue<T extends SanityType<any, any, any, any>> =
+  T extends SanityType<any, any, any, infer ResolvedValue>
+    ? ResolvedValue
+    : never;
+
+const createMocker = <MockType>(
+  mockFn: (faker: Faker, path: string) => MockType
 ) => {
   const fakers: Record<string, Faker> = {};
 
-  return (faker: Faker, path = ""): z.input<Zod> => {
+  return (faker: Faker, path = ""): MockType => {
     // @ts-expect-error -- We need faker to not be bundled with the library while getting both the class to create new instances and faker.locales.
     const FakerClass: typeof Faker = faker.constructor;
 
@@ -65,23 +60,28 @@ const createMocker = <
 };
 
 // TODO createType tests
-export const createType = <
-  Definition,
-  Input,
-  Zod extends z.ZodType<any, any, Input> | z.ZodObject<any>
->({
+export const createType = <Definition, Value, ParsedValue, ResolvedValue>({
   mock,
   zod,
+  zodResolved = zod as unknown as z.ZodType<ResolvedValue, any, Value>,
   parse = zod.parse.bind(zod),
+  resolve = zodResolved.parse.bind(zodResolved),
   ...def
 }: Merge<
-  SetOptional<SanityType<Definition, Zod>, "parse">,
-  { mock: (faker: Faker, path: string) => Input }
->): SanityType<Definition, Zod> => ({
+  SetOptional<
+    SanityType<Definition, Value, ParsedValue, ResolvedValue>,
+    "parse" | "resolve" | "zodResolved"
+  >,
+  {
+    mock: (faker: Faker, path: string) => Value;
+  }
+>): SanityType<Definition, Value, ParsedValue, ResolvedValue> => ({
   ...def,
   mock: createMocker(mock),
   parse,
+  resolve,
   zod,
+  zodResolved,
 });
 
 // Don't use Merge, because it creates a deep recursive type
@@ -89,38 +89,43 @@ export type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
   custom: (fn: CustomValidator<PartialDeep<Value>>) => Rule<PartialDeep<Value>>;
 };
 
-export type WithTypedValidation<
+export type WithTypedValidation<Definition, Value> = Merge<
   Definition,
-  Zod extends z.ZodType<any, any, any>
-> = Merge<
-  Definition,
-  { validation?: (rule: Rule<z.input<Zod>>) => Rule<z.input<Zod>> }
+  { validation?: (rule: Rule<Value>) => Rule<Value> }
 >;
 
 export type NamedSchemaFields = "description" | "name" | "title";
 
-export type SanityTypeDef<
+export type SanityNamedTypeDef<
   Definition,
-  Zod extends z.ZodType<any, any, any>,
-  Output
+  Value,
+  ParsedValue,
+  ResolvedValue,
+  IntermediateValue = Value
 > = Merge<
-  WithTypedValidation<Omit<Definition, NamedSchemaFields | "type">, Zod>,
+  WithTypedValidation<Omit<Definition, "type">, Value>,
   {
-    initialValue?: z.input<Zod> | (() => Promisable<z.input<Zod>>);
-    mock?: (faker: Faker, path: string) => z.input<Zod>;
-    zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
+    initialValue?: Value | (() => Promisable<Value>);
+    mock?: (faker: Faker, path: string) => Value;
+    zod?: (
+      zod: z.ZodType<IntermediateValue, any, Value>
+    ) => z.ZodType<ParsedValue, any, Value>;
+    zodResolved?: (
+      zod: z.ZodType<IntermediateValue, any, Value>
+    ) => z.ZodType<ResolvedValue, any, Value>;
   }
 >;
 
-export type SanityNamedTypeDef<
+export type SanityTypeDef<
   Definition,
-  Zod extends z.ZodType<any, any, any>,
-  Output
-> = Merge<
-  WithTypedValidation<Omit<Definition, "type">, Zod>,
-  {
-    initialValue?: z.input<Zod> | (() => Promisable<z.input<Zod>>);
-    mock?: (faker: Faker, path: string) => z.input<Zod>;
-    zod?: (zod: Zod) => z.ZodType<Output, any, z.input<Zod>>;
-  }
+  Value,
+  ParsedValue,
+  ResolvedValue,
+  IntermediateValue = Value
+> = SanityNamedTypeDef<
+  Omit<Definition, NamedSchemaFields>,
+  Value,
+  ParsedValue,
+  ResolvedValue,
+  IntermediateValue
 >;

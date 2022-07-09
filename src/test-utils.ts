@@ -7,7 +7,7 @@ type ValidateError<Received, Expected> = Simplify<{
   received: Received;
 }>;
 
-export type ValidateShape<Received, Expected> = IsEqual<
+export type ValidateShape<Received, Expected extends Received> = IsEqual<
   Expected,
   Received
 > extends true

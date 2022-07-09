@@ -7,7 +7,11 @@ import { mockRule } from "../test-utils";
 import { date } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 
 describe("date", () => {
   it("builds a sanity config", () =>
@@ -18,16 +22,28 @@ describe("date", () => {
   it("passes through schema values", () =>
     expect(date({ hidden: false }).schema()).toHaveProperty("hidden", false));
 
-  it("parses into a date", () => {
+  it("parses into a string", () => {
     const type = date();
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "2017-02-12";
+    const value: ValidateShape<InferValue<typeof type>, string> = "2017-02-12";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into a string", () => {
+    const type = date();
+
+    const value: ValidateShape<InferValue<typeof type>, string> = "2017-02-12";
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      string
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
   });
 
   it("mocks a string", () => {
@@ -62,7 +78,7 @@ describe("date", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       number
     > = type.parse("2017-02-12");
 

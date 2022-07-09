@@ -8,7 +8,11 @@ import { mockRule } from "../test-utils";
 import { array } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 import type { PartialDeep } from "type-fest";
 
 describe("array", () => {
@@ -28,9 +32,9 @@ describe("array", () => {
   it("adds primitive types", () => {
     const type = array({ of: [boolean()] });
 
-    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [];
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [];
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       boolean[]
     > = type.parse(value);
 
@@ -67,7 +71,7 @@ describe("array", () => {
     ]);
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       Array<{
         _key: string;
         foo: boolean;
@@ -77,7 +81,7 @@ describe("array", () => {
       { _key: "b", foo: false },
     ];
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       Array<{
         _key: string;
         foo: boolean;
@@ -135,7 +139,7 @@ describe("array", () => {
     ]);
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       Array<
         | {
             _key: string;
@@ -151,7 +155,7 @@ describe("array", () => {
       { _key: "b", bar: true },
     ];
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       Array<
         | {
             _key: string;
@@ -167,6 +171,24 @@ describe("array", () => {
     expect(parsedValue).toEqual(value);
   });
 
+  it("resolves into an array", () => {
+    const type = array({
+      of: [
+        boolean({
+          zodResolved: (zod) => zod.transform(() => "foo"),
+        }),
+      ],
+    });
+
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      string[]
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(["foo"]);
+  });
+
   it("sets min", () => {
     const type = array({ min: 1, of: [boolean()] });
 
@@ -176,9 +198,9 @@ describe("array", () => {
 
     expect(rule.min).toHaveBeenCalledWith(1);
 
-    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [true];
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       boolean[]
     > = type.parse(value);
 
@@ -198,9 +220,9 @@ describe("array", () => {
 
     expect(rule.max).toHaveBeenCalledWith(1);
 
-    const value: ValidateShape<InferInput<typeof type>, boolean[]> = [true];
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       boolean[]
     > = type.parse(value);
 
@@ -220,13 +242,13 @@ describe("array", () => {
 
     expect(rule.length).toHaveBeenCalledWith(1);
 
-    const value0: ValidateShape<InferInput<typeof type>, boolean[]> = [];
+    const value0: ValidateShape<InferValue<typeof type>, boolean[]> = [];
 
     expect(() => {
       type.parse(value0);
     }).toThrow(z.ZodError);
 
-    const value2: ValidateShape<InferInput<typeof type>, boolean[]> = [
+    const value2: ValidateShape<InferValue<typeof type>, boolean[]> = [
       true,
       false,
     ];
@@ -246,11 +268,11 @@ describe("array", () => {
     expect(rule.min).toHaveBeenCalledWith(1);
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       [boolean, ...boolean[]]
     > = [true];
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       [boolean, ...boolean[]]
     > = type.parse(value);
 
@@ -263,16 +285,21 @@ describe("array", () => {
 
   it("allows defining the zod", () => {
     const type = array({
-      of: [boolean()],
-      zod: (zod) => zod.transform((value) => value.length),
+      of: [
+        boolean({ zod: (zod) => zod.transform((value) => (value ? 1 : 0)) }),
+      ],
+      zod: (zod) =>
+        zod.transform((values) =>
+          values.reduce<number>((sum, val) => sum + val, 0)
+        ),
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       number
     > = type.parse([true, false]);
 
-    expect(parsedValue).toEqual(2);
+    expect(parsedValue).toEqual(1);
   });
 
   it("types custom validation", () => {

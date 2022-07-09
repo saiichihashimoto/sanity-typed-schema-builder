@@ -8,7 +8,11 @@ import { mockRule } from "../test-utils";
 import { objectNamed } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 import type { Merge, PartialDeep } from "type-fest";
 
 describe("object", () => {
@@ -61,18 +65,46 @@ describe("object", () => {
     });
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       { _type: "foo"; foo: boolean }
     > = {
       _type: "foo",
       foo: true,
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       { _type: "foo"; foo: boolean }
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("resolves into an object", () => {
+    const type = objectNamed({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: boolean({
+            zodResolved: (zod) => zod.transform(() => "foo"),
+          }),
+        },
+      ],
+    });
+
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      { _type: "foo"; foo: boolean }
+    > = {
+      _type: "foo",
+      foo: true,
+    };
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      { _type: "foo"; foo: string }
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual({ _type: "foo", foo: "foo" });
   });
 
   it("allows optional fields", () => {
@@ -119,7 +151,7 @@ describe("object", () => {
     expect(barRule.required).not.toHaveBeenCalled();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "foo";
         bar?: string;
@@ -130,7 +162,7 @@ describe("object", () => {
       foo: true,
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       {
         _type: "foo";
         bar?: string;
@@ -159,7 +191,7 @@ describe("object", () => {
     });
 
     const value: ValidateShape<
-      InferInput<typeof type2>,
+      InferValue<typeof type2>,
       {
         _type: "bar";
         foo: {
@@ -175,7 +207,7 @@ describe("object", () => {
       },
     };
     const parsedValue: ValidateShape<
-      InferOutput<typeof type2>,
+      InferParsedValue<typeof type2>,
       {
         _type: "bar";
         foo: {
@@ -217,7 +249,7 @@ describe("object", () => {
           name: "foo",
           type: string(),
         },
-      ],
+      ] as const,
     });
 
     expect(objectNamed(objectDef()).mock(faker)).toEqual(
@@ -328,7 +360,7 @@ describe("object", () => {
     const schema = type.schema();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "foo";
         bar?: string;
@@ -352,18 +384,25 @@ describe("object", () => {
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: boolean({
+            zod: (zod) => zod.transform((value) => (value ? 1 : 0)),
+          }),
         },
       ],
-      zod: (zod) => zod.transform((value) => Object.keys(value).length),
+      zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
-      number
+      InferParsedValue<typeof type>,
+      Array<[string, 0 | 1 | "foo"]>
     > = type.parse({ _type: "foo", foo: true });
 
-    expect(parsedValue).toEqual(2);
+    expect(parsedValue).toEqual(
+      expect.arrayContaining([
+        ["_type", "foo"],
+        ["foo", 1],
+      ])
+    );
   });
 
   it("types custom validation", () => {
@@ -418,7 +457,7 @@ describe("object", () => {
     });
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       {
         _type: "type";
         value: string;
@@ -441,7 +480,7 @@ describe("object", () => {
     });
 
     const referencingValue: ValidateShape<
-      InferInput<typeof referencingType>,
+      InferValue<typeof referencingType>,
       {
         _type: "referencingType";
         value: {
@@ -467,7 +506,7 @@ describe("object", () => {
 
     // TS2589: Type instantiation is excessively deep and possibly infinite.
     const deepReferencingValue: ValidateShape<
-      InferInput<typeof deepReferencingType>,
+      InferValue<typeof deepReferencingType>,
       {
         _type: "deepReferencingType";
         referencingValue: {

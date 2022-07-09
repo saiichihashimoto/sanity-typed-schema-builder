@@ -2,7 +2,8 @@ import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
 import type {
-  AnyObject,
+  InferResolvedValue,
+  InferValue,
   NamedSchemaFields,
   SanityType,
   WithTypedValidation,
@@ -19,7 +20,8 @@ import type { Merge } from "type-fest";
 
 export type FieldOptions<
   Name extends string,
-  Zod extends z.ZodType<any, any, any>,
+  Zod extends z.ZodTypeAny,
+  ResolvedValue,
   Optional extends boolean
 > = Pick<
   Schema.FieldDefinition,
@@ -30,25 +32,36 @@ export type FieldOptions<
   type: SanityType<
     WithTypedValidation<
       Omit<Schema.FieldDefinition<any>, NamedSchemaFields>,
-      Zod
+      z.input<Zod>
     >,
-    Zod
+    z.input<Zod>,
+    z.output<Zod>,
+    ResolvedValue
   >;
 };
 
+type ZodOptional<
+  T extends z.ZodTypeAny,
+  Optional extends boolean
+> = Optional extends true ? z.ZodOptional<T> : T;
+
 export type FieldsZodObject<
-  FieldsArray extends Array<FieldOptions<any, z.ZodType<any, any, any>, any>>
+  FieldsArray extends readonly [
+    FieldOptions<any, z.ZodTypeAny, any, any>,
+    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
+  ]
 > = {
-  [Name in FieldsArray[number]["name"]]: Extract<
-    FieldsArray[number],
-    { name: Name }
-  >["optional"] extends true
-    ? z.ZodOptional<Extract<FieldsArray[number], { name: Name }>["type"]["zod"]>
-    : Extract<FieldsArray[number], { name: Name }>["type"]["zod"];
+  [Name in FieldsArray[number]["name"]]: ZodOptional<
+    Extract<FieldsArray[number], { name: Name }>["type"]["zod"],
+    Extract<FieldsArray[number], { name: Name }>["optional"]
+  >;
 };
 
 export const fieldsZodObject = <
-  FieldsArray extends Array<FieldOptions<any, z.ZodType<any, any, any>, any>>
+  FieldsArray extends readonly [
+    FieldOptions<any, z.ZodTypeAny, any, any>,
+    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
+  ]
 >(
   fields: FieldsArray
 ) =>
@@ -59,12 +72,44 @@ export const fieldsZodObject = <
     ])
   ) as FieldsZodObject<FieldsArray>;
 
+export type FieldsZodResolvedObject<
+  FieldsArray extends readonly [
+    FieldOptions<any, z.ZodTypeAny, any, any>,
+    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
+  ]
+> = {
+  [Name in FieldsArray[number]["name"]]: ZodOptional<
+    z.ZodType<
+      InferResolvedValue<Extract<FieldsArray[number], { name: Name }>["type"]>,
+      any,
+      InferValue<Extract<FieldsArray[number], { name: Name }>["type"]>
+    >,
+    Extract<FieldsArray[number], { name: Name }>["optional"]
+  >;
+};
+
+export const fieldsZodResolvedObject = <
+  FieldsArray extends readonly [
+    FieldOptions<any, z.ZodTypeAny, any, any>,
+    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
+  ]
+>(
+  fields: FieldsArray
+) =>
+  fromPairs(
+    fields.map(({ name, optional, type: { zodResolved } }) => [
+      name,
+      optional ? z.optional(zodResolved) : zodResolved,
+    ])
+  ) as FieldsZodResolvedObject<FieldsArray>;
+
 export const fieldsMock =
   <
     Names extends string,
-    FieldsArray extends Array<
-      FieldOptions<Names, z.ZodType<any, any, any>, any>
-    >
+    FieldsArray extends readonly [
+      FieldOptions<Names, z.ZodTypeAny, any, any>,
+      ...Array<FieldOptions<Names, z.ZodTypeAny, any, any>>
+    ]
   >(
     fields: FieldsArray
   ) =>
@@ -77,7 +122,7 @@ export const fieldsMock =
     ) as z.input<z.ZodObject<FieldsZodObject<FieldsArray>>>;
 
 export type Preview<
-  Value extends AnyObject,
+  Value extends Record<string, unknown>,
   Select extends NonNullable<PreviewConfig["select"]>
 > =
   | {
@@ -98,8 +143,11 @@ export type Preview<
 
 export const fieldsSchema = <
   Names extends string,
-  FieldsArray extends Array<FieldOptions<Names, any, any>>,
-  Value extends AnyObject,
+  FieldsArray extends readonly [
+    FieldOptions<Names, z.ZodTypeAny, any, any>,
+    ...Array<FieldOptions<Names, z.ZodTypeAny, any, any>>
+  ],
+  Value extends Record<string, unknown>,
   Select extends NonNullable<PreviewConfig["select"]>
 >(
   fields: FieldsArray,

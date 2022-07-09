@@ -7,7 +7,11 @@ import { mockRule } from "../test-utils";
 import { url } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferInput, InferOutput } from "../types";
+import type {
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
 
 describe("url", () => {
   it("builds a sanity config", () =>
@@ -22,21 +26,36 @@ describe("url", () => {
     const type = url();
 
     const value: ValidateShape<
-      InferInput<typeof type>,
+      InferValue<typeof type>,
       string
     > = "https://example.com/img.jpg";
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       string
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
   });
 
+  it("resolves into a string", () => {
+    const type = url();
+
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      string
+    > = "https://example.com/img.jpg";
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      string
+    > = type.resolve(value);
+
+    expect(resolvedValue).toEqual(value);
+  });
+
   it("enforces a url", () => {
     const type = url();
 
-    const value: ValidateShape<InferInput<typeof type>, string> = "not a url";
+    const value: ValidateShape<InferValue<typeof type>, string> = "not a url";
 
     expect(() => {
       type.parse(value);
@@ -73,7 +92,7 @@ describe("url", () => {
     });
 
     const parsedValue: ValidateShape<
-      InferOutput<typeof type>,
+      InferParsedValue<typeof type>,
       number
     > = type.parse("https://google.com");
 
