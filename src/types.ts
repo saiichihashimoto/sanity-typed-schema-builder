@@ -7,10 +7,28 @@ import type {
 } from "@sanity/types";
 import type { Merge, PartialDeep, Promisable, SetOptional } from "type-fest";
 
+export type TupleOfLength<
+  T,
+  Min extends number = number,
+  Max extends number = number,
+  Result extends readonly T[] = readonly []
+> = Result["length"] extends Min
+  ? number extends Max
+    ? readonly [...Result, ...T[]]
+    : Result["length"] extends Max
+    ? Result
+    :
+        | Result
+        | TupleOfLength<
+            T,
+            [T, ...Result]["length"] & number,
+            Max,
+            readonly [T, ...Result]
+          >
+  : TupleOfLength<T, Min, Max, readonly [T, ...Result]>;
+
 export const zodUnion = <Zods extends z.ZodTypeAny>(zods: Zods[]): Zods =>
-  zods.length === 0
-    ? (z.never() as unknown as Zods)
-    : zods.length === 1
+  zods.length === 1
     ? zods[0]!
     : (z.union([zods[0]!, zods[1]!, ...zods.slice(2)]) as unknown as Zods);
 

@@ -6,6 +6,7 @@ import type {
   InferValue,
   NamedSchemaFields,
   SanityType,
+  TupleOfLength,
   WithTypedValidation,
 } from "../types";
 import type { Faker } from "@faker-js/faker";
@@ -46,10 +47,10 @@ type ZodOptional<
 > = Optional extends true ? z.ZodOptional<T> : T;
 
 export type FieldsZodObject<
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<any, z.ZodTypeAny, any, any>,
-    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
-  ]
+    1
+  >
 > = {
   [Name in FieldsArray[number]["name"]]: ZodOptional<
     Extract<FieldsArray[number], { name: Name }>["type"]["zod"],
@@ -58,10 +59,10 @@ export type FieldsZodObject<
 };
 
 export const fieldsZodObject = <
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<any, z.ZodTypeAny, any, any>,
-    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
-  ]
+    1
+  >
 >(
   fields: FieldsArray
 ) =>
@@ -73,10 +74,10 @@ export const fieldsZodObject = <
   ) as FieldsZodObject<FieldsArray>;
 
 export type FieldsZodResolvedObject<
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<any, z.ZodTypeAny, any, any>,
-    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
-  ]
+    1
+  >
 > = {
   [Name in FieldsArray[number]["name"]]: ZodOptional<
     z.ZodType<
@@ -89,10 +90,10 @@ export type FieldsZodResolvedObject<
 };
 
 export const fieldsZodResolvedObject = <
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<any, z.ZodTypeAny, any, any>,
-    ...Array<FieldOptions<any, z.ZodTypeAny, any, any>>
-  ]
+    1
+  >
 >(
   fields: FieldsArray
 ) =>
@@ -106,10 +107,10 @@ export const fieldsZodResolvedObject = <
 export const fieldsMock =
   <
     Names extends string,
-    FieldsArray extends readonly [
+    FieldsArray extends TupleOfLength<
       FieldOptions<Names, z.ZodTypeAny, any, any>,
-      ...Array<FieldOptions<Names, z.ZodTypeAny, any, any>>
-    ]
+      1
+    >
   >(
     fields: FieldsArray
   ) =>
@@ -143,10 +144,10 @@ export type Preview<
 
 export const fieldsSchema = <
   Names extends string,
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<Names, z.ZodTypeAny, any, any>,
-    ...Array<FieldOptions<Names, z.ZodTypeAny, any, any>>
-  ],
+    1
+  >,
   Value extends Record<string, unknown>,
   Select extends NonNullable<PreviewConfig["select"]>
 >(

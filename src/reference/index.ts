@@ -3,7 +3,12 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { DocumentType } from "../document";
-import type { InferResolvedValue, InferValue, SanityTypeDef } from "../types";
+import type {
+  InferResolvedValue,
+  InferValue,
+  SanityTypeDef,
+  TupleOfLength,
+} from "../types";
 import type { Reference, Schema } from "@sanity/types";
 import type { Merge } from "type-fest";
 
@@ -38,10 +43,10 @@ export const referenceZod: z.ZodType<SanityReference, any, SanityReference> =
 
 export const reference = <
   DocumentName extends string,
-  DocumentTypes extends [
+  DocumentTypes extends TupleOfLength<
     DocumentType<DocumentName, any, any, any>,
-    ...Array<DocumentType<DocumentName, any, any, any>>
-  ],
+    1
+  >,
   ParsedValue = SanityReference,
   ResolvedValue = InferResolvedValue<DocumentTypes[number]>
 >({

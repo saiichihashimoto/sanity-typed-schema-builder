@@ -15,7 +15,7 @@ import type {
   FieldsZodResolvedObject,
 } from "../field";
 import type { SanityReference } from "../reference";
-import type { SanityTypeDef } from "../types";
+import type { SanityTypeDef, TupleOfLength } from "../types";
 import type { Schema } from "@sanity/types";
 import type { Merge } from "type-fest";
 
@@ -45,10 +45,10 @@ export const file = <
     // eslint-disable-next-line no-use-before-define -- ZodResolved can't be optional, but FieldsArray has to be
     Merge<FieldsZodResolvedObject<FieldsArray>, typeof extraZodFields>
   >,
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<Names, Zods, ResolvedValues, Optionals>,
-    ...Array<FieldOptions<Names, Zods, ResolvedValues, Optionals>>
-  ] = [never, ...never],
+    1
+  > = [never, ...never],
   ParsedValue = z.output<Zod>,
   ResolvedValue = z.output<ZodResolved>
 >({
