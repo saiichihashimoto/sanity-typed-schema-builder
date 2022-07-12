@@ -1,7 +1,17 @@
 {
   "name": "sanity-typed-schema-builder",
   "version": "0.0.0-development",
+  "description": "Build Sanity schemas declaratively and get typescript types of schema values for free!",
+  "keywords": [
+    "sanity",
+    "schema",
+    "typescript",
+    "builder"
+  ],
+  "homepage": "https://saiichihashimoto.github.io/sanity-typed-schema-builder",
   "repository": "github:saiichihashimoto/sanity-typed-schema-builder",
+  "license": "MIT",
+  "author": "Saiichi Hashimoto (http://saiichihashimoto.com)",
   "main": "dist/index.js",
   "files": [
     "dist"
