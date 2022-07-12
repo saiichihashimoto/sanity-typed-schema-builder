@@ -15,7 +15,7 @@ import type {
   FieldsZodResolvedObject,
 } from "../field";
 import type { SanityReference } from "../reference";
-import type { SanityNamedTypeDef } from "../types";
+import type { SanityNamedTypeDef, TupleOfLength } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type { ImageCrop, ImageHotspot, Schema } from "@sanity/types";
 import type { Merge } from "type-fest";
@@ -110,10 +110,10 @@ export const image = <
       ExtraZodFields<Hotspot>
     >
   >,
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<Names, Zods, ResolvedValues, Optionals>,
-    ...Array<FieldOptions<Names, Zods, ResolvedValues, Optionals>>
-  ] = [never, ...never],
+    1
+  > = [never, ...never],
   Hotspot extends boolean = false,
   ParsedValue = z.output<Zod>,
   ResolvedValue = z.output<ZodResolved>

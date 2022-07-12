@@ -44,7 +44,8 @@ export const string = <
         (zod) => (!max ? zod : zod.max(max)),
         (zod) => (!length ? zod : zod.length(length)),
         (zod) => (!regex ? zod : zod.regex(regex)),
-        (zod) => zod as unknown as z.ZodType<TypedValue, any, TypedValue>
+        (zod: z.ZodType<string, any, string>) =>
+          zod as z.ZodType<TypedValue, any, TypedValue>
       )(z.string())
     : flow(
         (value: typeof list) => value,

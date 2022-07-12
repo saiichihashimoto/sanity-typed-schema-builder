@@ -14,7 +14,7 @@ import type {
   FieldsZodResolvedObject,
   Preview,
 } from "../field";
-import type { SanityNamedTypeDef } from "../types";
+import type { SanityNamedTypeDef, TupleOfLength } from "../types";
 import type { Schema } from "@sanity/types";
 import type { Merge } from "type-fest";
 
@@ -28,10 +28,10 @@ export const objectNamed = <
   Zods extends z.ZodTypeAny,
   ResolvedValues,
   Optionals extends boolean,
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<Names, Zods, ResolvedValues, Optionals>,
-    ...Array<FieldOptions<Names, Zods, ResolvedValues, Optionals>>
-  ],
+    1
+  >,
   Zod extends z.ZodObject<
     Merge<FieldsZodObject<FieldsArray>, ExtraZodFields<ObjectNames>>
   >,
