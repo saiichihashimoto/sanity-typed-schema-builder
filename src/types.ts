@@ -85,8 +85,17 @@ export const createType = <Definition, Value, ParsedValue, ResolvedValue>({
 });
 
 // Don't use Merge, because it creates a deep recursive type
-export type Rule<Value> = Omit<RuleWithoutTypedCustom, "custom"> & {
-  custom: (fn: CustomValidator<PartialDeep<Value>>) => Rule<PartialDeep<Value>>;
+export type Rule<Value> = Omit<
+  {
+    [Key in keyof RuleWithoutTypedCustom]: RuleWithoutTypedCustom[Key] extends (
+      ...args: infer Args
+    ) => RuleWithoutTypedCustom
+      ? (...args: Args) => Rule<Value>
+      : RuleWithoutTypedCustom[Key];
+  },
+  "custom"
+> & {
+  custom: (fn: CustomValidator<PartialDeep<Value>>) => Rule<Value>;
 };
 
 export type WithTypedValidation<Definition, Value> = Merge<
