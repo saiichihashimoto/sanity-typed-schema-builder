@@ -1,11 +1,17 @@
 # sanity-typed-schema-builder
 
+[![Saiichi Hashimoto](https://img.shields.io/badge/author-Saiichi%20Hashimoto-blueviolet)](http://saiichihashimoto.com)
+[![npm](https://img.shields.io/npm/dw/sanity-typed-schema-builder)](https://www.npmjs.com/package/sanity-typed-schema-builder)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/saiichihashimoto/sanity-typed-schema-builder)](https://github.com/saiichihashimoto/sanity-typed-schema-builder)
+[![npm](https://img.shields.io/npm/v/sanity-typed-schema-builder)](https://www.npmjs.com/package/sanity-typed-schema-builder)
+[![GitHub](https://img.shields.io/github/license/saiichihashimoto/sanity-typed-schema-builder)](https://github.com/saiichihashimoto/sanity-typed-schema-builder)
+
 Build [Sanity schemas](https://www.sanity.io/docs/content-modelling) declaratively and get typescript types of schema values for free!
 
 - Typescript types for Sanity Values!
+- _ALL_ types are inferred! No messing with generics, awkward casting, or code generation.
 - [Zod](https://zod.dev/) schemas for parsing & transforming values (most notably, `datetime` values into javascript `Date`)!
 - Generated [Faker](https://fakerjs.dev/guide/) mock values!
-- _ALL_ types are inferred! No messing with generics or awkward casting.
 
 ## Install
 
@@ -498,7 +504,9 @@ type Value = s.infer<typeof type>;
 /**
  * type Value === [boolean] | [boolean, boolean];
  */
+```
 
+```typescript
 const type = s.array({
   length: 3,
   of: [s.boolean()],
@@ -1186,3 +1194,34 @@ const schema = type.schema();
  * };
  */
 ```
+
+## Alternative Projects
+
+- [`sanity-codegen`](https://www.npmjs.com/package/sanity-codegen)
+  - Pros:
+    - Types GROQ query results.
+    - Active Development with a community. Seems to have the sanity team's blessing, as well.
+    - A [new version](https://github.com/ricokahler/sanity-codegen/issues/5) on the way and it looks great.
+    - Schemas are defined as-is, which is very nice.
+    - [Rico](https://github.com/ricokahler) is a rockstar.
+  - Cons:
+    - No generated mocks.
+    - Requires a separate build step. Delay in development for the IDE to pickup new types (the new version should have a watch mode).
+    - Modeling your code so code generation picks it up can be somewhat of a hassle.
+    - Code generation comes with it's own set of unsolvable issues and is inherently heavy. The main reason this library was made was specifically to avoid code generation entirely.
+- [`sanity-query-helper`](https://www.npmjs.com/package/sanity-query-helper)
+  - Pros:
+    - Seems to solve the problem in a very similar manner.
+  - Cons:
+    - Inactive Development.
+    - No typescript.
+    - No generated mocks.
+    - Syntax deviates further from native sanity schemas than this library.
+- [`sanity-typed-queries`](https://www.npmjs.com/package/sanity-typed-queries)
+  - Pros:
+    - Types GROQ query results.
+    - Seems to solve the problem in a very similar manner. Honestly, I got a lot of ideas from this package.
+  - Cons:
+    - No generated mocks.
+    - Sanity fields order relies on object member order, which works but is technically unreliable.
+    - Syntax deviates further from native sanity schemas than this library.
