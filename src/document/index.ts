@@ -18,6 +18,7 @@ import type {
 import type {
   SanityNamedTypeDef,
   SanityType,
+  TupleOfLength,
   WithTypedValidation,
 } from "../types";
 import type { Faker } from "@faker-js/faker";
@@ -85,10 +86,10 @@ export const document = <
   Zods extends z.ZodTypeAny,
   ResolvedValues,
   Optionals extends boolean,
-  FieldsArray extends readonly [
+  FieldsArray extends TupleOfLength<
     FieldOptions<Names, Zods, ResolvedValues, Optionals>,
-    ...Array<FieldOptions<Names, Zods, ResolvedValues, Optionals>>
-  ],
+    1
+  >,
   Zod extends z.ZodObject<
     Merge<FieldsZodObject<FieldsArray>, ExtraZodFields<DocumentName>>
   >,
