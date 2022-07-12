@@ -190,96 +190,81 @@ describe("array", () => {
   });
 
   it("sets min", () => {
-    const type = array({ min: 1, of: [boolean()] });
+    const type = array({ min: 2, of: [boolean()] });
 
     const rule = mockRule();
 
     type.schema().validation(rule);
 
-    expect(rule.min).toHaveBeenCalledWith(1);
+    expect(rule.min).toHaveBeenCalledWith(2);
 
-    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      [boolean, boolean, ...boolean[]]
+    > = [true, false];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      boolean[]
+      [boolean, boolean, ...boolean[]]
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse([]);
+      type.parse([true]);
     }).toThrow(z.ZodError);
   });
 
   it("sets max", () => {
-    const type = array({ max: 1, of: [boolean()] });
+    const type = array({ max: 3, of: [boolean()] });
 
     const rule = mockRule();
 
     type.schema().validation(rule);
 
-    expect(rule.max).toHaveBeenCalledWith(1);
+    expect(rule.max).toHaveBeenCalledWith(3);
 
-    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      [] | [boolean] | [boolean, boolean] | [boolean, boolean, boolean]
+    > = [true, false, true];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      boolean[]
+      [] | [boolean] | [boolean, boolean] | [boolean, boolean, boolean]
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse([true, false]);
+      type.parse([true, false, true, false]);
     }).toThrow(z.ZodError);
   });
 
   it("sets length", () => {
-    const type = array({ length: 1, of: [boolean()] });
+    const type = array({ length: 2, of: [boolean()] });
 
     const rule = mockRule();
 
     type.schema().validation(rule);
 
-    expect(rule.length).toHaveBeenCalledWith(1);
+    expect(rule.length).toHaveBeenCalledWith(2);
 
-    const value0: ValidateShape<InferValue<typeof type>, boolean[]> = [];
-
-    expect(() => {
-      type.parse(value0);
-    }).toThrow(z.ZodError);
-
-    const value2: ValidateShape<InferValue<typeof type>, boolean[]> = [
+    const value: ValidateShape<InferValue<typeof type>, [boolean, boolean]> = [
       true,
       false,
     ];
-
-    expect(() => {
-      type.parse(value2);
-    }).toThrow(z.ZodError);
-  });
-
-  it("sets nonempty", () => {
-    const type = array({ nonempty: true, of: [boolean()] });
-
-    const rule = mockRule();
-
-    type.schema().validation(rule);
-
-    expect(rule.min).toHaveBeenCalledWith(1);
-
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      [boolean, ...boolean[]]
-    > = [true];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      [boolean, ...boolean[]]
+      [boolean, boolean]
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
 
     expect(() => {
-      type.parse([]);
+      type.parse([true]);
+    }).toThrow(z.ZodError);
+
+    expect(() => {
+      type.parse([true, false, true]);
     }).toThrow(z.ZodError);
   });
 
