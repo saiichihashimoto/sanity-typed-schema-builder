@@ -12,6 +12,7 @@ Build [Sanity schemas](https://www.sanity.io/docs/content-modelling) declarative
 - _ALL_ types are inferred! No messing with generics, awkward casting, or code generation.
 - [Zod](https://zod.dev/) schemas for parsing & transforming values (most notably, `datetime` values into javascript `Date`)!
 - Generated [Faker](https://fakerjs.dev/guide/) mock values!
+- Support for [additional types](#additional-types)!
 
 ## Install
 
@@ -425,6 +426,136 @@ const value = type.resolve(type.mock(faker));
  *   aString: string;
  *   nonSanity: NonSanity;
  * }
+ */
+```
+
+## Additional Types
+
+In addition to the default [sanity schema types](#types), you may have nonstandard types ([custom asset sources](https://www.sanity.io/docs/custom-asset-sources) like [MUX Input](https://www.sanity.io/plugins/sanity-plugin-mux-input) or unique inputs like [code input](https://www.sanity.io/plugins/code-input)).
+
+`s.createType` allows for creation of a custom type. It returns an object of type `s.SanityType<Definition, Value, ParsedValue, ResolvedValue>`. All provided `s.*` methods use this, so it should be fully featured for any use case.
+
+An example using [Mux Input](https://www.sanity.io/plugins/sanity-plugin-mux-input) (not including installing the plugin):
+
+```typescript
+import { faker } from "@faker-js/faker";
+import { s } from "sanity-typed-schema-builder";
+import { z } from "zod";
+
+const muxVideo = () =>
+  s.createType({
+    // `schema` returns the sanity schema type
+    schema: () => ({ type: "mux.video" } as const),
+
+    // `mock` returns an instance of the native sanity value
+    // `faker` will have a stable `seed` value
+    mock: (faker) =>
+      ({
+        _type: "mux.video",
+        asset: {
+          _type: "reference",
+          _ref: faker.datatype.uuid(),
+        },
+      } as const),
+
+    // `zod` is used for parsing this type
+    zod: z.object({
+      _type: z.literal("mux.video"),
+      asset: z.object({
+        _type: z.literal("reference"),
+        _ref: z.string(),
+      }),
+    }),
+
+    // `zodResolved` is used for parsing into the resolved value
+    // defaults to reusing `zod`
+    zodResolved: z
+      .object({
+        _type: z.literal("mux.video"),
+        asset: z.object({
+          _type: z.literal("reference"),
+          _ref: z.string(),
+        }),
+      })
+      .transform(
+        ({ asset: { _ref: playbackId } }) => resolvedValues[playbackId]
+      ),
+  });
+
+const type = document({
+  name: "foo",
+  fields: [
+    {
+      name: "video",
+      type: muxVideo(),
+    },
+  ],
+});
+
+const value = type.mock(faker);
+
+/**
+ * typeof value === {
+ *   _createdAt: string;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: string;
+ *   video: {
+ *     _type: "mux.video";
+ *     asset: {
+ *       _ref: string;
+ *       _type: "reference";
+ *     };
+ *   };
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _createdAt: Date;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: Date;
+ *   video: {
+ *     _type: "mux.video";
+ *     asset: {
+ *       _ref: string;
+ *       _type: "reference";
+ *     };
+ *   };
+ * };
+ */
+
+const resolvedValue: s.resolved<typeof type> = type.resolve(value);
+
+/**
+ * typeof resolvedValue === {
+ *   _createdAt: Date;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: Date;
+ *   video: (typeof resolvedValues)[string];
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   name: "foo",
+ *   type: "document",
+ *   fields: [
+ *     {
+ *       name: "video",
+ *       type: "mux.video",
+ *     },
+ *   ],
+ * };
  */
 ```
 
@@ -1225,6 +1356,7 @@ const schema = type.schema();
     - [Rico](https://github.com/ricokahler) is a rockstar.
   - Cons:
     - No generated mocks.
+    - No [additional types](https://github.com/ricokahler/sanity-codegen/issues/6).
     - Requires a separate build step. Delay in development for the IDE to pickup new types (the new version should have a watch mode).
     - Modeling your code so code generation picks it up can be somewhat of a hassle.
     - Code generation comes with it's own set of unsolvable issues and is inherently heavy. The main reason this library was made was specifically to avoid code generation entirely.
