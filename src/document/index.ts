@@ -169,8 +169,12 @@ export const document = <
     getNthMock,
     name,
     ...createType({
-      // eslint-disable-next-line fp/no-mutation, no-plusplus -- Need side effects
-      mock: (faker) => getNthMock(faker, counter++),
+      mock: (faker) => {
+        // eslint-disable-next-line fp/no-mutation -- Need side effects
+        counter += 1;
+
+        return getNthMock(faker, counter);
+      },
       schema: () => ({
         ...def,
         ...fieldsSchema(fields, previewDef),
