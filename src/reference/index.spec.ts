@@ -135,6 +135,43 @@ describe("reference", () => {
     expect(docType.mock(faker)._id).toEqual(type.mock(faker)._ref);
   });
 
+  it("adds weak", () => {
+    const docType = document({
+      name: "foo",
+      fields: [
+        {
+          name: "foo",
+          type: boolean({}),
+        },
+      ],
+    });
+
+    const type = reference({
+      weak: true,
+      to: [docType],
+    });
+
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      SanityReference<true>
+    > = type.mock(faker);
+    const parsedValue: ValidateShape<
+      InferParsedValue<typeof type>,
+      SanityReference<true>
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      InferResolvedValue<typeof docType> | null
+    > = type.resolve(value);
+
+    const docMock = docType.resolve(docType.mock(faker));
+
+    expect([docMock, null]).toContainEqual(resolvedValue);
+  });
+
   it("allows defining the mocks", () =>
     expect([
       {
@@ -144,7 +181,6 @@ describe("reference", () => {
       {
         _ref: "93f3af18-337a-4df7-a8de-fbaa6609fd0a",
         _type: "reference",
-        _weak: true,
       },
     ]).toContainEqual(
       reference({
@@ -168,7 +204,6 @@ describe("reference", () => {
             {
               _ref: "93f3af18-337a-4df7-a8de-fbaa6609fd0a",
               _type: "reference",
-              _weak: true,
             },
           ]),
       }).mock(faker)
