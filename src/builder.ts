@@ -24,4 +24,5 @@ export type {
   InferParsedValue as output,
   InferParsedValue as parsed,
   InferResolvedValue as resolved,
+  SanityType,
 } from "./types";
