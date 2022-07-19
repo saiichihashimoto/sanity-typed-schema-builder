@@ -10,9 +10,9 @@ Build [Sanity schemas](https://www.sanity.io/docs/content-modelling) declarative
 
 - Typescript types for Sanity Values!
 - _ALL_ types are inferred! No messing with generics, awkward casting, or code generation.
-- [Zod](https://zod.dev/) schemas for parsing & transforming values (most notably, `datetime` values into javascript `Date`)!
-- Generated [Faker](https://fakerjs.dev/guide/) mock values!
-- Support for [additional types](#additional-types)!
+- [Zod](https://zod.dev/) schemas for [parsing & transforming values](#parsing-and-zod) (most notably, `datetime` values into javascript `Date`)!
+- [Automatically generated mocks](#mocking) for testing!
+- Support for any [additional types](#additional-types)!
 
 ## Install
 
@@ -133,11 +133,11 @@ const mock = foo.mock(faker);
  **/
 ```
 
-## Type Definitions
+## Types
 
-All methods pass through their corresponding [Schema Type Properties](https://www.sanity.io/docs/schema-types) as-is. For example, `s.string(def)` takes the usual properties of the sanity string type. Sanity's types documentation should "just work" with these types.
+All methods correspond to a [Schema Type](https://www.sanity.io/docs/schema-types) and pass through their corresponding [Schema Type Properties](https://www.sanity.io/docs/schema-types) as-is. For example, `s.string(def)` takes the usual properties of the sanity string type. Sanity's types documentation should "just work" with these types.
 
-The notable difference is between how the sanity schema, the `type` property, and the `name`/`title`/`description` property are defined. The differentiator is that the `s.*` methods replace the `type`s, not the entire field:
+The notable difference is between how the sanity schema, the `type` property, and the `name` / `title` / `description` property are defined. The differentiator is that the `s.*` methods replace `type`, not the entire field:
 
 ```typescript
 // This is how schemas are defined in sanity
@@ -147,6 +147,8 @@ const schema = {
   fields: [
     {
       name: "bar",
+      title: "Bar",
+      description: "The Bar",
       type: "string",
     },
   ],
@@ -158,6 +160,8 @@ const type = s.document({
   fields: [
     {
       name: "bar",
+      title: "Bar",
+      description: "The Bar",
       type: s.string(),
     },
   ],
@@ -170,24 +174,18 @@ const invalidType = s.document({
     // This is invalid. s.string is a type, not an entire field.
     s.string({
       name: "bar",
+      title: "Bar",
+      description: "The Bar",
     }),
   ],
 });
 ```
 
-Exceptions to that are [`s.document`](#document) (because all documents are named and not nested) and [`s.objectNamed`](#object-named) (because named objects have unique behavior from nameless objects).
+The only types with names directly in the type are [`s.document`](#document) (because all documents are named and not nested) and [`s.objectNamed`](#object-named) (because named objects have unique behavior from nameless objects).
 
 ### Types with Fields
 
-For types with `fields` (ie [`s.document`](#document), [`s.object`](#object), [`s.objectNamed`](#object-named), [`s.file`](#file), and [`s.image`](#image)) there are a few nuances:
-
-#### `fields` are required by default
-
-All `fields` are required by default (rather than sanity's default, which is optional by default). You can set it to optional with `optional: true`. This includes:
-
-- zod parsing
-- sanity validation
-- Generated zod types.
+For types with `fields` (ie [`s.document`](#document), [`s.object`](#object), [`s.objectNamed`](#object-named), [`s.file`](#file), and [`s.image`](#image)) all `fields` are required by default (rather than sanity's default, which is optional by default). You can set it to `optional: true`.
 
 ```typescript
 const type = s.object({
@@ -236,6 +234,918 @@ const schema = type.schema();
  *     {
  *       name: "bar",
  *       type: "number",
+ *     },
+ *   ],
+ * };
+ */
+```
+
+### Array
+
+All [array type](https://www.sanity.io/docs/array-type) properties pass through with the exceptions noted in [Types](#types).
+
+Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations, the sanity validations, and the inferred types.
+
+```typescript
+const type = s.array({
+  of: [s.boolean(), s.datetime()],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === (boolean | string)[];
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === (boolean | Date)[];
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "array",
+ *   of: [{ type: "boolean" }, { type: "datetime" }],
+ *   ...
+ * };
+ */
+```
+
+```typescript
+const type = s.array({
+  min: 1,
+  of: [s.boolean()],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === [boolean, ...boolean[]];
+ */
+```
+
+```typescript
+const type = s.array({
+  max: 2,
+  of: [s.boolean()],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === [] | [boolean] | [boolean, boolean];
+ */
+```
+
+```typescript
+const type = s.array({
+  min: 1,
+  max: 2,
+  of: [s.boolean()],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === [boolean] | [boolean, boolean];
+ */
+```
+
+```typescript
+const type = s.array({
+  length: 3,
+  of: [s.boolean()],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === [boolean, boolean, boolean];
+ */
+```
+
+### Block
+
+All [block type](https://www.sanity.io/docs/block-type) properties pass through with the exceptions noted in [Types](#types).
+
+```typescript
+const type = s.block();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === PortableTextBlock;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === PortableTextBlock;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "block",
+ *   ...
+ * };
+ */
+```
+
+### Boolean
+
+All [boolean type](https://www.sanity.io/docs/boolean-type) properties pass through with the exceptions noted in [Types](#types).
+
+```typescript
+const type = boolean();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === boolean;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === boolean;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "boolean",
+ *   ...
+ * };
+ */
+```
+
+### Date
+
+All [date type](https://www.sanity.io/docs/date-type) properties pass through with the exceptions noted in [Types](#types).
+
+```typescript
+const type = date();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === string;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === string;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "date",
+ *   ...
+ * };
+ */
+```
+
+### Datetime
+
+All [datetime type](https://www.sanity.io/docs/datetime-type) properties pass through with the exceptions noted in [Types](#types).
+
+Other exceptions include `min` and `max`. These values are used in the zod validations and the sanity validations.
+
+Datetime parses into a javascript `Date`.
+
+```typescript
+const type = datetime();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === string;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === Date;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "datetime",
+ *   ...
+ * };
+ */
+```
+
+### Document
+
+All [document type](https://www.sanity.io/docs/document-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
+
+```typescript
+const type = document({
+  name: "foo",
+  fields: [
+    {
+      name: "foo",
+      type: s.number(),
+    },
+    {
+      name: "bar",
+      optional: true,
+      type: s.number(),
+    },
+  ],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _createdAt: string;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: string;
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _createdAt: Date;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: Date;
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   name: "foo",
+ *   type: "document",
+ *   fields: [...],
+ *   ...
+ * };
+ */
+```
+
+### File
+
+All [file type](https://www.sanity.io/docs/file-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
+
+```typescript
+const type = file({
+  fields: [
+    {
+      name: "foo",
+      type: s.number(),
+    },
+    {
+      name: "bar",
+      optional: true,
+      type: s.number(),
+    },
+  ],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _type: "file";
+ *   asset: {
+ *     _type: "reference";
+ *     _ref: string;
+ *   };
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _type: "file";
+ *   asset: {
+ *     _type: "reference";
+ *     _ref: string;
+ *   };
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   name: "foo",
+ *   type: "file",
+ *   fields: [...],
+ *   ...
+ * };
+ */
+```
+
+### Geopoint
+
+All [geopoint type](https://www.sanity.io/docs/geopoint-type) properties pass through with the exceptions noted in [Types](#types).
+
+```typescript
+const type = geopoint();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _type: "geopoint";
+ *   alt: number;
+ *   lat: number;
+ *   lng: number;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _type: "geopoint";
+ *   alt: number;
+ *   lat: number;
+ *   lng: number;
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "geopoint",
+ *   ...
+ * };
+ */
+```
+
+### Image
+
+All [image type](https://www.sanity.io/docs/image-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
+
+Other exceptions include `hotspot`. Including `hotspot: true` adds the `crop` and `hotspot` properties in the infer types.
+
+```typescript
+const type = image({
+  fields: [
+    {
+      name: "foo",
+      type: s.number(),
+    },
+    {
+      name: "bar",
+      optional: true,
+      type: s.number(),
+    },
+  ],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _type: "image";
+ *   asset: {
+ *     _type: "reference";
+ *     _ref: string;
+ *   };
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _type: "image";
+ *   asset: {
+ *     _type: "reference";
+ *     _ref: string;
+ *   };
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   name: "foo",
+ *   type: "image",
+ *   fields: [...],
+ *   ...
+ * };
+ */
+```
+
+### Number
+
+All [number type](https://www.sanity.io/docs/number-type) properties pass through with the exceptions noted in [Types](#types).
+
+Other exceptions include `greaterThan`, `integer`, `lessThan`, `max`, `min`, `negative`, `positive`, and `precision`. These values are used in the zod validations and the sanity validations.
+
+```typescript
+const type = number();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === number;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === number;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "number",
+ *   ...
+ * };
+ */
+```
+
+### Object
+
+All [object type](https://www.sanity.io/docs/object-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
+
+```typescript
+const type = object({
+  fields: [
+    {
+      name: "foo",
+      type: s.number(),
+    },
+    {
+      name: "bar",
+      optional: true,
+      type: s.number(),
+    },
+  ],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   name: "foo",
+ *   type: "object",
+ *   fields: [...],
+ *   ...
+ * };
+ */
+```
+
+### Object (Named)
+
+All [object type](https://www.sanity.io/docs/object-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
+
+This is separate from [`s.object`](#object) because, when objects are named in sanity, there are significant differences:
+
+- The value has a `_type` field equal to the object's name.
+- They can be used directly in schemas (like any other schema).
+- They can also be registered as a top level object and simply referenced by type within another schema.
+
+```typescript
+const type = objectNamed({
+  name: "aNamedObject",
+  fields: [
+    {
+      name: "foo",
+      type: s.number(),
+    },
+    {
+      name: "bar",
+      optional: true,
+      type: s.number(),
+    },
+  ],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _type: "aNamedObject";
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _type: "aNamedObject";
+ *   foo: number;
+ *   bar?: number;
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   name: "foo",
+ *   type: "object",
+ *   fields: [...],
+ *   ...
+ * };
+ */
+```
+
+```typescript
+// Use `.ref()` to reference it in another schema.
+const someOtherType = array({ of: [type.ref()] });
+
+// The reference value is used directly.
+type SomeOtherValue = s.infer<typeof someOtherType>;
+
+/**
+ * type SomeOtherValue = [{
+ *   _type: "aNamedObject";
+ *   foo: number;
+ *   bar?: number;
+ * }];
+ */
+
+// The schema is made within the referencing schema
+const someOtherTypeSchema = someOtherType.schema();
+
+/**
+ * const someOtherTypeSchema = {
+ *   type: "array",
+ *   of: [{ type: "" }],
+ *   ...
+ * };
+ */
+
+createSchema({
+  name: "default",
+  types: [type.schema(), someOtherType.schema()],
+});
+```
+
+### Reference
+
+All [reference type](https://www.sanity.io/docs/reference-type) properties pass through with the exceptions noted in [Types](#types).
+
+Reference resolves into the [referenced document's mock](#resolving-mocks).
+
+Other exceptions include `weak`. Including `weak: true` adds the `_weak: true` properties in the infer types.
+
+```typescript
+const type = reference({
+  to: [someDocumentType, someOtherDocumentType],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _ref: string;
+ *   _type: "reference";
+ *   _weak?: boolean;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _ref: string;
+ *   _type: "reference";
+ *   _weak?: boolean;
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "reference",
+ *   to: [...],
+ *   ...
+ * };
+ */
+```
+
+```typescript
+const type = reference({
+  weak: true,
+  to: [someDocumentType, someOtherDocumentType],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _ref: string;
+ *   _type: "reference";
+ *   _weak: true;
+ * };
+ */
+```
+
+### Slug
+
+All [slug type](https://www.sanity.io/docs/slug-type) properties pass through with the exceptions noted in [Types](#types).
+
+Slug parses into a string.
+
+```typescript
+const type = slug();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _type: "slug";
+ *   current: string;
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === string;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "slug",
+ *   ...
+ * };
+ */
+```
+
+### String
+
+All [string type](https://www.sanity.io/docs/string-type) properties pass through with the exceptions noted in [Types](#types).
+
+Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations and the sanity validations.
+
+```typescript
+const type = string();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === string;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === string;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "string",
+ *   ...
+ * };
+ */
+```
+
+### Text
+
+All [text type](https://www.sanity.io/docs/text-type) properties pass through with the exceptions noted in [Types](#types).
+
+Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations and the sanity validations.
+
+```typescript
+const type = text();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === string;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === string;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "text",
+ *   ...
+ * };
+ */
+```
+
+### URL
+
+All [url type](https://www.sanity.io/docs/url-type) properties pass through with the exceptions noted in [Types](#types).
+
+```typescript
+const type = url();
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === string;
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === string;
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   type: "url",
+ *   ...
+ * };
+ */
+```
+
+## Additional Types
+
+In addition to the default [sanity schema types](#types), you may have nonstandard types ([custom asset sources](https://www.sanity.io/docs/custom-asset-sources) like [MUX Input](https://www.sanity.io/plugins/sanity-plugin-mux-input) or unique inputs like [code input](https://www.sanity.io/plugins/code-input)).
+
+`s.createType` allows for creation of a custom type. It returns an object of type `s.SanityType<Definition, Value, ParsedValue, ResolvedValue>`. All provided `s.*` methods use this, so it should be fully featured for any use case.
+
+An example using [Mux Input](https://www.sanity.io/plugins/sanity-plugin-mux-input) (not including installing the plugin):
+
+```typescript
+import { faker } from "@faker-js/faker";
+import { s } from "sanity-typed-schema-builder";
+import { z } from "zod";
+
+const muxVideo = () =>
+  s.createType({
+    // `schema` returns the sanity schema type
+    schema: () => ({ type: "mux.video" } as const),
+
+    // `mock` returns an instance of the native sanity value
+    // `faker` will have a stable `seed` value
+    mock: (faker) =>
+      ({
+        _type: "mux.video",
+        asset: {
+          _type: "reference",
+          _ref: faker.datatype.uuid(),
+        },
+      } as const),
+
+    // `zod` is used for parsing this type
+    zod: z.object({
+      _type: z.literal("mux.video"),
+      asset: z.object({
+        _type: z.literal("reference"),
+        _ref: z.string(),
+      }),
+    }),
+
+    // `zodResolved` is used for parsing into the resolved value
+    // defaults to reusing `zod`
+    zodResolved: z
+      .object({
+        _type: z.literal("mux.video"),
+        asset: z.object({
+          _type: z.literal("reference"),
+          _ref: z.string(),
+        }),
+      })
+      .transform(
+        ({ asset: { _ref: playbackId } }) => resolvedValues[playbackId]
+      ),
+  });
+
+const type = document({
+  name: "foo",
+  fields: [
+    {
+      name: "video",
+      type: muxVideo(),
+    },
+  ],
+});
+
+const value = type.mock(faker);
+
+/**
+ * typeof value === {
+ *   _createdAt: string;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: string;
+ *   video: {
+ *     _type: "mux.video";
+ *     asset: {
+ *       _ref: string;
+ *       _type: "reference";
+ *     };
+ *   };
+ * };
+ */
+
+const parsedValue: s.output<typeof type> = type.parse(value);
+
+/**
+ * typeof parsedValue === {
+ *   _createdAt: Date;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: Date;
+ *   video: {
+ *     _type: "mux.video";
+ *     asset: {
+ *       _ref: string;
+ *       _type: "reference";
+ *     };
+ *   };
+ * };
+ */
+
+const resolvedValue: s.resolved<typeof type> = type.resolve(value);
+
+/**
+ * typeof resolvedValue === {
+ *   _createdAt: Date;
+ *   _id: string;
+ *   _rev: string;
+ *   _type: "foo";
+ *   _updatedAt: Date;
+ *   video: (typeof resolvedValues)[string];
+ * };
+ */
+
+const schema = type.schema();
+
+/**
+ * const schema = {
+ *   name: "foo",
+ *   type: "document",
+ *   fields: [
+ *     {
+ *       name: "video",
+ *       type: "mux.video",
  *     },
  *   ],
  * };
@@ -419,7 +1329,7 @@ const value = type.resolve(type.mock(faker));
  *     _createdAt: Date;
  *     _id: string;
  *     _rev: string;
- *     _type: "foo";
+ *     _type: "bar";
  *     _updatedAt: Date;
  *     value: string;
  *   };
@@ -428,951 +1338,3 @@ const value = type.resolve(type.mock(faker));
  * }
  */
 ```
-
-## Additional Types
-
-In addition to the default [sanity schema types](#types), you may have nonstandard types ([custom asset sources](https://www.sanity.io/docs/custom-asset-sources) like [MUX Input](https://www.sanity.io/plugins/sanity-plugin-mux-input) or unique inputs like [code input](https://www.sanity.io/plugins/code-input)).
-
-`s.createType` allows for creation of a custom type. It returns an object of type `s.SanityType<Definition, Value, ParsedValue, ResolvedValue>`. All provided `s.*` methods use this, so it should be fully featured for any use case.
-
-An example using [Mux Input](https://www.sanity.io/plugins/sanity-plugin-mux-input) (not including installing the plugin):
-
-```typescript
-import { faker } from "@faker-js/faker";
-import { s } from "sanity-typed-schema-builder";
-import { z } from "zod";
-
-const muxVideo = () =>
-  s.createType({
-    // `schema` returns the sanity schema type
-    schema: () => ({ type: "mux.video" } as const),
-
-    // `mock` returns an instance of the native sanity value
-    // `faker` will have a stable `seed` value
-    mock: (faker) =>
-      ({
-        _type: "mux.video",
-        asset: {
-          _type: "reference",
-          _ref: faker.datatype.uuid(),
-        },
-      } as const),
-
-    // `zod` is used for parsing this type
-    zod: z.object({
-      _type: z.literal("mux.video"),
-      asset: z.object({
-        _type: z.literal("reference"),
-        _ref: z.string(),
-      }),
-    }),
-
-    // `zodResolved` is used for parsing into the resolved value
-    // defaults to reusing `zod`
-    zodResolved: z
-      .object({
-        _type: z.literal("mux.video"),
-        asset: z.object({
-          _type: z.literal("reference"),
-          _ref: z.string(),
-        }),
-      })
-      .transform(
-        ({ asset: { _ref: playbackId } }) => resolvedValues[playbackId]
-      ),
-  });
-
-const type = document({
-  name: "foo",
-  fields: [
-    {
-      name: "video",
-      type: muxVideo(),
-    },
-  ],
-});
-
-const value = type.mock(faker);
-
-/**
- * typeof value === {
- *   _createdAt: string;
- *   _id: string;
- *   _rev: string;
- *   _type: "foo";
- *   _updatedAt: string;
- *   video: {
- *     _type: "mux.video";
- *     asset: {
- *       _ref: string;
- *       _type: "reference";
- *     };
- *   };
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   _createdAt: Date;
- *   _id: string;
- *   _rev: string;
- *   _type: "foo";
- *   _updatedAt: Date;
- *   video: {
- *     _type: "mux.video";
- *     asset: {
- *       _ref: string;
- *       _type: "reference";
- *     };
- *   };
- * };
- */
-
-const resolvedValue: s.resolved<typeof type> = type.resolve(value);
-
-/**
- * typeof resolvedValue === {
- *   _createdAt: Date;
- *   _id: string;
- *   _rev: string;
- *   _type: "foo";
- *   _updatedAt: Date;
- *   video: (typeof resolvedValues)[string];
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   name: "foo",
- *   type: "document",
- *   fields: [
- *     {
- *       name: "video",
- *       type: "mux.video",
- *     },
- *   ],
- * };
- */
-```
-
-## Types
-
-All methods correspond to a [Schema Type](https://www.sanity.io/docs/schema-types) and pass through their corresponding properties as-is with the exceptions noted in [Type Definitions](#type-definitions).
-
-### Array
-
-All [array type](https://www.sanity.io/docs/array-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations, the sanity validations, and the inferred types.
-
-```typescript
-const type = s.array({
-  of: [s.boolean(), s.datetime()],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === (boolean | string)[];
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === (boolean | Date)[];
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "array",
- *   of: [{ type: "boolean" }, { type: "datetime" }],
- *   ...
- * };
- */
-```
-
-```typescript
-const type = s.array({
-  min: 1,
-  of: [s.boolean()],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === [boolean, ...boolean[]];
- */
-```
-
-```typescript
-const type = s.array({
-  max: 2,
-  of: [s.boolean()],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === [] | [boolean] | [boolean, boolean];
- */
-```
-
-```typescript
-const type = s.array({
-  min: 1,
-  max: 2,
-  of: [s.boolean()],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === [boolean] | [boolean, boolean];
- */
-```
-
-```typescript
-const type = s.array({
-  length: 3,
-  of: [s.boolean()],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === [boolean, boolean, boolean];
- */
-```
-
-### Block
-
-All [block type](https://www.sanity.io/docs/block-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = s.block();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === PortableTextBlock;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === PortableTextBlock;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "block",
- *   ...
- * };
- */
-```
-
-### Boolean
-
-All [boolean type](https://www.sanity.io/docs/boolean-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = boolean();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === boolean;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === boolean;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "boolean",
- *   ...
- * };
- */
-```
-
-### Date
-
-All [date type](https://www.sanity.io/docs/date-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = date();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === string;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === string;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "date",
- *   ...
- * };
- */
-```
-
-### Datetime
-
-All [datetime type](https://www.sanity.io/docs/datetime-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Other exceptions include `min` and `max`. These values are used in the zod validations and the sanity validations.
-
-Datetime parses into a javascript `Date`.
-
-```typescript
-const type = datetime();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === string;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === Date;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "datetime",
- *   ...
- * };
- */
-```
-
-### Document
-
-All [document type](https://www.sanity.io/docs/document-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = document({
-  name: "foo",
-  fields: [
-    {
-      name: "foo",
-      type: s.number(),
-    },
-    {
-      name: "bar",
-      optional: true,
-      type: s.number(),
-    },
-  ],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _createdAt: string;
- *   _id: string;
- *   _rev: string;
- *   _type: "foo";
- *   _updatedAt: string;
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   _createdAt: Date;
- *   _id: string;
- *   _rev: string;
- *   _type: "foo";
- *   _updatedAt: Date;
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   name: "foo",
- *   type: "document",
- *   fields: [...],
- *   ...
- * };
- */
-```
-
-### File
-
-All [file type](https://www.sanity.io/docs/file-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = file({
-  fields: [
-    {
-      name: "foo",
-      type: s.number(),
-    },
-    {
-      name: "bar",
-      optional: true,
-      type: s.number(),
-    },
-  ],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _type: "file";
- *   asset: {
- *     _type: "reference";
- *     _ref: string;
- *   };
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   _type: "file";
- *   asset: {
- *     _type: "reference";
- *     _ref: string;
- *   };
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   name: "foo",
- *   type: "file",
- *   fields: [...],
- *   ...
- * };
- */
-```
-
-### Geopoint
-
-All [geopoint type](https://www.sanity.io/docs/geopoint-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = geopoint();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _type: "geopoint";
- *   alt: number;
- *   lat: number;
- *   lng: number;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   _type: "geopoint";
- *   alt: number;
- *   lat: number;
- *   lng: number;
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "geopoint",
- *   ...
- * };
- */
-```
-
-### Image
-
-All [image type](https://www.sanity.io/docs/image-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Other exceptions include `hotspot`. Including `hotspot: true` adds the `crop` and `hotspot` properties in the infer types.
-
-```typescript
-const type = image({
-  fields: [
-    {
-      name: "foo",
-      type: s.number(),
-    },
-    {
-      name: "bar",
-      optional: true,
-      type: s.number(),
-    },
-  ],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _type: "image";
- *   asset: {
- *     _type: "reference";
- *     _ref: string;
- *   };
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   _type: "image";
- *   asset: {
- *     _type: "reference";
- *     _ref: string;
- *   };
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   name: "foo",
- *   type: "image",
- *   fields: [...],
- *   ...
- * };
- */
-```
-
-### Number
-
-All [number type](https://www.sanity.io/docs/number-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Other exceptions include `greaterThan`, `integer`, `lessThan`, `max`, `min`, `negative`, `positive`, and `precision`. These values are used in the zod validations and the sanity validations.
-
-```typescript
-const type = number();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === number;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === number;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "number",
- *   ...
- * };
- */
-```
-
-### Object
-
-All [object type](https://www.sanity.io/docs/object-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = object({
-  fields: [
-    {
-      name: "foo",
-      type: s.number(),
-    },
-    {
-      name: "bar",
-      optional: true,
-      type: s.number(),
-    },
-  ],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   name: "foo",
- *   type: "object",
- *   fields: [...],
- *   ...
- * };
- */
-```
-
-### Object (Named)
-
-All [object type](https://www.sanity.io/docs/object-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-This is separate from [`s.object`](#object) because, when objects are named in sanity, there are significant differences:
-
-- The value has a `_type` field equal to the object's name.
-- They can be used directly in schemas (like any other schema).
-- They can also be registered as a top level object and simply referenced by type within another schema.
-
-```typescript
-const type = objectNamed({
-  name: "aNamedObject",
-  fields: [
-    {
-      name: "foo",
-      type: s.number(),
-    },
-    {
-      name: "bar",
-      optional: true,
-      type: s.number(),
-    },
-  ],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _type: "aNamedObject";
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   _type: "aNamedObject";
- *   foo: number;
- *   bar?: number;
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   name: "foo",
- *   type: "object",
- *   fields: [...],
- *   ...
- * };
- */
-```
-
-```typescript
-// Use `.ref()` to reference it in another schema.
-const someOtherType = array({ of: [type.ref()] });
-
-// The reference value is used directly.
-type SomeOtherValue = s.infer<typeof someOtherType>;
-
-/**
- * type SomeOtherValue = [{
- *   _type: "aNamedObject";
- *   foo: number;
- *   bar?: number;
- * }];
- */
-
-// The schema is made within the referencing schema
-const someOtherTypeSchema = someOtherType.schema();
-
-/**
- * const someOtherTypeSchema = {
- *   type: "array",
- *   of: [{ type: "" }],
- *   ...
- * };
- */
-
-createSchema({
-  name: "default",
-  types: [type.schema(), someOtherType.schema()],
-});
-```
-
-### Reference
-
-All [reference type](https://www.sanity.io/docs/reference-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Reference resolves into the [referenced document's mock](#resolving-mocks).
-
-Other exceptions include `weak`. Including `weak: true` adds the `_weak: true` properties in the infer types.
-
-```typescript
-const type = reference({
-  to: [someDocumentType, someOtherDocumentType],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _ref: string;
- *   _type: "reference";
- *   _weak?: boolean;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === {
- *   _ref: string;
- *   _type: "reference";
- *   _weak?: boolean;
- * };
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "reference",
- *   to: [...],
- *   ...
- * };
- */
-```
-
-```typescript
-const type = reference({
-  weak: true,
-  to: [someDocumentType, someOtherDocumentType],
-});
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _ref: string;
- *   _type: "reference";
- *   _weak: true;
- * };
- */
-```
-
-### Slug
-
-All [slug type](https://www.sanity.io/docs/slug-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Slug parses into a string.
-
-```typescript
-const type = slug();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === {
- *   _type: "slug";
- *   current: string;
- * };
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === string;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "slug",
- *   ...
- * };
- */
-```
-
-### String
-
-All [string type](https://www.sanity.io/docs/string-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations and the sanity validations.
-
-```typescript
-const type = string();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === string;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === string;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "string",
- *   ...
- * };
- */
-```
-
-### Text
-
-All [text type](https://www.sanity.io/docs/text-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations and the sanity validations.
-
-```typescript
-const type = text();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === string;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === string;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "text",
- *   ...
- * };
- */
-```
-
-### URL
-
-All [url type](https://www.sanity.io/docs/url-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
-
-```typescript
-const type = url();
-
-type Value = s.infer<typeof type>;
-
-/**
- * type Value === string;
- */
-
-const parsedValue: s.output<typeof type> = type.parse(value);
-
-/**
- * typeof parsedValue === string;
- */
-
-const schema = type.schema();
-
-/**
- * const schema = {
- *   type: "url",
- *   ...
- * };
- */
-```
-
-## Alternative Projects
-
-- [`sanity-codegen`](https://www.npmjs.com/package/sanity-codegen)
-  - Pros:
-    - Types GROQ query results.
-    - Active Development with a community. Seems to have the sanity team's blessing, as well.
-    - A [new version](https://github.com/ricokahler/sanity-codegen/issues/5) on the way and it looks great.
-    - Schemas are defined as-is, which is very nice.
-    - [Rico](https://github.com/ricokahler) is a rockstar.
-  - Cons:
-    - No generated mocks.
-    - No [additional types](https://github.com/ricokahler/sanity-codegen/issues/6).
-    - Requires a separate build step. Delay in development for the IDE to pickup new types (the new version should have a watch mode).
-    - Modeling your code so code generation picks it up can be somewhat of a hassle.
-    - Code generation comes with it's own set of unsolvable issues and is inherently heavy. The main reason this library was made was specifically to avoid code generation entirely.
-- [`sanity-query-helper`](https://www.npmjs.com/package/sanity-query-helper)
-  - Pros:
-    - Seems to solve the problem in a very similar manner.
-  - Cons:
-    - Inactive Development.
-    - No typescript.
-    - No generated mocks.
-    - Syntax deviates further from native sanity schemas than this library.
-- [`sanity-typed-queries`](https://www.npmjs.com/package/sanity-typed-queries)
-  - Pros:
-    - Types GROQ query results.
-    - Seems to solve the problem in a very similar manner. Honestly, I got a lot of ideas from this package.
-  - Cons:
-    - No generated mocks.
-    - Sanity fields order relies on object member order, which works but is technically unreliable.
-    - Syntax deviates further from native sanity schemas than this library.
