@@ -9,17 +9,17 @@ import type {
   SanityTypeDef,
   TupleOfLength,
 } from "../types";
-import type { Reference, Schema } from "@sanity/types";
+import type { Reference, Schema, WeakReference } from "@sanity/types";
 import type { Merge } from "type-fest";
 
-export type SanityReference = Merge<
-  Reference,
-  {
-    _type: "reference";
-  }
->;
+export type SanityReference<Weak extends boolean = false> = Omit<
+  Weak extends false ? Omit<Reference, "_weak"> : WeakReference,
+  "_type"
+> & {
+  _type: "reference";
+};
 
-export const referenceZod: z.ZodType<SanityReference, any, SanityReference> =
+export const referenceZod = <Weak extends boolean>(weak: Weak | undefined) =>
   z.object({
     _key: z.string().optional(),
     _ref: z.string(),
@@ -38,60 +38,84 @@ export const referenceZod: z.ZodType<SanityReference, any, SanityReference> =
       })
       .optional(),
     _type: z.literal("reference"),
-    _weak: z.boolean().optional(),
-  });
+    _weak: weak ? z.literal(true) : z.boolean().optional(),
+  }) as z.ZodType<SanityReference<Weak>, any, SanityReference<Weak>>;
 
 export const reference = <
   DocumentName extends string,
+  ResolvedDocumentValue,
   DocumentTypes extends TupleOfLength<
-    DocumentType<DocumentName, any, any, any>,
+    DocumentType<DocumentName, any, any, ResolvedDocumentValue>,
     1
   >,
-  ParsedValue = SanityReference,
-  ResolvedValue = InferResolvedValue<DocumentTypes[number]>
+  Weak extends boolean = false,
+  ParsedValue = SanityReference<Weak>,
+  ResolvedValue =
+    | InferResolvedValue<DocumentTypes[number]>
+    | (Weak extends false ? never : null)
 >({
+  weak,
   to: documents,
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<ParsedValue, any, SanityReference>,
+    zod as unknown as z.ZodType<ParsedValue, any, SanityReference<Weak>>,
   zodResolved = (zod) =>
     zod.transform(
       ({ _ref }) =>
-        documents
+        (documents
           .map(({ getMockById, resolve }) => {
-            const mock = getMockById(_ref) as InferValue<DocumentTypes[number]>;
+            const mock = getMockById(_ref) as
+              | InferValue<DocumentTypes[number]>
+              | undefined;
 
-            return !mock ? undefined : (resolve(mock) as ResolvedValue);
+            return !mock
+              ? null
+              : (resolve(mock) as InferResolvedValue<DocumentTypes[number]>);
           })
-          .find((mock) => mock)!
+          .find((mock) => mock) ?? null) as ResolvedValue
     ),
   ...defRaw
 }: Merge<
   SanityTypeDef<
     Schema.ReferenceDefinition,
-    SanityReference,
+    SanityReference<Weak>,
     ParsedValue,
     ResolvedValue
   >,
   {
     to: DocumentTypes;
+    weak?: Weak;
   }
 >) => {
   // eslint-disable-next-line fp/no-let -- Need side effects
-  let counter = -1;
+  let counter = 0;
 
   const {
-    mock = (faker): SanityReference => {
-      // eslint-disable-next-line fp/no-mutation, no-plusplus -- Need side effects
-      counter++;
+    mock = (faker) => {
+      // eslint-disable-next-line fp/no-mutation -- Need side effects
+      counter += 1;
 
-      return {
-        _ref: faker.helpers.arrayElement(
-          documents.map(
-            ({ getNthMock }) => getNthMock(faker, counter) as { _id: string }
-          )
-        )._id,
+      const ref = faker.helpers.arrayElement(
+        documents.map(
+          ({ getNthMock }) =>
+            getNthMock(faker, counter) as unknown as { _id: string }
+        )
+      )._id;
+      const isBrokenRef = faker.datatype.boolean();
+      const brokenRef = faker.datatype.uuid();
+
+      const mock: SanityReference = {
+        _ref: weak && isBrokenRef ? brokenRef : ref,
         _type: "reference",
       };
+
+      return (
+        !weak
+          ? mock
+          : {
+              ...mock,
+              _weak: true,
+            }
+      ) as SanityReference<Weak>;
     },
     ...def
   } = defRaw;
@@ -100,10 +124,11 @@ export const reference = <
     mock,
     schema: () => ({
       ...def,
+      weak,
       type: "reference",
       to: documents.map(({ name: type }) => ({ type })),
     }),
-    zod: zodFn(referenceZod),
-    zodResolved: zodResolved(referenceZod),
+    zod: zodFn(referenceZod(weak)),
+    zodResolved: zodResolved(referenceZod(weak)),
   });
 };
