@@ -419,7 +419,7 @@ const value = type.resolve(type.mock(faker));
  *     _createdAt: Date;
  *     _id: string;
  *     _rev: string;
- *     _type: "foo";
+ *     _type: "bar";
  *     _updatedAt: Date;
  *     value: string;
  *   };
