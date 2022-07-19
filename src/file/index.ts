@@ -26,7 +26,7 @@ export interface SanityFile {
 
 const extraZodFields = {
   _type: z.literal("file"),
-  asset: referenceZod,
+  asset: referenceZod(false),
 };
 
 export const file = <

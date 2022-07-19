@@ -801,7 +801,7 @@ const schema = type.schema();
 
 All [image type](https://www.sanity.io/docs/image-type) properties pass through with the exceptions noted in [Type Definitions](#type-definitions).
 
-Othe exceptions include `hotspot`. Including `hotspot: true` adds the `crop` and `hotspot` properties in the infer types.
+Other exceptions include `hotspot`. Including `hotspot: true` adds the `crop` and `hotspot` properties in the infer types.
 
 ```typescript
 const type = image({
@@ -1034,6 +1034,8 @@ All [reference type](https://www.sanity.io/docs/reference-type) properties pass 
 
 Reference resolves into the [referenced document's mock](#resolving-mocks).
 
+Other exceptions include `weak`. Including `weak: true` adds the `_weak: true` properties in the infer types.
+
 ```typescript
 const type = reference({
   to: [someDocumentType, someOtherDocumentType],
@@ -1066,6 +1068,23 @@ const schema = type.schema();
  *   type: "reference",
  *   to: [...],
  *   ...
+ * };
+ */
+```
+
+```typescript
+const type = reference({
+  weak: true,
+  to: [someDocumentType, someOtherDocumentType],
+});
+
+type Value = s.infer<typeof type>;
+
+/**
+ * type Value === {
+ *   _ref: string;
+ *   _type: "reference";
+ *   _weak: true;
  * };
  */
 ```

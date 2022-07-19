@@ -35,11 +35,11 @@ export type SanityImage<Hotspot extends boolean> = Hotspot extends false
 type ExtraZodFields<Hotspot extends boolean> = Hotspot extends false
   ? {
       _type: z.ZodLiteral<"image">;
-      asset: typeof referenceZod;
+      asset: ReturnType<typeof referenceZod<false>>;
     }
   : {
       _type: z.ZodLiteral<"image">;
-      asset: typeof referenceZod;
+      asset: ReturnType<typeof referenceZod<false>>;
       crop: z.ZodObject<{
         _type: z.ZodOptional<z.ZodLiteral<"sanity.imageCrop">>;
         bottom: z.ZodNumber;
@@ -61,7 +61,7 @@ const extraZodFields = <Hotspot extends boolean>(
 ) =>
   ({
     _type: z.literal("image"),
-    asset: referenceZod,
+    asset: referenceZod(false),
     ...(!hotspot
       ? {}
       : {
