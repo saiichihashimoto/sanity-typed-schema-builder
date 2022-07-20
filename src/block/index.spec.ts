@@ -6,13 +6,12 @@ import { mockRule } from "../test-utils";
 import { block } from ".";
 
 import type { ValidateShape } from "../test-utils";
-import type { InferValue } from "../types";
 import type {
-  PortableTextBlock,
-  PortableTextMarkDefinition,
-  TypedObject,
-} from "@portabletext/types";
-import type { PartialDeep } from "type-fest";
+  InferParsedValue,
+  InferResolvedValue,
+  InferValue,
+} from "../types";
+import type { PortableTextBlock } from "@portabletext/types";
 
 describe("block", () => {
   it("builds a sanity config", () =>
@@ -24,7 +23,7 @@ describe("block", () => {
   it("parses into a block", () => {
     const type = block();
 
-    const value: InferValue<typeof type> = {
+    const value: ValidateShape<InferValue<typeof type>, PortableTextBlock> = {
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -36,11 +35,9 @@ describe("block", () => {
         },
       ],
     };
-    const parsedValue: PortableTextBlock<
-      PortableTextMarkDefinition,
-      TypedObject,
-      string,
-      string
+    const parsedValue: ValidateShape<
+      InferParsedValue<typeof type>,
+      PortableTextBlock
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -49,7 +46,7 @@ describe("block", () => {
   it("resolves into a block", () => {
     const type = block();
 
-    const value: InferValue<typeof type> = {
+    const value: ValidateShape<InferValue<typeof type>, PortableTextBlock> = {
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -61,11 +58,9 @@ describe("block", () => {
         },
       ],
     };
-    const resolvedValue: PortableTextBlock<
-      PortableTextMarkDefinition,
-      TypedObject,
-      string,
-      string
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      PortableTextBlock
     > = type.resolve(value);
 
     expect(resolvedValue).toEqual(value);
@@ -176,7 +171,10 @@ describe("block", () => {
       zod: (zod) => zod.transform(({ _type }) => _type),
     });
 
-    const parsedValue: string = type.parse({
+    const parsedValue: ValidateShape<
+      InferParsedValue<typeof type>,
+      string
+    > = type.parse({
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -195,21 +193,10 @@ describe("block", () => {
   it("types custom validation", () => {
     const type = block({
       validation: (Rule) =>
-        Rule.custom((value) => {
-          const block: ValidateShape<
-            typeof value,
-            PartialDeep<
-              PortableTextBlock<
-                PortableTextMarkDefinition,
-                TypedObject & Record<string, unknown>,
-                string,
-                string
-              >
-            >
-          > = value;
-
-          return (block.children?.length ?? 0) > 0 || "Needs to have children";
-        }),
+        Rule.custom(
+          (block) =>
+            (block.children?.length ?? 0) > 0 || "Needs to have children"
+        ),
     });
 
     const rule = mockRule();
