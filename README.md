@@ -1,7 +1,7 @@
 # sanity-typed-schema-builder
 
 [![Created by Saiichi Hashimoto](https://img.shields.io/badge/created%20by-Saiichi%20Hashimoto-4BBAAB)](http://saiichihashimoto.com)
-[![GitHub](https://img.shields.io/github/license/saiichihashimoto/sanity-typed-schema-builder)](https://github.com/saiichihashimoto/sanity-typed-schema-builder)
+[![License](https://img.shields.io/github/license/saiichihashimoto/sanity-typed-schema-builder)](https://github.com/saiichihashimoto/sanity-typed-schema-builder/blob/master/LICENSE)
 [![npm](https://img.shields.io/npm/dw/sanity-typed-schema-builder)](https://www.npmjs.com/package/sanity-typed-schema-builder)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/y/saiichihashimoto/sanity-typed-schema-builder)](https://github.com/saiichihashimoto/sanity-typed-schema-builder)
 
