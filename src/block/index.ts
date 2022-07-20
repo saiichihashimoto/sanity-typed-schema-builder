@@ -4,20 +4,22 @@ import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
 import type {
+  ArbitraryTypedObject,
   PortableTextBlock,
+  PortableTextBlockStyle,
+  PortableTextListItemType,
   PortableTextMarkDefinition,
+  PortableTextSpan,
   TypedObject,
 } from "@portabletext/types";
 import type { Schema } from "@sanity/types";
 
-type DefaultPortableTextBlock = PortableTextBlock<
-  PortableTextMarkDefinition,
-  TypedObject & Record<string, unknown>,
-  string,
-  string
->;
-
-const zod: z.ZodType<DefaultPortableTextBlock, any, DefaultPortableTextBlock> =
+const zod = <
+  M extends PortableTextMarkDefinition,
+  C extends TypedObject,
+  S extends string,
+  L extends string
+>() =>
   z.object({
     _key: z.optional(z.string()),
     _type: z.string(),
@@ -42,14 +44,22 @@ const zod: z.ZodType<DefaultPortableTextBlock, any, DefaultPortableTextBlock> =
           .catchall(z.unknown())
       )
     ),
-  });
+  }) as z.ZodType<
+    PortableTextBlock<M, C, S, L>,
+    any,
+    PortableTextBlock<M, C, S, L>
+  >;
 
 export const block = <
-  ParsedValue = DefaultPortableTextBlock,
-  ResolvedValue = DefaultPortableTextBlock
+  M extends PortableTextMarkDefinition = PortableTextMarkDefinition,
+  C extends TypedObject = ArbitraryTypedObject | PortableTextSpan,
+  S extends string = PortableTextBlockStyle,
+  L extends string = PortableTextListItemType,
+  ParsedValue = PortableTextBlock<M, C, S, L>,
+  ResolvedValue = PortableTextBlock<M, C, S, L>
 >({
   mock = (faker) => ({
-    style: "normal",
+    style: "normal" as S,
     _type: "block",
     markDefs: [],
     children: [
@@ -57,16 +67,20 @@ export const block = <
         _type: "span",
         text: faker.lorem.paragraph(),
         marks: [],
-      },
+      } as unknown as C,
     ],
   }),
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<ParsedValue, any, DefaultPortableTextBlock>,
+    zod as unknown as z.ZodType<
+      ParsedValue,
+      any,
+      PortableTextBlock<M, C, S, L>
+    >,
   zodResolved,
   ...def
 }: SanityTypeDef<
   Schema.BlockDefinition,
-  DefaultPortableTextBlock,
+  PortableTextBlock<M, C, S, L>,
   ParsedValue,
   ResolvedValue
 > = {}) =>
@@ -76,6 +90,6 @@ export const block = <
       ...def,
       type: "block",
     }),
-    zod: zodFn(zod),
-    zodResolved: zodResolved?.(zod),
+    zod: zodFn(zod()),
+    zodResolved: zodResolved?.(zod()),
   });
