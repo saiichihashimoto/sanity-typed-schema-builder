@@ -360,7 +360,7 @@ const schema = type.schema();
 All [boolean type](https://www.sanity.io/docs/boolean-type) properties pass through with the exceptions noted in [Types](#types).
 
 ```typescript
-const type = boolean();
+const type = s.boolean();
 
 type Value = s.infer<typeof type>;
 
@@ -389,7 +389,7 @@ const schema = type.schema();
 All [date type](https://www.sanity.io/docs/date-type) properties pass through with the exceptions noted in [Types](#types).
 
 ```typescript
-const type = date();
+const type = s.date();
 
 type Value = s.infer<typeof type>;
 
@@ -422,7 +422,7 @@ Other exceptions include `min` and `max`. These values are used in the zod valid
 Datetime parses into a javascript `Date`.
 
 ```typescript
-const type = datetime();
+const type = s.datetime();
 
 type Value = s.infer<typeof type>;
 
@@ -451,7 +451,7 @@ const schema = type.schema();
 All [document type](https://www.sanity.io/docs/document-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
 
 ```typescript
-const type = document({
+const type = s.document({
   name: "foo",
   fields: [
     {
@@ -511,7 +511,7 @@ const schema = type.schema();
 All [file type](https://www.sanity.io/docs/file-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
 
 ```typescript
-const type = file({
+const type = s.file({
   fields: [
     {
       name: "foo",
@@ -570,7 +570,7 @@ const schema = type.schema();
 All [geopoint type](https://www.sanity.io/docs/geopoint-type) properties pass through with the exceptions noted in [Types](#types).
 
 ```typescript
-const type = geopoint();
+const type = s.geopoint();
 
 type Value = s.infer<typeof type>;
 
@@ -611,7 +611,7 @@ All [image type](https://www.sanity.io/docs/image-type) properties pass through 
 Other exceptions include `hotspot`. Including `hotspot: true` adds the `crop` and `hotspot` properties in the infer types.
 
 ```typescript
-const type = image({
+const type = s.image({
   fields: [
     {
       name: "foo",
@@ -672,7 +672,7 @@ All [number type](https://www.sanity.io/docs/number-type) properties pass throug
 Other exceptions include `greaterThan`, `integer`, `lessThan`, `max`, `min`, `negative`, `positive`, and `precision`. These values are used in the zod validations and the sanity validations.
 
 ```typescript
-const type = number();
+const type = s.number();
 
 type Value = s.infer<typeof type>;
 
@@ -701,7 +701,7 @@ const schema = type.schema();
 All [object type](https://www.sanity.io/docs/object-type) properties pass through with the exceptions noted in [Types](#types) and [Types with Fields](#types-with-fields).
 
 ```typescript
-const type = object({
+const type = s.object({
   fields: [
     {
       name: "foo",
@@ -756,7 +756,7 @@ This is separate from [`s.object`](#object) because, when objects are named in s
 - They can also be registered as a top level object and simply referenced by type within another schema.
 
 ```typescript
-const type = objectNamed({
+const type = s.objectNamed({
   name: "aNamedObject",
   fields: [
     {
@@ -805,7 +805,7 @@ const schema = type.schema();
 
 ```typescript
 // Use `.ref()` to reference it in another schema.
-const someOtherType = array({ of: [type.ref()] });
+const someOtherType = s.array({ of: [type.ref()] });
 
 // The reference value is used directly.
 type SomeOtherValue = s.infer<typeof someOtherType>;
@@ -844,7 +844,7 @@ Reference resolves into the [referenced document's mock](#resolving-mocks).
 Other exceptions include `weak`. Including `weak: true` adds the `_weak: true` properties in the infer types.
 
 ```typescript
-const type = reference({
+const type = s.reference({
   to: [someDocumentType, someOtherDocumentType],
 });
 
@@ -880,7 +880,7 @@ const schema = type.schema();
 ```
 
 ```typescript
-const type = reference({
+const type = s.reference({
   weak: true,
   to: [someDocumentType, someOtherDocumentType],
 });
@@ -903,7 +903,7 @@ All [slug type](https://www.sanity.io/docs/slug-type) properties pass through wi
 Slug parses into a string.
 
 ```typescript
-const type = slug();
+const type = s.slug();
 
 type Value = s.infer<typeof type>;
 
@@ -937,7 +937,7 @@ All [string type](https://www.sanity.io/docs/string-type) properties pass throug
 Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations and the sanity validations.
 
 ```typescript
-const type = string();
+const type = s.string();
 
 type Value = s.infer<typeof type>;
 
@@ -968,7 +968,7 @@ All [text type](https://www.sanity.io/docs/text-type) properties pass through wi
 Other exceptions include `min`, `max`, and `length`. These values are used in the zod validations and the sanity validations.
 
 ```typescript
-const type = text();
+const type = s.text();
 
 type Value = s.infer<typeof type>;
 
@@ -997,7 +997,7 @@ const schema = type.schema();
 All [url type](https://www.sanity.io/docs/url-type) properties pass through with the exceptions noted in [Types](#types).
 
 ```typescript
-const type = url();
+const type = s.url();
 
 type Value = s.infer<typeof type>;
 
