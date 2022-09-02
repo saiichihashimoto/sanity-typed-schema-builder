@@ -32,13 +32,10 @@ describe("array", () => {
   it("adds primitive types", () => {
     const type = array({ of: [boolean()] });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      readonly boolean[]
-    > = [];
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      readonly boolean[]
+      boolean[]
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -75,7 +72,7 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      ReadonlyArray<{
+      Array<{
         _key: string;
         foo: boolean;
       }>
@@ -85,7 +82,7 @@ describe("array", () => {
     ];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      ReadonlyArray<{
+      Array<{
         _key: string;
         foo: boolean;
       }>
@@ -143,7 +140,7 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      ReadonlyArray<
+      Array<
         | {
             _key: string;
             foo: boolean;
@@ -159,7 +156,7 @@ describe("array", () => {
     ];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      ReadonlyArray<
+      Array<
         | {
             _key: string;
             foo: boolean;
@@ -183,12 +180,10 @@ describe("array", () => {
       ],
     });
 
-    const value: ValidateShape<InferValue<typeof type>, readonly boolean[]> = [
-      true,
-    ];
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
     const resolvedValue: ValidateShape<
       InferResolvedValue<typeof type>,
-      readonly string[]
+      string[]
     > = type.resolve(value);
 
     expect(resolvedValue).toEqual(["foo"]);
@@ -205,11 +200,11 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      readonly [boolean, boolean, ...boolean[]]
+      [boolean, boolean, ...boolean[]]
     > = [true, false];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      readonly [boolean, boolean, ...boolean[]]
+      [boolean, boolean, ...boolean[]]
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -230,17 +225,11 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      | readonly []
-      | readonly [boolean]
-      | readonly [boolean, boolean]
-      | readonly [boolean, boolean, boolean]
+      [] | [boolean] | [boolean, boolean] | [boolean, boolean, boolean]
     > = [true, false, true];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      | readonly []
-      | readonly [boolean]
-      | readonly [boolean, boolean]
-      | readonly [boolean, boolean, boolean]
+      [] | [boolean] | [boolean, boolean] | [boolean, boolean, boolean]
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -259,13 +248,13 @@ describe("array", () => {
 
     expect(rule.length).toHaveBeenCalledWith(2);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      readonly [boolean, boolean]
-    > = [true, false];
+    const value: ValidateShape<InferValue<typeof type>, [boolean, boolean]> = [
+      true,
+      false,
+    ];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      readonly [boolean, boolean]
+      [boolean, boolean]
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -323,7 +312,7 @@ describe("array", () => {
           const elements: ValidateShape<
             typeof value,
             PartialDeep<
-              ReadonlyArray<
+              Array<
                 | {
                     _key: string;
                     foo: boolean;

@@ -174,14 +174,16 @@ describe("object", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    const objectDef = () => ({
-      fields: [
-        {
-          name: "foo",
-          type: string(),
-        },
-      ] as const,
-    });
+    const objectDef = () => {
+      const field = {
+        name: "foo",
+        type: string(),
+      };
+
+      const fields: [typeof field] = [field];
+
+      return { fields };
+    };
 
     expect(object(objectDef()).mock(faker)).toEqual(
       object(objectDef()).mock(faker)
