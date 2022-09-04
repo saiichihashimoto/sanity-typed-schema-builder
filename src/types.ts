@@ -11,10 +11,10 @@ export type TupleOfLength<
   T,
   Min extends number = number,
   Max extends number = number,
-  Result extends readonly T[] = readonly []
+  Result extends T[] = []
 > = Result["length"] extends Min
   ? number extends Max
-    ? readonly [...Result, ...T[]]
+    ? [...Result, ...T[]]
     : Result["length"] extends Max
     ? Result
     :
@@ -23,9 +23,9 @@ export type TupleOfLength<
             T,
             [T, ...Result]["length"] & number,
             Max,
-            readonly [T, ...Result]
+            [T, ...Result]
           >
-  : TupleOfLength<T, Min, Max, readonly [T, ...Result]>;
+  : TupleOfLength<T, Min, Max, [T, ...Result]>;
 
 export const zodUnion = <Zods extends z.ZodTypeAny>(zods: Zods[]): Zods =>
   zods.length === 1
