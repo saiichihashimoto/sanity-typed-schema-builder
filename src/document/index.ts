@@ -74,7 +74,7 @@ interface ExtraZodFields<DocumentName extends string> {
 
 const extraZodFields = <DocumentNames extends string>(name: DocumentNames) => ({
   _createdAt: z.string().transform((v) => new Date(v)),
-  _id: z.string().uuid(),
+  _id: z.string(),
   _rev: z.string(),
   _type: z.literal(name),
   _updatedAt: z.string().transform((v) => new Date(v)),
