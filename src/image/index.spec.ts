@@ -70,6 +70,24 @@ describe("image", () => {
     expect(parsedValue).toEqual(value);
   });
 
+  it("allows undefined hotspot and crop on new images", () => {
+    const type = image({ hotspot: true });
+
+    const value: ValidateShape<InferValue<typeof type>, SanityImage<true>> = {
+      _type: "image",
+      asset: {
+        _type: "reference",
+        _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+      },
+    };
+    const parsedValue: ValidateShape<
+      InferParsedValue<typeof type>,
+      SanityImage<true>
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+  });
+
   it("adds fields", () => {
     const type = image({
       fields: [

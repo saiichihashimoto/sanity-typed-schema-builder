@@ -28,8 +28,8 @@ export type SanityImage<Hotspot extends boolean> = Hotspot extends false
   : {
       _type: "image";
       asset: SanityReference;
-      crop: ImageCrop;
-      hotspot: ImageHotspot;
+      crop?: ImageCrop;
+      hotspot?: ImageHotspot;
     };
 
 type ExtraZodFields<Hotspot extends boolean> = Hotspot extends false
@@ -40,20 +40,24 @@ type ExtraZodFields<Hotspot extends boolean> = Hotspot extends false
   : {
       _type: z.ZodLiteral<"image">;
       asset: ReturnType<typeof referenceZod<false>>;
-      crop: z.ZodObject<{
-        _type: z.ZodOptional<z.ZodLiteral<"sanity.imageCrop">>;
-        bottom: z.ZodNumber;
-        left: z.ZodNumber;
-        right: z.ZodNumber;
-        top: z.ZodNumber;
-      }>;
-      hotspot: z.ZodObject<{
-        _type: z.ZodOptional<z.ZodLiteral<"sanity.imageHotspot">>;
-        height: z.ZodNumber;
-        width: z.ZodNumber;
-        x: z.ZodNumber;
-        y: z.ZodNumber;
-      }>;
+      crop: z.ZodOptional<
+        z.ZodObject<{
+          _type: z.ZodOptional<z.ZodLiteral<"sanity.imageCrop">>;
+          bottom: z.ZodNumber;
+          left: z.ZodNumber;
+          right: z.ZodNumber;
+          top: z.ZodNumber;
+        }>
+      >;
+      hotspot: z.ZodOptional<
+        z.ZodObject<{
+          _type: z.ZodOptional<z.ZodLiteral<"sanity.imageHotspot">>;
+          height: z.ZodNumber;
+          width: z.ZodNumber;
+          x: z.ZodNumber;
+          y: z.ZodNumber;
+        }>
+      >;
     };
 
 const extraZodFields = <Hotspot extends boolean>(
@@ -65,20 +69,24 @@ const extraZodFields = <Hotspot extends boolean>(
     ...(!hotspot
       ? {}
       : {
-          crop: z.object({
-            _type: z.literal("sanity.imageCrop").optional(),
-            bottom: z.number(),
-            left: z.number(),
-            right: z.number(),
-            top: z.number(),
-          }),
-          hotspot: z.object({
-            _type: z.literal("sanity.imageHotspot").optional(),
-            height: z.number(),
-            width: z.number(),
-            x: z.number(),
-            y: z.number(),
-          }),
+          crop: z
+            .object({
+              _type: z.literal("sanity.imageCrop").optional(),
+              bottom: z.number(),
+              left: z.number(),
+              right: z.number(),
+              top: z.number(),
+            })
+            .optional(),
+          hotspot: z
+            .object({
+              _type: z.literal("sanity.imageHotspot").optional(),
+              height: z.number(),
+              width: z.number(),
+              x: z.number(),
+              y: z.number(),
+            })
+            .optional(),
         }),
   } as unknown as ExtraZodFields<Hotspot>);
 
