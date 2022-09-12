@@ -196,6 +196,9 @@ export const image = <
     schema: () => ({
       ...def,
       ...(fields && fieldsSchema(fields)),
+      ...(hotspot === true
+        ? { options: { ...def.options, hotspot: true } }
+        : {}),
       type: "image",
     }),
     zod: zodFn(

@@ -88,6 +88,13 @@ describe("image", () => {
     expect(parsedValue).toEqual(value);
   });
 
+  it("passes through hotspot to options object", () => {
+    const type = image({ hotspot: true });
+
+    expect(type.schema()).toHaveProperty("options");
+    expect(type.schema().options).toHaveProperty("hotspot", true);
+  });
+
   it("adds fields", () => {
     const type = image({
       fields: [
