@@ -17,6 +17,9 @@ describe("image", () => {
   it("builds a sanity config", () =>
     expect(image().schema()).toEqual({
       type: "image",
+      options: {
+        hotspot: false,
+      },
     }));
 
   it("passes through schema values", () =>

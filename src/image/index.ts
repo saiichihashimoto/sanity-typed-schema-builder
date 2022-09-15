@@ -172,6 +172,7 @@ export const image = <
     zod as unknown as z.ZodType<ParsedValue, any, z.input<Zod>>,
   zodResolved = (zod) =>
     zod as unknown as z.ZodType<ResolvedValue, any, z.input<Zod>>,
+  options,
   ...def
 }: Merge<
   Omit<
@@ -196,9 +197,7 @@ export const image = <
     schema: () => ({
       ...def,
       ...(fields && fieldsSchema(fields)),
-      ...(hotspot === true
-        ? { options: { ...def.options, hotspot: true } }
-        : {}),
+      options: { ...options, hotspot: Boolean(hotspot) },
       type: "image",
     }),
     zod: zodFn(
