@@ -5,6 +5,7 @@ export { createType } from "./types";
 export { date } from "./date";
 export { datetime } from "./datetime";
 export { document } from "./document";
+export { namedObjectArray } from "./namedObjectArray";
 export { file } from "./file";
 export { geopoint } from "./geopoint";
 export { image } from "./image";

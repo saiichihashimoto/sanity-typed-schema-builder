@@ -32,6 +32,17 @@ export const zodUnion = <Zods extends z.ZodTypeAny>(zods: Zods[]): Zods =>
     ? zods[0]!
     : (z.union([zods[0]!, zods[1]!, ...zods.slice(2)]) as unknown as Zods);
 
+export const zodDiscriminatedUnion = <Zods extends z.ZodObject<any>>(
+  zods: Zods[]
+): Zods =>
+  zods.length === 1
+    ? zods[0]!
+    : (z.discriminatedUnion("_type", [
+        zods[0]!,
+        zods[1]!,
+        ...zods.slice(2),
+      ]) as unknown as Zods);
+
 export interface SanityType<Definition, Value, ParsedValue, ResolvedValue> {
   mock: (faker: Faker, path?: string) => Value;
   parse: (data: unknown) => ParsedValue;
