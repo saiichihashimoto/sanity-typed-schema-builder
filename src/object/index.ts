@@ -14,8 +14,8 @@ import type {
   FieldsZodResolvedObject,
   Preview,
 } from "../field";
-import type { SanityTypeDef, TupleOfLength } from "../types";
-import type { Schema } from "@sanity/types";
+import type { SanityTypeDef, TupleOfLength, TypedValues } from "../types";
+import type { ObjectDefinition } from "@sanity/types";
 import type { Merge } from "type-fest";
 
 export const object = <
@@ -44,7 +44,7 @@ export const object = <
   ...def
 }: Merge<
   SanityTypeDef<
-    Schema.ObjectDefinition,
+    Merge<ObjectDefinition, TypedValues<z.input<Zod>>>,
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,

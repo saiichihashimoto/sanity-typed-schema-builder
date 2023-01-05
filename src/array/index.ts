@@ -8,12 +8,17 @@ import type {
   InferResolvedValue,
   InferValue,
   NamedSchemaFields,
-  Rule,
   SanityType,
   SanityTypeDef,
   TupleOfLength,
+  TypedValues,
 } from "../types";
-import type { Schema } from "@sanity/types";
+import type {
+  ArrayDefinition,
+  ArrayRule,
+  IntrinsicDefinitions,
+  TypeAliasDefinition,
+} from "@sanity/types";
 import type { Merge } from "type-fest";
 
 type AddKey<T> = T extends object ? Merge<T, { _key: string }> : T;
@@ -66,7 +71,9 @@ const zodArrayOfLength =
 
 // HACK Shouldn't have to omit NamedSchemaFields because arrays don't need names
 type ItemDefinitions = Omit<
-  Schema.ArrayDefinition["of"][number],
+  // Schema.ArrayDefinition["of"][number],
+  | IntrinsicDefinitions[keyof IntrinsicDefinitions]
+  | TypeAliasDefinition<string, undefined>,
   NamedSchemaFields
 >;
 
@@ -109,7 +116,7 @@ export const array = <
   ...def
 }: Merge<
   SanityTypeDef<
-    Schema.ArrayDefinition<Value[keyof Value]>,
+    Merge<ArrayDefinition, TypedValues<Value, ArrayRule<Value>>>,
     Value,
     ParsedValue,
     ResolvedValue,
@@ -170,7 +177,7 @@ export const array = <
       type: "array",
       of: items.map(({ schema }) => schema()),
       validation: flow(
-        (rule: Rule<Value>) => (!min ? rule : rule.min(min)),
+        (rule: ArrayRule<Value>) => (!min ? rule : rule.min(min)),
         (rule) => (!max ? rule : rule.max(max)),
         (rule) => (length === undefined ? rule : rule.length(length)),
         (rule) => validation?.(rule) ?? rule

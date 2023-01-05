@@ -5,8 +5,8 @@ import { listMock, listValueToValue } from "../list";
 import { createType, zodUnion } from "../types";
 
 import type { WithTypedOptionsList } from "../list";
-import type { Rule, SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { GetRule, SanityTypeDef } from "../types";
+import type { NumberDefinition } from "@sanity/types";
 
 export const number = <
   TypedValue extends number,
@@ -37,7 +37,7 @@ export const number = <
   zodResolved,
   ...def
 }: SanityTypeDef<
-  WithTypedOptionsList<TypedValue, Schema.NumberDefinition>,
+  WithTypedOptionsList<TypedValue, NumberDefinition>,
   TypedValue,
   ParsedValue,
   ResolvedValue
@@ -84,7 +84,7 @@ export const number = <
       type: "number",
       validation: flow(
         flow(
-          (rule: Rule<TypedValue>) => (!min ? rule : rule.min(min)),
+          (rule: GetRule<NumberDefinition>) => (!min ? rule : rule.min(min)),
           (rule) => (!max ? rule : rule.max(max)),
           (rule) => (!greaterThan ? rule : rule.greaterThan(greaterThan)),
           (rule) => (!lessThan ? rule : rule.lessThan(lessThan)),

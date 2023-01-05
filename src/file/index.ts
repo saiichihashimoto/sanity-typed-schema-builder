@@ -15,8 +15,8 @@ import type {
   FieldsZodResolvedObject,
 } from "../field";
 import type { SanityReference } from "../reference";
-import type { SanityTypeDef, TupleOfLength } from "../types";
-import type { Schema } from "@sanity/types";
+import type { SanityTypeDef, TupleOfLength, TypedValues } from "../types";
+import type { FileDefinition } from "@sanity/types";
 import type { Merge } from "type-fest";
 
 export interface SanityFile {
@@ -69,7 +69,7 @@ export const file = <
   ...def
 }: Merge<
   SanityTypeDef<
-    Schema.FileDefinition,
+    Merge<FileDefinition, TypedValues<z.input<Zod>>>,
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,

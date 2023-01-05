@@ -254,9 +254,9 @@ describe("number", () => {
     const type = number({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const number: ValidateShape<typeof value, number> = value;
+          const number: ValidateShape<typeof value, number | undefined> = value;
 
-          return number > 50 || "Needs to be more than 50";
+          return (number ?? 0) > 50 || "Needs to be more than 50";
         }),
     });
 

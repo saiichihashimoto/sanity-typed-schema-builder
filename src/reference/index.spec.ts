@@ -14,7 +14,6 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { PartialDeep } from "type-fest";
 
 describe("reference", () => {
   it("builds a sanity config", () =>
@@ -251,11 +250,15 @@ describe("reference", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const {
-            _ref,
-          }: ValidateShape<typeof value, PartialDeep<SanityReference>> = value;
+          const reference: ValidateShape<
+            typeof value,
+            SanityReference | undefined
+          > = value;
 
-          return (_ref?.length ?? 0) > 50 || "Needs to be 50 characters";
+          return (
+            // eslint-disable-next-line no-underscore-dangle -- Need _ref
+            (reference?._ref.length ?? 0) > 50 || "Needs to be 50 characters"
+          );
         }),
     });
 

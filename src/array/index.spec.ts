@@ -13,7 +13,6 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { PartialDeep } from "type-fest";
 
 describe("array", () => {
   it("builds a sanity config", () =>
@@ -311,8 +310,7 @@ describe("array", () => {
         Rule.custom((value) => {
           const elements: ValidateShape<
             typeof value,
-            PartialDeep<
-              Array<
+            | Array<
                 | {
                     _key: string;
                     foo: boolean;
@@ -322,10 +320,10 @@ describe("array", () => {
                     bar: boolean;
                   }
               >
-            >
+            | undefined
           > = value;
 
-          return elements.length > 50 || "Needs to be 50 characters";
+          return (elements?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

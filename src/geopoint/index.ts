@@ -3,25 +3,18 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { GeopointDefinition, GeopointValue } from "@sanity/types";
 
-export interface SanityGeopoint {
-  _type: "geopoint";
-  alt: number;
-  lat: number;
-  lng: number;
-}
-
-const zod: z.ZodType<SanityGeopoint, any, SanityGeopoint> = z.object({
+const zod: z.ZodType<GeopointValue, any, GeopointValue> = z.object({
   _type: z.literal("geopoint"),
-  alt: z.number(),
+  alt: z.number().optional(),
   lat: z.number(),
   lng: z.number(),
 });
 
 export const geopoint = <
-  ParsedValue = SanityGeopoint,
-  ResolvedValue = SanityGeopoint
+  ParsedValue = GeopointValue,
+  ResolvedValue = GeopointValue
 >({
   mock = (faker) => ({
     _type: "geopoint",
@@ -30,12 +23,12 @@ export const geopoint = <
     lng: parseFloat(faker.address.longitude()),
   }),
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<ParsedValue, any, SanityGeopoint>,
+    zod as unknown as z.ZodType<ParsedValue, any, GeopointValue>,
   zodResolved,
   ...def
 }: SanityTypeDef<
-  Schema.GeopointDefinition,
-  SanityGeopoint,
+  GeopointDefinition,
+  GeopointValue,
   ParsedValue,
   ResolvedValue
 > = {}) =>

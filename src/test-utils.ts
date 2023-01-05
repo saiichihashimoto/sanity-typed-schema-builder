@@ -1,6 +1,26 @@
-import type { Rule } from "@sanity/types";
+import type {
+  ArrayDefinition,
+  BlockDefinition,
+  BooleanDefinition,
+  DateDefinition,
+  DatetimeDefinition,
+  DocumentDefinition,
+  EmailDefinition,
+  FileDefinition,
+  GeopointDefinition,
+  ImageDefinition,
+  NumberDefinition,
+  ObjectDefinition,
+  ReferenceDefinition,
+  Rule,
+  SlugDefinition,
+  StringDefinition,
+  TextDefinition,
+  UrlDefinition,
+} from "@sanity/types";
 import type { Simplify } from "type-fest";
 import type { IsEqual } from "type-fest/source/internal";
+import type { GetRule } from "types";
 
 type ValidateError<Received, Expected> = Simplify<{
   expected: Expected;
@@ -15,7 +35,24 @@ export type ValidateShape<Received, Expected extends Received> = IsEqual<
   : ValidateError<Received, Expected>;
 
 export const mockRule = () => {
-  const rule: Rule = {
+  const rule: Rule &
+    GetRule<ArrayDefinition> &
+    GetRule<BlockDefinition> &
+    GetRule<BooleanDefinition> &
+    GetRule<DateDefinition> &
+    GetRule<DatetimeDefinition> &
+    GetRule<DocumentDefinition> &
+    GetRule<EmailDefinition> &
+    GetRule<FileDefinition> &
+    GetRule<GeopointDefinition> &
+    GetRule<ImageDefinition> &
+    GetRule<NumberDefinition> &
+    GetRule<ObjectDefinition> &
+    GetRule<ReferenceDefinition> &
+    GetRule<SlugDefinition> &
+    GetRule<StringDefinition> &
+    GetRule<TextDefinition> &
+    GetRule<UrlDefinition> = {
     _fieldRules: undefined,
     _level: undefined,
     _message: undefined,
@@ -23,25 +60,24 @@ export const mockRule = () => {
     _rules: [],
     _type: undefined,
     _typeDef: undefined,
-    all: jest.fn(() => mockRule()),
+    all: jest.fn(() => rule),
     assetRequired: jest.fn(() => rule),
-    block: jest.fn(jest.fn(() => rule)),
-    clone: jest.fn(() => mockRule()),
-    cloneWithRules: jest.fn(() => mockRule()),
+    clone: jest.fn(() => rule),
+    cloneWithRules: jest.fn(() => rule),
     custom: jest.fn(() => rule),
-    either: jest.fn(() => mockRule()),
+    either: jest.fn(() => rule),
     email: jest.fn(() => rule),
     error: jest.fn(() => rule),
     fields: jest.fn(() => rule),
     greaterThan: jest.fn(() => rule),
     info: jest.fn(() => rule),
     integer: jest.fn(() => rule),
-    isRequired: jest.fn(() => true),
+    isRequired: jest.fn(() => false),
     length: jest.fn(() => rule),
     lessThan: jest.fn(() => rule),
     lowercase: jest.fn(() => rule),
     max: jest.fn(() => rule),
-    merge: jest.fn(() => mockRule()),
+    merge: jest.fn(() => rule),
     min: jest.fn(() => rule),
     negative: jest.fn(() => rule),
     optional: jest.fn(() => rule),

@@ -157,7 +157,7 @@ describe("string", () => {
     const type = string({
       validation: (Rule) =>
         Rule.custom(
-          (string) => string.length > 50 || "Needs to be 50 characters"
+          (string) => (string?.length ?? 0) > 50 || "Needs to be 50 characters"
         ),
     });
 
@@ -185,9 +185,9 @@ describe("string", () => {
     const type = string({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const string: ValidateShape<typeof value, string> = value;
+          const string: ValidateShape<typeof value, string | undefined> = value;
 
-          return string.length > 50 || "Needs to be 50 characters";
+          return (string?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

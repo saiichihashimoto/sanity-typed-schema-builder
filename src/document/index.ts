@@ -19,14 +19,19 @@ import type {
   SanityNamedTypeDef,
   SanityType,
   TupleOfLength,
-  WithTypedValidation,
+  TypedValues,
 } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type {
+  DocumentDefinition,
   SanityDocument as SanityDocumentOriginal,
-  Schema,
 } from "@sanity/types";
 import type { Merge, RemoveIndexSignature } from "type-fest";
+
+type SanityDocumentDefinition<Value> = Merge<
+  DocumentDefinition,
+  TypedValues<Value>
+>;
 
 export interface DocumentType<
   DocumentName extends string,
@@ -34,12 +39,7 @@ export interface DocumentType<
   ParsedValue,
   ResolvedValue
 > extends SanityType<
-    Merge<
-      WithTypedValidation<Schema.DocumentDefinition, Value>,
-      {
-        name: DocumentName;
-      }
-    >,
+    Merge<SanityDocumentDefinition<Value>, { name: DocumentName }>,
     Value,
     ParsedValue,
     ResolvedValue
@@ -127,7 +127,7 @@ export const document = <
   ...def
 }: Merge<
   SanityNamedTypeDef<
-    Schema.DocumentDefinition,
+    SanityDocumentDefinition<z.input<Zod>>,
     z.input<Zod>,
     ParsedValue,
     ResolvedValue,
@@ -164,6 +164,7 @@ export const document = <
     return mocks[n]!;
   };
 
+  // @ts-expect-error FIXME fieldsSchema type doesn't work in document, but works in other object-like schemas
   return {
     getMockById: (id: string) => mocksById[id],
     getNthMock,

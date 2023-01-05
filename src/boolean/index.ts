@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { BooleanDefinition } from "@sanity/types";
 
 export const boolean = <ParsedValue = boolean, ResolvedValue = boolean>({
   mock = (faker) => faker.datatype.boolean(),
@@ -11,7 +11,7 @@ export const boolean = <ParsedValue = boolean, ResolvedValue = boolean>({
   zodResolved,
   ...def
 }: SanityTypeDef<
-  Schema.BooleanDefinition,
+  BooleanDefinition,
   boolean,
   ParsedValue,
   ResolvedValue

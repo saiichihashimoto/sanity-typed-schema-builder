@@ -5,14 +5,13 @@ import { mockRule } from "../test-utils";
 
 import { slug } from ".";
 
-import type { SanitySlug } from ".";
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { PartialDeep } from "type-fest";
+import type { SlugValue } from "@sanity/types";
 
 describe("slug", () => {
   it("builds a sanity config", () =>
@@ -26,7 +25,7 @@ describe("slug", () => {
   it("parses into a string", () => {
     const type = slug();
 
-    const value: ValidateShape<InferValue<typeof type>, SanitySlug> = {
+    const value: ValidateShape<InferValue<typeof type>, SlugValue> = {
       _type: "slug",
       current: "foo",
     };
@@ -41,7 +40,7 @@ describe("slug", () => {
   it("resolves into a string", () => {
     const type = slug();
 
-    const value: ValidateShape<InferValue<typeof type>, SanitySlug> = {
+    const value: ValidateShape<InferValue<typeof type>, SlugValue> = {
       _type: "slug",
       current: "foo",
     };
@@ -98,11 +97,12 @@ describe("slug", () => {
     const type = slug({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const {
-            current: slug,
-          }: ValidateShape<typeof value, PartialDeep<SanitySlug>> = value;
+          const slug: ValidateShape<typeof value, SlugValue | undefined> =
+            value;
 
-          return (slug?.length ?? 0) > 50 || "Needs to be 50 characters";
+          return (
+            (slug?.current?.length ?? 0) > 50 || "Needs to be 50 characters"
+          );
         }),
     });
 

@@ -3,8 +3,8 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { Rule, SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { GetRule, SanityTypeDef } from "../types";
+import type { TextDefinition } from "@sanity/types";
 
 export const text = <ParsedValue = string, ResolvedValue = string>({
   length,
@@ -16,7 +16,7 @@ export const text = <ParsedValue = string, ResolvedValue = string>({
   zod: zodFn = (zod) => zod as unknown as z.ZodType<ParsedValue, any, string>,
   zodResolved,
   ...def
-}: SanityTypeDef<Schema.TextDefinition, string, ParsedValue, ResolvedValue> & {
+}: SanityTypeDef<TextDefinition, string, ParsedValue, ResolvedValue> & {
   length?: number;
   max?: number;
   min?: number;
@@ -35,7 +35,7 @@ export const text = <ParsedValue = string, ResolvedValue = string>({
       ...def,
       type: "text",
       validation: flow(
-        (rule: Rule<string>) => (!min ? rule : rule.min(min)),
+        (rule: GetRule<TextDefinition>) => (!min ? rule : rule.min(min)),
         (rule) => (!max ? rule : rule.max(max)),
         (rule) => (!length ? rule : rule.length(length)),
         (rule) => (!regex ? rule : rule.regex(regex)),

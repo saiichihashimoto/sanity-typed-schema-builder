@@ -195,7 +195,7 @@ describe("block", () => {
       validation: (Rule) =>
         Rule.custom(
           (block) =>
-            (block.children?.length ?? 0) > 0 || "Needs to have children"
+            (block?.children.length ?? 0) > 0 || "Needs to have children"
         ),
     });
 

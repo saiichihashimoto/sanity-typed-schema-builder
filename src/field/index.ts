@@ -7,15 +7,13 @@ import type {
   NamedSchemaFields,
   SanityType,
   TupleOfLength,
-  WithTypedValidation,
 } from "../types";
 import type { Faker } from "@faker-js/faker";
 import type {
+  FieldDefinition,
   PrepareViewOptions,
   PreviewConfig,
   PreviewValue,
-  Schema,
-  Rule as UntypedRule,
 } from "@sanity/types";
 import type { Merge } from "type-fest";
 
@@ -24,17 +22,11 @@ export type FieldOptions<
   Zod extends z.ZodTypeAny,
   ResolvedValue,
   Optional extends boolean
-> = Pick<
-  Schema.FieldDefinition,
-  "description" | "fieldset" | "group" | "title"
-> & {
+> = Pick<FieldDefinition, "description" | "fieldset" | "group" | "title"> & {
   name: Name;
   optional?: Optional;
   type: SanityType<
-    WithTypedValidation<
-      Omit<Schema.FieldDefinition<any>, NamedSchemaFields>,
-      z.input<Zod>
-    >,
+    Omit<FieldDefinition<any>, NamedSchemaFields>,
     z.input<Zod>,
     z.output<Zod>,
     ResolvedValue
@@ -153,8 +145,25 @@ export const fieldsSchema = <
 >(
   fields: FieldsArray,
   previewDef?: Preview<Value, Select> | undefined
-) => {
-  const preview: PreviewConfig | undefined = !previewDef
+) => ({
+  fields: fields.map(({ name, type, optional, ...props }) => {
+    const schema = type.schema();
+
+    const { validation } = schema;
+
+    return {
+      ...schema,
+      ...props,
+      name,
+      validation: flow(
+        /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return -- FIXME Unsure what the error is */
+        (rule) => (optional ? rule : rule.required()),
+        (rule) => validation?.(rule) ?? rule
+        /* eslint-enable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
+      ),
+    };
+  }),
+  preview: !previewDef
     ? undefined
     : !("prepare" in previewDef)
     ? (previewDef as PreviewConfig)
@@ -164,24 +173,5 @@ export const fieldsSchema = <
           ...fromPairs(fields.map(({ name }) => [name, name])),
           ...previewDef.select,
         },
-      };
-
-  return {
-    preview,
-    fields: fields.map(({ name, type, optional, ...props }) => {
-      const schema = type.schema();
-
-      const { validation } = schema;
-
-      return {
-        ...schema,
-        ...props,
-        name,
-        validation: flow(
-          (rule: UntypedRule) => (optional ? rule : rule.required()),
-          (rule) => validation?.(rule) ?? rule
-        ),
-      };
-    }),
-  };
-};
+      },
+});

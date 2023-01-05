@@ -170,9 +170,9 @@ describe("text", () => {
     const type = text({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const text: ValidateShape<typeof value, string> = value;
+          const text: ValidateShape<typeof value, string | undefined> = value;
 
-          return text.length > 50 || "Needs to be 50 characters";
+          return (text?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

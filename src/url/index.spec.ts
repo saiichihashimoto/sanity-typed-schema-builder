@@ -103,9 +103,9 @@ describe("url", () => {
     const type = url({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const url: ValidateShape<typeof value, string> = value;
+          const url: ValidateShape<typeof value, string | undefined> = value;
 
-          return url.length > 50 || "Needs to be 50 characters";
+          return (url?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

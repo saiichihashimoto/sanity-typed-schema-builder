@@ -2,10 +2,11 @@ import { z } from "zod";
 
 import type { Faker } from "@faker-js/faker";
 import type {
-  CustomValidator,
-  Rule as RuleWithoutTypedCustom,
+  InitialValueProperty,
+  RuleDef,
+  ValidationBuilder,
 } from "@sanity/types";
-import type { Merge, PartialDeep, Promisable, SetOptional } from "type-fest";
+import type { Merge, SetOptional } from "type-fest";
 
 export type TupleOfLength<
   T,
@@ -102,24 +103,23 @@ export const createType = <Definition, Value, ParsedValue, ResolvedValue>({
   zodResolved,
 });
 
-// Don't use Merge, because it creates a deep recursive type
-export type Rule<Value> = Omit<
-  {
-    [Key in keyof RuleWithoutTypedCustom]: RuleWithoutTypedCustom[Key] extends (
-      ...args: infer Args
-    ) => RuleWithoutTypedCustom
-      ? (...args: Args) => Rule<Value>
-      : RuleWithoutTypedCustom[Key];
-  },
-  "custom"
-> & {
-  custom: (fn: CustomValidator<PartialDeep<Value>>) => Rule<Value>;
-};
+export type GetRule<T> = T extends {
+  validation?: ValidationBuilder<infer Rule, any>;
+}
+  ? Rule
+  : never;
 
-export type WithTypedValidation<Definition, Value> = Merge<
-  Definition,
-  { validation?: (rule: Rule<Value>) => Rule<Value> }
->;
+// eslint-disable-next-line import/no-unused-modules -- Users of TypedValues need access to TypedValueRule or they get a really weird error. Unclear why.
+export interface TypedValueRule<Value>
+  extends RuleDef<TypedValueRule<Value>, Value> {}
+
+export interface TypedValues<
+  Value,
+  Rule extends RuleDef<Rule, any> = TypedValueRule<Value>
+> {
+  initialValue?: InitialValueProperty<any, Value>;
+  validation?: ValidationBuilder<Rule, Value>;
+}
 
 export type NamedSchemaFields = "description" | "name" | "title";
 
@@ -131,9 +131,8 @@ export type SanityNamedTypeDef<
   PreParsedValue = Value,
   PreResolvedValue = Value
 > = Merge<
-  WithTypedValidation<Omit<Definition, "type">, Value>,
+  Omit<Definition, "type">,
   {
-    initialValue?: Value | (() => Promisable<Value>);
     mock?: (faker: Faker, path: string) => Value;
     zod?: (
       zod: z.ZodType<PreParsedValue, any, Value>

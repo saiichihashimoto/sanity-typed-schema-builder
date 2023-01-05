@@ -85,8 +85,10 @@ describe("boolean", () => {
     const type = boolean({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const boolean: ValidateShape<typeof value, boolean> = value;
+          const boolean: ValidateShape<typeof value, boolean | undefined> =
+            value;
 
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- I want the logical or
           return boolean || "Needs to be true";
         }),
     });

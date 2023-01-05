@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { SanityTypeDef } from "../types";
+import type { SanityTypeDef, TypedValues } from "../types";
 import type {
   ArbitraryTypedObject,
   PortableTextBlock,
@@ -12,7 +12,15 @@ import type {
   PortableTextSpan,
   TypedObject,
 } from "@portabletext/types";
-import type { Schema } from "@sanity/types";
+import type { BlockDefinition } from "@sanity/types";
+import type { Merge } from "type-fest";
+
+export type SanityBlock<
+  M extends PortableTextMarkDefinition = PortableTextMarkDefinition,
+  C extends TypedObject = ArbitraryTypedObject | PortableTextSpan,
+  S extends string = PortableTextBlockStyle,
+  L extends string = PortableTextListItemType
+> = PortableTextBlock<M, C, S, L>;
 
 const zod = <
   M extends PortableTextMarkDefinition,
@@ -44,19 +52,15 @@ const zod = <
           .catchall(z.unknown())
       )
     ),
-  }) as z.ZodType<
-    PortableTextBlock<M, C, S, L>,
-    any,
-    PortableTextBlock<M, C, S, L>
-  >;
+  }) as z.ZodType<SanityBlock<M, C, S, L>, any, SanityBlock<M, C, S, L>>;
 
 export const block = <
   M extends PortableTextMarkDefinition = PortableTextMarkDefinition,
   C extends TypedObject = ArbitraryTypedObject | PortableTextSpan,
   S extends string = PortableTextBlockStyle,
   L extends string = PortableTextListItemType,
-  ParsedValue = PortableTextBlock<M, C, S, L>,
-  ResolvedValue = PortableTextBlock<M, C, S, L>
+  ParsedValue = SanityBlock<M, C, S, L>,
+  ResolvedValue = SanityBlock<M, C, S, L>
 >({
   mock = (faker) => ({
     style: "normal" as S,
@@ -71,16 +75,12 @@ export const block = <
     ],
   }),
   zod: zodFn = (zod) =>
-    zod as unknown as z.ZodType<
-      ParsedValue,
-      any,
-      PortableTextBlock<M, C, S, L>
-    >,
+    zod as unknown as z.ZodType<ParsedValue, any, SanityBlock<M, C, S, L>>,
   zodResolved,
   ...def
 }: SanityTypeDef<
-  Schema.BlockDefinition,
-  PortableTextBlock<M, C, S, L>,
+  Merge<BlockDefinition, TypedValues<SanityBlock<M, C, S, L>>>,
+  SanityBlock<M, C, S, L>,
   ParsedValue,
   ResolvedValue
 > = {}) =>
