@@ -49,8 +49,8 @@ const zodArrayOfLength =
         map(addKeyToZod),
         zodUnion,
         z.array,
-        (zod) => (!min ? zod : zod.min(min)),
-        (zod) => (!max ? zod : zod.max(max)),
+        (zod) => (min === undefined ? zod : zod.min(min)),
+        (zod) => (max === undefined ? zod : zod.max(max)),
         (zod) => (length === undefined ? zod : zod.length(length))
       ),
       (zod) =>
