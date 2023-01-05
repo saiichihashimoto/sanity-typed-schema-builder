@@ -13,7 +13,7 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { Merge, PartialDeep } from "type-fest";
+import type { Merge } from "type-fest";
 
 describe("object", () => {
   it("builds a sanity config", () =>
@@ -341,17 +341,16 @@ describe("object", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const {
-            bar,
-          }: ValidateShape<
+          const object: ValidateShape<
             typeof value,
-            PartialDeep<{
-              bar: string;
-              foo?: boolean;
-            }>
+            | {
+                bar: string;
+                foo?: boolean;
+              }
+            | undefined
           > = value;
 
-          return !bar || "Needs an empty bar";
+          return !object?.bar || "Needs an empty bar";
         }),
     });
 

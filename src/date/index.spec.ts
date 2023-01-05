@@ -89,9 +89,9 @@ describe("date", () => {
     const type = date({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const date: ValidateShape<typeof value, string> = value;
+          const date: ValidateShape<typeof value, string | undefined> = value;
 
-          return date.length > 50 || "Needs to be 50 characters";
+          return (date?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

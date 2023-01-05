@@ -15,9 +15,9 @@ import type {
   FieldsZodResolvedObject,
 } from "../field";
 import type { SanityReference } from "../reference";
-import type { SanityNamedTypeDef, TupleOfLength } from "../types";
+import type { SanityNamedTypeDef, TupleOfLength, TypedValues } from "../types";
 import type { Faker } from "@faker-js/faker";
-import type { ImageCrop, ImageHotspot, Schema } from "@sanity/types";
+import type { ImageCrop, ImageDefinition, ImageHotspot } from "@sanity/types";
 import type { Merge } from "type-fest";
 
 export type SanityImage<Hotspot extends boolean> = Hotspot extends false
@@ -177,7 +177,7 @@ export const image = <
 }: Merge<
   Omit<
     SanityNamedTypeDef<
-      Schema.ImageDefinition,
+      Merge<ImageDefinition, TypedValues<z.input<Zod>>>,
       z.input<Zod>,
       ParsedValue,
       ResolvedValue,

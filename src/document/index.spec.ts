@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { isFunction } from "lodash/fp";
 import { z } from "zod";
 
 import { boolean } from "../boolean";
@@ -15,7 +16,7 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { Merge, PartialDeep } from "type-fest";
+import type { Merge } from "type-fest";
 
 describe("document", () => {
   it("builds a sanity config", () =>
@@ -158,20 +159,16 @@ describe("document", () => {
     ]);
 
     const fooRule = mockRule();
+    const fooValidation = schema.fields[0]?.validation;
 
-    ("validation" in schema.fields[0]!
-      ? schema.fields[0]
-      : undefined
-    )?.validation?.(fooRule);
+    (!isFunction(fooValidation) ? () => {} : fooValidation)(fooRule);
 
     expect(fooRule.required).toHaveBeenCalled();
 
     const barRule = mockRule();
+    const barValidation = schema.fields[1]?.validation;
 
-    ("validation" in schema.fields[1]!
-      ? schema.fields[1]
-      : undefined
-    )?.validation?.(barRule);
+    (!isFunction(barValidation) ? () => {} : barValidation)(barRule);
 
     expect(barRule.required).not.toHaveBeenCalled();
 
@@ -445,22 +442,21 @@ describe("document", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const {
-            bar,
-          }: ValidateShape<
+          const document: ValidateShape<
             typeof value,
-            PartialDeep<{
-              _createdAt: string;
-              _id: string;
-              _rev: string;
-              _type: "foo";
-              _updatedAt: string;
-              bar: string;
-              foo?: boolean;
-            }>
+            | {
+                _createdAt: string;
+                _id: string;
+                _rev: string;
+                _type: "foo";
+                _updatedAt: string;
+                bar: string;
+                foo?: boolean;
+              }
+            | undefined
           > = value;
 
-          return !bar || "Needs an empty bar";
+          return !document?.bar || "Needs an empty bar";
         }),
     });
 

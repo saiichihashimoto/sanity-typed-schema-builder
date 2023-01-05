@@ -3,8 +3,8 @@ import { z } from "zod";
 
 import { createType } from "../types";
 
-import type { Rule, SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { GetRule, SanityTypeDef } from "../types";
+import type { DatetimeDefinition } from "@sanity/types";
 
 export const datetime = <ParsedValue = Date, ResolvedValue = Date>({
   max,
@@ -25,12 +25,7 @@ export const datetime = <ParsedValue = Date, ResolvedValue = Date>({
       }) as unknown as z.ZodType<ParsedValue, any, string>,
   zodResolved,
   ...def
-}: SanityTypeDef<
-  Schema.DatetimeDefinition,
-  string,
-  ParsedValue,
-  ResolvedValue
-> & {
+}: SanityTypeDef<DatetimeDefinition, string, ParsedValue, ResolvedValue> & {
   max?: string;
   min?: string;
 } = {}) => {
@@ -55,9 +50,8 @@ export const datetime = <ParsedValue = Date, ResolvedValue = Date>({
       ...def,
       type: "datetime",
       validation: flow(
-        (rule: Rule<string>) =>
-          !min ? rule : rule.min(min as unknown as number),
-        (rule) => (!max ? rule : rule.max(max as unknown as number)),
+        (rule: GetRule<DatetimeDefinition>) => (!min ? rule : rule.min(min)),
+        (rule) => (!max ? rule : rule.max(max)),
         (rule) => validation?.(rule) ?? rule
       ),
     }),

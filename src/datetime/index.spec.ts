@@ -188,9 +188,10 @@ describe("datetime", () => {
     const type = datetime({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const datetime: ValidateShape<typeof value, string> = value;
+          const datetime: ValidateShape<typeof value, string | undefined> =
+            value;
 
-          return datetime.length > 50 || "Needs to be 50 characters";
+          return (datetime?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

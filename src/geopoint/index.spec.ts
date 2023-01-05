@@ -11,14 +11,7 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { PartialDeep } from "type-fest";
-
-interface SanityGeopoint {
-  _type: "geopoint";
-  alt: number;
-  lat: number;
-  lng: number;
-}
+import type { GeopointValue } from "@sanity/types";
 
 describe("geopoint", () => {
   it("builds a sanity config", () =>
@@ -35,7 +28,7 @@ describe("geopoint", () => {
   it("parses into a geopoint", () => {
     const type = geopoint();
 
-    const value: ValidateShape<InferValue<typeof type>, SanityGeopoint> = {
+    const value: ValidateShape<InferValue<typeof type>, GeopointValue> = {
       _type: "geopoint",
       lat: 58.63169011423141,
       lng: 9.089101352587932,
@@ -43,7 +36,7 @@ describe("geopoint", () => {
     };
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      SanityGeopoint
+      GeopointValue
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
@@ -52,7 +45,7 @@ describe("geopoint", () => {
   it("resolves into a geopoint", () => {
     const type = geopoint();
 
-    const value: ValidateShape<InferValue<typeof type>, SanityGeopoint> = {
+    const value: ValidateShape<InferValue<typeof type>, GeopointValue> = {
       _type: "geopoint",
       lat: 58.63169011423141,
       lng: 9.089101352587932,
@@ -60,7 +53,7 @@ describe("geopoint", () => {
     };
     const resolvedValue: ValidateShape<
       InferResolvedValue<typeof type>,
-      SanityGeopoint
+      GeopointValue
     > = type.resolve(value);
 
     expect(resolvedValue).toEqual(value);
@@ -140,11 +133,12 @@ describe("geopoint", () => {
     const type = geopoint({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const {
-            lat,
-          }: ValidateShape<typeof value, PartialDeep<SanityGeopoint>> = value;
+          const geopoint: ValidateShape<
+            typeof value,
+            GeopointValue | undefined
+          > = value;
 
-          return (lat ?? 0) > 50 || "Needs to be greater than 50";
+          return (geopoint?.lat ?? 0) > 50 || "Needs to be greater than 50";
         }),
     });
 

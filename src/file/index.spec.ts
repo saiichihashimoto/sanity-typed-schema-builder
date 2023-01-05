@@ -15,7 +15,7 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { Merge, PartialDeep } from "type-fest";
+import type { Merge } from "type-fest";
 
 describe("file", () => {
   it("builds a sanity config", () =>
@@ -256,22 +256,19 @@ describe("file", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const {
-            bar,
-          }: ValidateShape<
+          const file: ValidateShape<
             typeof value,
-            PartialDeep<
-              Merge<
+            | Merge<
                 SanityFile,
                 {
                   bar: string;
                   foo?: boolean;
                 }
               >
-            >
+            | undefined
           > = value;
 
-          return !bar || "Needs an empty bar";
+          return !file?.bar || "Needs an empty bar";
         }),
     });
 

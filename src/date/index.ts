@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { DateDefinition } from "@sanity/types";
 
 export const date = <ParsedValue = string, ResolvedValue = string>({
   mock = (faker) =>
@@ -20,12 +20,7 @@ export const date = <ParsedValue = string, ResolvedValue = string>({
   zod: zodFn = (zod) => zod as unknown as z.ZodType<ParsedValue, any, string>,
   zodResolved,
   ...def
-}: SanityTypeDef<
-  Schema.DateDefinition,
-  string,
-  ParsedValue,
-  ResolvedValue
-> = {}) =>
+}: SanityTypeDef<DateDefinition, string, ParsedValue, ResolvedValue> = {}) =>
   createType({
     mock,
     schema: () => ({

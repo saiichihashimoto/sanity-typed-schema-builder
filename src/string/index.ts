@@ -5,8 +5,8 @@ import { listMock, listValueToValue } from "../list";
 import { createType, zodUnion } from "../types";
 
 import type { WithTypedOptionsList } from "../list";
-import type { Rule, SanityTypeDef } from "../types";
-import type { Schema } from "@sanity/types";
+import type { GetRule, SanityTypeDef } from "../types";
+import type { StringDefinition } from "@sanity/types";
 
 export const string = <
   TypedValue extends string,
@@ -28,7 +28,7 @@ export const string = <
   zodResolved,
   ...def
 }: SanityTypeDef<
-  WithTypedOptionsList<TypedValue, Schema.StringDefinition>,
+  WithTypedOptionsList<TypedValue, StringDefinition>,
   TypedValue,
   ParsedValue,
   ResolvedValue
@@ -60,7 +60,7 @@ export const string = <
       options,
       type: "string",
       validation: flow(
-        (rule: Rule<TypedValue>) => (!min ? rule : rule.min(min)),
+        (rule: GetRule<StringDefinition>) => (!min ? rule : rule.min(min)),
         (rule) => (!max ? rule : rule.max(max)),
         (rule) => (!length ? rule : rule.length(length)),
         (rule) => (!regex ? rule : rule.regex(regex)),

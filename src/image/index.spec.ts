@@ -11,7 +11,7 @@ import type { SanityImage } from ".";
 import type { SanityReference } from "../reference";
 import type { ValidateShape } from "../test-utils";
 import type { InferParsedValue, InferValue } from "../types";
-import type { Merge, PartialDeep } from "type-fest";
+import type { Merge } from "type-fest";
 
 describe("image", () => {
   it("builds a sanity config", () =>
@@ -292,22 +292,19 @@ describe("image", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const {
-            bar,
-          }: ValidateShape<
+          const image: ValidateShape<
             typeof value,
-            PartialDeep<
-              Merge<
+            | Merge<
                 SanityImage<false>,
                 {
                   bar: string;
                   foo?: boolean;
                 }
               >
-            >
+            | undefined
           > = value;
 
-          return !bar || "Needs an empty bar";
+          return !image?.bar || "Needs an empty bar";
         }),
     });
 

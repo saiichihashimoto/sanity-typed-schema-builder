@@ -8,12 +8,17 @@ import type {
   InferValue,
   SanityTypeDef,
   TupleOfLength,
+  TypedValues,
 } from "../types";
-import type { Reference, Schema, WeakReference } from "@sanity/types";
+import type {
+  ReferenceDefinition,
+  ReferenceValue,
+  WeakReference,
+} from "@sanity/types";
 import type { Merge } from "type-fest";
 
 export type SanityReference<Weak extends boolean = false> = Omit<
-  Weak extends false ? Omit<Reference, "_weak"> : WeakReference,
+  Weak extends false ? Omit<ReferenceValue, "_weak"> : WeakReference,
   "_type"
 > & {
   _type: "reference";
@@ -76,7 +81,7 @@ export const reference = <
   ...defRaw
 }: Merge<
   SanityTypeDef<
-    Schema.ReferenceDefinition,
+    Merge<ReferenceDefinition, TypedValues<SanityReference<Weak>>>,
     SanityReference<Weak>,
     ParsedValue,
     ResolvedValue
