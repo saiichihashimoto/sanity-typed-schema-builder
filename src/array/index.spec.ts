@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { boolean } from "../boolean";
 import { object } from "../object";
+import { objectNamed } from "../objectNamed";
+import { string } from "../string";
 import { mockRule } from "../test-utils";
 
 import { array } from ".";
@@ -29,15 +31,28 @@ describe("array", () => {
     ));
 
   it("adds primitive types", () => {
-    const type = array({ of: [boolean()] });
+    const type = array({
+      of: [
+        boolean({
+          zod: (zod) => zod.transform((value) => value.toString()),
+          zodResolved: (zod) =>
+            zod.transform((value) => value.toString().length),
+        }),
+      ],
+    });
 
-    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [];
+    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      boolean[]
+      string[]
     > = type.parse(value);
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      number[]
+    > = type.resolve(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toEqual(["true"]);
+    expect(resolvedValue).toEqual([4]);
   });
 
   it("adds keyed nonprimitive types", () => {
@@ -47,7 +62,11 @@ describe("array", () => {
           fields: [
             {
               name: "foo",
-              type: boolean(),
+              type: boolean({
+                zod: (zod) => zod.transform((value) => value.toString()),
+                zodResolved: (zod) =>
+                  zod.transform((value) => value.toString().length),
+              }),
             },
           ],
         }),
@@ -83,57 +102,128 @@ describe("array", () => {
       InferParsedValue<typeof type>,
       Array<{
         _key: string;
-        foo: boolean;
+        foo: string;
       }>
     > = type.parse(value);
+    const resolvedValue: ValidateShape<
+      InferResolvedValue<typeof type>,
+      Array<{
+        _key: string;
+        foo: number;
+      }>
+    > = type.resolve(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toEqual([
+      { _key: "a", foo: "true" },
+      { _key: "b", foo: "false" },
+    ]);
+    expect(resolvedValue).toEqual([
+      { _key: "a", foo: 4 },
+      { _key: "b", foo: 5 },
+    ]);
   });
 
-  it("creates union with multiple types", () => {
+  it("creates union with primitive types", () => {
     const type = array({
-      of: [
-        object({
-          fields: [
-            {
-              name: "foo",
-              type: boolean(),
-            },
-          ],
-        }),
-        object({
-          fields: [
-            {
-              name: "bar",
-              type: boolean(),
-            },
-          ],
-        }),
-      ],
+      of: [boolean(), string()],
     });
 
     const schema = type.schema();
 
     expect(schema).toHaveProperty("of", [
       {
-        type: "object",
-        fields: [
-          {
-            name: "foo",
-            type: "boolean",
-            validation: expect.any(Function),
-          },
-        ],
+        type: "boolean",
       },
       {
-        type: "object",
-        fields: [
+        type: "string",
+        validation: expect.any(Function),
+      },
+    ]);
+
+    const value: ValidateShape<
+      InferValue<typeof type>,
+      Array<boolean | string>
+    > = [true, "a"];
+    const parsedValue: ValidateShape<
+      InferParsedValue<typeof type>,
+      Array<boolean | string>
+    > = type.parse(value);
+
+    expect(parsedValue).toEqual(value);
+
+    expect(() => type.parse([5])).toThrow(
+      JSON.stringify(
+        [
           {
-            name: "bar",
-            type: "boolean",
-            validation: expect.any(Function),
+            code: "invalid_union",
+            unionErrors: [
+              {
+                issues: [
+                  {
+                    code: "invalid_type",
+                    expected: "boolean",
+                    received: "number",
+                    path: [0],
+                    message: "Expected boolean, received number",
+                  },
+                ],
+                name: "ZodError",
+              },
+              {
+                issues: [
+                  {
+                    code: "invalid_type",
+                    expected: "string",
+                    received: "number",
+                    path: [0],
+                    message: "Expected string, received number",
+                  },
+                ],
+                name: "ZodError",
+              },
+            ],
+            path: [0],
+            message: "Invalid input",
           },
         ],
+        null,
+        2
+      )
+    );
+  });
+
+  it('creates discriminated union with nonprimitive "_type" types', () => {
+    const objectNamedType1 = objectNamed({
+      name: "a",
+      fields: [
+        {
+          name: "foo",
+          type: boolean(),
+        },
+      ],
+    });
+    const objectNamedType2 = objectNamed({
+      name: "b",
+      fields: [
+        {
+          name: "foo",
+          type: string(),
+        },
+      ],
+    });
+
+    const type = array({
+      of: [objectNamedType1.ref(), objectNamedType2.ref()],
+    });
+
+    const schema = type.schema();
+
+    expect(schema).toHaveProperty("of", [
+      {
+        type: "a",
+      },
+      {
+        type: "b",
       },
     ]);
 
@@ -142,50 +232,93 @@ describe("array", () => {
       Array<
         | {
             _key: string;
+            _type: "a";
             foo: boolean;
           }
         | {
             _key: string;
-            bar: boolean;
+            _type: "b";
+            foo: string;
           }
       >
     > = [
-      { _key: "a", foo: true },
-      { _key: "b", bar: true },
+      {
+        _key: "1",
+        _type: "a",
+        foo: true,
+      },
+      {
+        _key: "2",
+        _type: "b",
+        foo: "hello",
+      },
     ];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
       Array<
         | {
             _key: string;
+            _type: "a";
             foo: boolean;
           }
         | {
             _key: string;
-            bar: boolean;
+            _type: "b";
+            foo: string;
           }
       >
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
-  });
 
-  it("resolves into an array", () => {
-    const type = array({
-      of: [
-        boolean({
-          zodResolved: (zod) => zod.transform(() => "foo"),
-        }),
-      ],
-    });
+    // Discriminated union should show that "_type" is invalid
+    expect(() =>
+      type.parse([
+        {
+          _key: "3",
+          _type: "c",
+          fee: 6,
+        },
+      ])
+    ).toThrow(
+      JSON.stringify(
+        [
+          {
+            code: "invalid_union_discriminator",
+            options: ["a", "b"],
+            path: [0, "_type"],
+            message: "Invalid discriminator value. Expected 'a' | 'b'",
+          },
+        ],
+        null,
+        2
+      )
+    );
 
-    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      string[]
-    > = type.resolve(value);
-
-    expect(resolvedValue).toEqual(["foo"]);
+    // Since "_type" is valid, should show an error only against that specific schema
+    expect(() =>
+      type.parse([
+        {
+          _key: "3",
+          _type: "a",
+          foo: 6,
+        },
+      ])
+    ).toThrow(
+      JSON.stringify(
+        [
+          {
+            code: "invalid_type",
+            expected: "boolean",
+            received: "number",
+            path: [0, "foo"],
+            message: "Expected boolean, received number",
+          },
+        ],
+        null,
+        2
+      )
+    );
   });
 
   it("sets min", () => {

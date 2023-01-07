@@ -1,7 +1,7 @@
 import { flow, map } from "lodash/fp";
 import { z } from "zod";
 
-import { createType, zodUnion } from "../types";
+import { createType, zodDiscriminatedUnionMaybe } from "../types";
 
 import type {
   InferParsedValue,
@@ -47,7 +47,7 @@ const zodArrayOfLength =
       flow(
         (value: typeof zods) => value,
         map(addKeyToZod),
-        zodUnion,
+        zodDiscriminatedUnionMaybe("_type"),
         z.array,
         (zod) => (min === undefined ? zod : zod.min(min)),
         (zod) => (max === undefined ? zod : zod.max(max)),
