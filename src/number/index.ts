@@ -6,7 +6,7 @@ import { createType, zodUnion } from "../types";
 
 import type { WithTypedOptionsList } from "../list";
 import type { GetRule, SanityTypeDef } from "../types";
-import type { NumberDefinition } from "@sanity/types";
+import type { NumberDefinition } from "sanity";
 
 export const number = <
   TypedValue extends number,

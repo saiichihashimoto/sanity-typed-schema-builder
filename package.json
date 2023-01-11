@@ -31,9 +31,9 @@
   },
   "dependencies": {
     "@portabletext/types": "1.0.3",
-    "@sanity/types": "3.1.4",
     "@types/lodash": "4.14.182",
     "lodash": "4.17.21",
+    "sanity": "3.2.0",
     "type-fest": "2.18.0",
     "zod": "3.17.10"
   },

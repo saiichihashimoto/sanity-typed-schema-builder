@@ -17,7 +17,7 @@ import type {
 import type { SanityReference } from "../reference";
 import type { SanityNamedTypeDef, TupleOfLength, TypedValues } from "../types";
 import type { Faker } from "@faker-js/faker";
-import type { ImageCrop, ImageDefinition, ImageHotspot } from "@sanity/types";
+import type { ImageCrop, ImageDefinition, ImageHotspot } from "sanity";
 import type { Merge } from "type-fest";
 
 export type SanityImage<Hotspot extends boolean> = Hotspot extends false

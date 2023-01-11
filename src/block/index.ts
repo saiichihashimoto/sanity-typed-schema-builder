@@ -12,7 +12,7 @@ import type {
   PortableTextSpan,
   TypedObject,
 } from "@portabletext/types";
-import type { BlockDefinition } from "@sanity/types";
+import type { BlockDefinition } from "sanity";
 import type { Merge } from "type-fest";
 
 export type SanityBlock<

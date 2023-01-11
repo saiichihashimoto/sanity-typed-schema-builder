@@ -11,7 +11,7 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { SlugValue } from "@sanity/types";
+import type { SlugValue } from "sanity";
 
 describe("slug", () => {
   it("builds a sanity config", () =>

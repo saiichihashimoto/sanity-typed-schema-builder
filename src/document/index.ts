@@ -25,7 +25,7 @@ import type { Faker } from "@faker-js/faker";
 import type {
   DocumentDefinition,
   SanityDocument as SanityDocumentOriginal,
-} from "@sanity/types";
+} from "sanity";
 import type { Merge, RemoveIndexSignature } from "type-fest";
 
 type SanityDocumentDefinition<Value> = Merge<

@@ -11,7 +11,7 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { GeopointValue } from "@sanity/types";
+import type { GeopointValue } from "sanity";
 
 describe("geopoint", () => {
   it("builds a sanity config", () =>

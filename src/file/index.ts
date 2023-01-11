@@ -16,7 +16,7 @@ import type {
 } from "../field";
 import type { SanityReference } from "../reference";
 import type { SanityTypeDef, TupleOfLength, TypedValues } from "../types";
-import type { FileDefinition } from "@sanity/types";
+import type { FileDefinition } from "sanity";
 import type { Merge } from "type-fest";
 
 export interface SanityFile {

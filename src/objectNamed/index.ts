@@ -15,7 +15,7 @@ import type {
   Preview,
 } from "../field";
 import type { SanityNamedTypeDef, TupleOfLength, TypedValues } from "../types";
-import type { ObjectDefinition } from "@sanity/types";
+import type { ObjectDefinition } from "sanity";
 import type { Merge } from "type-fest";
 
 interface ExtraZodFields<ObjectNames extends string> {

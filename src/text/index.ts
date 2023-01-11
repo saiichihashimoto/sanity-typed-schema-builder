@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { GetRule, SanityTypeDef } from "../types";
-import type { TextDefinition } from "@sanity/types";
+import type { TextDefinition } from "sanity";
 
 export const text = <ParsedValue = string, ResolvedValue = string>({
   length,

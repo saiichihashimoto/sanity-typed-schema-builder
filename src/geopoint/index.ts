@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { GeopointDefinition, GeopointValue } from "@sanity/types";
+import type { GeopointDefinition, GeopointValue } from "sanity";
 
 const zod: z.ZodType<GeopointValue, any, GeopointValue> = z.object({
   _type: z.literal("geopoint"),
