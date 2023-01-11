@@ -16,7 +16,7 @@ Build [Sanity schemas](https://www.sanity.io/docs/content-modelling) declarative
 ## Install
 
 ```bash
-npm install sanity-typed-schema-builder
+npm install sanity-typed-schema-builder sanity
 ```
 
 ## Usage
