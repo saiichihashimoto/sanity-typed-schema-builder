@@ -17,7 +17,7 @@ import type {
   StringDefinition,
   TextDefinition,
   UrlDefinition,
-} from "@sanity/types";
+} from "sanity";
 import type { Simplify } from "type-fest";
 import type { IsEqual } from "type-fest/source/internal";
 import type { GetRule } from "types";

@@ -1,11 +1,7 @@
 import { z } from "zod";
 
 import type { Faker } from "@faker-js/faker";
-import type {
-  InitialValueProperty,
-  RuleDef,
-  ValidationBuilder,
-} from "@sanity/types";
+import type { InitialValueProperty, RuleDef, ValidationBuilder } from "sanity";
 import type { Merge, SetOptional } from "type-fest";
 
 export type TupleOfLength<

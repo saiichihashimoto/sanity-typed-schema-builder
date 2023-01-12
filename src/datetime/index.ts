@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { GetRule, SanityTypeDef } from "../types";
-import type { DatetimeDefinition } from "@sanity/types";
+import type { DatetimeDefinition } from "sanity";
 
 export const datetime = <ParsedValue = Date, ResolvedValue = Date>({
   max,

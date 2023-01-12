@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { UrlDefinition } from "@sanity/types";
+import type { UrlDefinition } from "sanity";
 
 const zod = z.string().url();
 

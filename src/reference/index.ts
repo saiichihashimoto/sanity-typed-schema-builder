@@ -14,7 +14,7 @@ import type {
   ReferenceDefinition,
   ReferenceValue,
   WeakReference,
-} from "@sanity/types";
+} from "sanity";
 import type { Merge } from "type-fest";
 
 export type SanityReference<Weak extends boolean = false> = Omit<

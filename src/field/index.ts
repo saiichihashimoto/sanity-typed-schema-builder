@@ -14,7 +14,7 @@ import type {
   PrepareViewOptions,
   PreviewConfig,
   PreviewValue,
-} from "@sanity/types";
+} from "sanity";
 import type { Merge } from "type-fest";
 
 export type FieldOptions<

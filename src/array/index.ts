@@ -18,7 +18,7 @@ import type {
   ArrayRule,
   IntrinsicDefinitions,
   TypeAliasDefinition,
-} from "@sanity/types";
+} from "sanity";
 import type { Merge } from "type-fest";
 
 type AddKey<T> = T extends object ? Merge<T, { _key: string }> : T;
