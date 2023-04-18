@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from "../boolean";
+import { sharedFields } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
 
@@ -152,6 +153,39 @@ describe("object", () => {
     > = type.parse(value);
 
     expect(parsedValue).toEqual(value);
+  });
+
+  it("works with shared fields", () => {
+    const fields = sharedFields([
+      {
+        name: "foo",
+        type: boolean(),
+      },
+    ]);
+
+    const type = object({
+      fields: [
+        ...fields,
+        {
+          name: "bar",
+          optional: true,
+          type: string(),
+        },
+      ],
+    });
+
+    expect(type.schema()).toHaveProperty("fields", [
+      {
+        name: "foo",
+        type: "boolean",
+        validation: expect.any(Function),
+      },
+      {
+        name: "bar",
+        type: "string",
+        validation: expect.any(Function),
+      },
+    ]);
   });
 
   it("mocks the field values", () =>

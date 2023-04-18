@@ -4,6 +4,7 @@ import { isFunction } from "lodash/fp";
 import { z } from "zod";
 
 import { boolean } from "../boolean";
+import { sharedFields } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
 
@@ -205,6 +206,40 @@ describe("document", () => {
       _createdAt: new Date("2022-06-03T03:24:55.395Z"),
       _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
     });
+  });
+
+  it("works with shared fields", () => {
+    const fields = sharedFields([
+      {
+        name: "foo",
+        type: boolean(),
+      },
+    ]);
+
+    const type = document({
+      name: "foo",
+      fields: [
+        ...fields,
+        {
+          name: "bar",
+          optional: true,
+          type: string(),
+        },
+      ],
+    });
+
+    expect(type.schema()).toHaveProperty("fields", [
+      {
+        name: "foo",
+        type: "boolean",
+        validation: expect.any(Function),
+      },
+      {
+        name: "bar",
+        type: "string",
+        validation: expect.any(Function),
+      },
+    ]);
   });
 
   it("mocks the field values", () => {
