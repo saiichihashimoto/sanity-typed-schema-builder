@@ -160,6 +160,10 @@ const config = {
         "@typescript-eslint/member-delimiter-style": "error",
         "@typescript-eslint/method-signature-style": "error",
         "@typescript-eslint/no-confusing-non-null-assertion": "error",
+        "@typescript-eslint/no-confusing-void-expression": [
+          "error",
+          { ignoreArrowShorthand: true, ignoreVoidOperator: true },
+        ],
         "@typescript-eslint/no-empty-function": [
           "error",
           {
@@ -171,9 +175,28 @@ const config = {
           { allowSingleExtends: true },
         ],
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-meaningless-void-operator": [
+          "error",
+          { checkNever: false },
+        ],
         "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
         "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
         "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-unnecessary-boolean-literal-compare": [
+          "error",
+          {
+            allowComparingNullableBooleansToFalse: false,
+            allowComparingNullableBooleansToTrue: false,
+          },
+        ],
+        "@typescript-eslint/no-unnecessary-condition": [
+          "error",
+          { allowConstantLoopConditions: true },
+        ],
+
+        "@typescript-eslint/no-unnecessary-type-assertion": "error",
+
         "@typescript-eslint/no-unused-vars": [
           "error",
           {
@@ -182,8 +205,18 @@ const config = {
             vars: "all",
           },
         ],
+        "@typescript-eslint/non-nullable-type-assertion-style": "error",
+        "@typescript-eslint/prefer-nullish-coalescing": [
+          "error",
+          {
+            ignoreConditionalTests: false,
+            ignoreMixedLogicalExpressions: false,
+          },
+        ],
         "@typescript-eslint/prefer-optional-chain": "error",
+        "@typescript-eslint/prefer-reduce-type-parameter": "error",
         "@typescript-eslint/prefer-ts-expect-error": "error",
+        "@typescript-eslint/promise-function-async": "error",
         "@typescript-eslint/type-annotation-spacing": "error",
         "@typescript-eslint/unified-signatures": "error",
         // needed since mongodb's id field is _id
@@ -254,7 +287,7 @@ const config = {
       /* eslint-disable sort-keys-fix/sort-keys-fix -- Sorting rules */
     },
     {
-      files: [".eslintrc.js", ".eslintrc.strict.js"],
+      files: [".eslintrc.js"],
       /* eslint-enable sort-keys-fix/sort-keys-fix -- Sorting rules */
       rules: {
         // HACK The sort-keys-fix pairs sometimes have a technically unnecessary disable, but removing them cascades into other eslint errors. I couldn't disable no-unused-disable on specific comments or globally for this file via a comment. Might be related to these limitations: https://mysticatea.github.io/eslint-plugin-eslint-comments/rules/no-unused-disable.html#known-limitations

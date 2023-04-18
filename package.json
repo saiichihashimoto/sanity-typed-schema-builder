@@ -21,7 +21,7 @@
     "build": "tsc --project tsconfig.json",
     "dev": "jest --watch",
     "lint": "run-p --aggregate-output --continue-on-error lint:*",
-    "lint:eslint": "eslint --color --ext .js,.ts,.tsx --config ./.eslintrc.strict.js --ignore-pattern '!.*' .",
+    "lint:eslint": "eslint --color --ext .js,.ts,.tsx --config ./.eslintrc.js --ignore-pattern '!.*' .",
     "lint:prettier": "prettier --color --check .",
     "lint:sort-package-json": "sort-package-json \"**/package.json\" \"!node_modules/**\" --check",
     "prepare": "is-ci || run-p --continue-on-error prepare:*",
