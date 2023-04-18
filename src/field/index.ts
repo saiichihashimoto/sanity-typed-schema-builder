@@ -173,3 +173,17 @@ export const fieldsSchema = <
         },
       },
 });
+
+// TODO sharedFields needs documentation
+export const sharedFields = <
+  Names extends string,
+  Zods extends z.ZodTypeAny,
+  ResolvedValues,
+  Optionals extends boolean,
+  FieldsArray extends TupleOfLength<
+    FieldOptions<Names, Zods, ResolvedValues, Optionals>,
+    1
+  >
+>(
+  fields: FieldsArray
+) => fields;
