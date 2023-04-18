@@ -1,5 +1,4 @@
 /* eslint sort-keys-fix/sort-keys-fix: ["error", "asc", { natural: true }] -- This rule is ONLY for this .eslintrc.js file, not as a rule in our codebase. */
-/* eslint-disable sort-keys-fix/sort-keys-fix -- Usually, our eslint comment pairs are enabling then disabling rules. Since we can only properly configure this by globally enabling it, we immediately disable it here (and reenable at the bottom), so we can have disable then enable pairs around objects. */
 
 // Some @typescript-eslint/eslint-plugin rules require type-checking to work, ie running typescript. This can get heavy, especially in IDEs where we save and linting is running in realtime. https://github.com/typescript-eslint/typescript-eslint/tree/main/packages/eslint-plugin#recommended-configs
 // Instead, we run all "heavy" eslint rules only on lint-staged and on push. This ensures we run all of our rules before commits, but our IDEs won't lag.
@@ -15,16 +14,15 @@ const config = {
   extends: ["./.eslintrc.js"],
   overrides: [
     {
+      extends: [
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      ],
       files: ["**/*.ts", "**/*.tsx"],
       parser: "@typescript-eslint/parser",
       parserOptions: {
         project: ["./tsconfig.json"],
       },
       plugins: ["@typescript-eslint", "typescript-sort-keys"],
-      extends: [
-        "plugin:@typescript-eslint/recommended-requiring-type-checking",
-      ],
-      /* eslint-enable sort-keys-fix/sort-keys-fix -- Sorting rules */
       rules: {
         "@typescript-eslint/no-confusing-void-expression": [
           "error",
@@ -58,20 +56,16 @@ const config = {
         "@typescript-eslint/prefer-reduce-type-parameter": "error",
         "@typescript-eslint/promise-function-async": "error",
       },
-      /* eslint-disable sort-keys-fix/sort-keys-fix -- Sorting rules */
     },
     {
+      env: { jest: true, "jest/globals": true },
       files: testFiles,
-      env: { "jest/globals": true, jest: true },
       plugins: ["jest"],
-      /* eslint-enable sort-keys-fix/sort-keys-fix -- Sorting rules */
       rules: {
         "@typescript-eslint/unbound-method": "off",
       },
-      /* eslint-disable sort-keys-fix/sort-keys-fix -- Sorting rules */
     },
   ],
 };
-/* eslint-enable sort-keys-fix/sort-keys-fix */
 
 module.exports = config;

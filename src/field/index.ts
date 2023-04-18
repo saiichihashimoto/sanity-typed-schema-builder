@@ -156,10 +156,8 @@ export const fieldsSchema = <
       ...props,
       name,
       validation: flow(
-        /* eslint-disable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return -- FIXME Unsure what the error is */
         (rule) => (optional ? rule : rule.required()),
         (rule) => validation?.(rule) ?? rule
-        /* eslint-enable @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
       ),
     };
   }),
