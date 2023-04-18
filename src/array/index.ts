@@ -107,6 +107,7 @@ export const array = <
   length,
   max,
   min,
+  name,
   validation,
   of: items,
   // FIXME Mock the array element types. Not sure how to allow an override, since the function has to be defined before we know the element types.
@@ -174,6 +175,7 @@ export const array = <
     ),
     schema: () => ({
       ...def,
+      name,
       type: "array",
       of: items.map(({ schema }) => schema()),
       validation: flow(
