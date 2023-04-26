@@ -19,6 +19,7 @@ import type {
   UrlDefinition,
 } from "sanity";
 import type { Simplify } from "type-fest";
+// TODO [type-fest@>=3.5.0]: IsEqual is available directly from type-fest
 import type { IsEqual } from "type-fest/source/internal";
 import type { GetRule } from "types";
 
