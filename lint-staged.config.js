@@ -12,28 +12,28 @@ const config = {
   "**/package.json": ["sort-package-json"],
   "{prettier.config.js,**/package.json}": () => [`${prettierCmd} .`],
   "{.eslintrc.js,**/package.json}": () => [`${eslintCmd} .`],
-  "{.*ignore,.gitattributes}": (files) =>
-    files.map((file) =>
-      [`cat ${file}`, "sort -u", "sed '/^ *$/d'", `sponge ${file}`].join(" | ")
-    ),
-  "**/Brewfile": (files) =>
-    files.map((file) =>
-      [
-        // Got the idea from https://gist.github.com/mattmc3/e64c58073d6cd64692561d0843ea8ad3
-        // TODO This would be great in a brewfile-lint-staged file
-        `cat ${file}`,
-        `awk 'BEGIN{FS=OFS=" "}
-          /^tap/  {print 1 "\t" $0; next}
-          /^brew/ {print 2 "\t" $0; next}
-          /^cask/ {print 3 "\t" $0; next}
-          /^mas/  {print 4 "\t" $0; next}
-                  {print 9 "\t" $0}'`,
-        "sort -u",
-        `awk 'BEGIN{FS="\t";OFS=""}{$1=""; print $0}'`,
-        "sed '/^ *$/d'",
-        `sponge ${file}`,
-      ].join(" | ")
-    ),
+  ...(process.env.NO_FIX
+    ? {}
+    : {
+        "{.env*,.gitattributes}": (files) =>
+          files.map((file) => `sort -o ${file} ${file}`),
+        Brewfile: (files) =>
+          files.map((file) =>
+            [
+              `cat ${file}`,
+              `awk 'BEGIN{FS=OFS=" "}
+                /^tap/  {print 1 "\t" $0; next}
+                /^brew/ {print 2 "\t" $0; next}
+                /^cask/ {print 3 "\t" $0; next}
+                /^mas/  {print 4 "\t" $0; next}
+                        {print 9 "\t" $0}'`,
+              "sort -u",
+              `awk 'BEGIN{FS="\t";OFS=""}{$1=""; print $0}'`,
+              "sed '/^ *$/d'",
+              `sponge ${file}`,
+            ].join(" | ")
+          ),
+      }),
 };
 
 module.exports = config;

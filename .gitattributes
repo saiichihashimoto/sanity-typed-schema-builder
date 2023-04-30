@@ -1,3 +1,6 @@
+*.ico -diff
 *.svg -diff
+*.ttf -diff
 package-lock.json -diff
 public/.well-known/apple-developer-merchantid-domain-association -diff
+yarn.lock -diff
