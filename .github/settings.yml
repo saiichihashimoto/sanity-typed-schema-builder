@@ -3,7 +3,7 @@ repository:
   name: sanity-typed-schema-builder
   description: Build Sanity schemas declaratively and get typescript types of schema values for free!
   homepage: https://saiichihashimoto.github.io/sanity-typed-schema-builder
-  topics: sanity, schema, typescript, builder
+  topics: sanity, schema, typescript, builder, zod
   private: false
   has_issues: true
   has_projects: false
