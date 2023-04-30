@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import type { Merge } from "type-fest";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
@@ -14,7 +15,6 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { Merge } from "type-fest";
 
 describe("object", () => {
   it("builds a sanity config", () =>
@@ -27,8 +27,9 @@ describe("object", () => {
           },
         ],
       }).schema()
-    ).toEqual({
+    ).toStrictEqual({
       type: "object",
+      preview: undefined,
       fields: [
         {
           name: "foo",
@@ -69,7 +70,7 @@ describe("object", () => {
       { foo: boolean }
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into an object", () => {
@@ -92,7 +93,7 @@ describe("object", () => {
       { foo: string }
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual({ foo: "foo" });
+    expect(resolvedValue).toStrictEqual({ foo: "foo" });
   });
 
   it("allows optional fields", () => {
@@ -129,13 +130,13 @@ describe("object", () => {
 
     schema.fields[0]?.validation?.(fooRule);
 
-    expect(fooRule.required).toHaveBeenCalled();
+    expect(fooRule.required).toHaveBeenCalledWith();
 
     const barRule = mockRule();
 
     schema.fields[1]?.validation?.(barRule);
 
-    expect(barRule.required).not.toHaveBeenCalled();
+    expect(barRule.required).not.toHaveBeenCalledWith();
 
     const value: ValidateShape<
       InferValue<typeof type>,
@@ -152,7 +153,7 @@ describe("object", () => {
       }
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("works with shared fields", () => {
@@ -202,7 +203,7 @@ describe("object", () => {
           },
         ],
       }).mock(faker)
-    ).toEqual({
+    ).toStrictEqual({
       foo: expect.any(Boolean),
       bar: expect.any(String),
     }));
@@ -219,17 +220,17 @@ describe("object", () => {
       return { fields };
     };
 
-    expect(object(objectDef()).mock(faker)).toEqual(
+    expect(object(objectDef()).mock(faker)).toStrictEqual(
       object(objectDef()).mock(faker)
     );
-    expect(object(objectDef()).mock(faker, ".foo")).toEqual(
+    expect(object(objectDef()).mock(faker, ".foo")).toStrictEqual(
       object(objectDef()).mock(faker, ".foo")
     );
 
-    expect(object(objectDef()).mock(faker, ".foo")).not.toEqual(
+    expect(object(objectDef()).mock(faker, ".foo")).not.toStrictEqual(
       object(objectDef()).mock(faker)
     );
-    expect(object(objectDef()).mock(faker)).not.toEqual(
+    expect(object(objectDef()).mock(faker)).not.toStrictEqual(
       object(objectDef()).mock(faker, ".foo")
     );
   });
@@ -333,7 +334,7 @@ describe("object", () => {
       foo: "someFoo",
     };
 
-    expect(schema.preview?.prepare?.(value)).toEqual({
+    expect(schema.preview?.prepare?.(value)).toStrictEqual({
       title: "someFoo",
       subtitle: "someBar",
     });
@@ -354,10 +355,10 @@ describe("object", () => {
 
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<[string, 0 | 1]>
+      [string, 0 | 1][]
     > = type.parse({ foo: true });
 
-    expect(parsedValue).toEqual([["foo", 1]]);
+    expect(parsedValue).toStrictEqual([["foo", 1]]);
   });
 
   it("types custom validation", () => {

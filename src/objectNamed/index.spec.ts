@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import type { Merge } from "type-fest";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
@@ -14,7 +15,6 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { Merge } from "type-fest";
 
 describe("object", () => {
   it("builds a sanity config", () =>
@@ -28,9 +28,10 @@ describe("object", () => {
           },
         ],
       }).schema()
-    ).toEqual({
+    ).toStrictEqual({
       name: "foo",
       type: "object",
+      preview: undefined,
       fields: [
         {
           name: "foo",
@@ -77,7 +78,7 @@ describe("object", () => {
       { _type: "foo"; foo: boolean }
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into an object", () => {
@@ -105,7 +106,7 @@ describe("object", () => {
       { _type: "foo"; foo: string }
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual({ _type: "foo", foo: "foo" });
+    expect(resolvedValue).toStrictEqual({ _type: "foo", foo: "foo" });
   });
 
   it("allows optional fields", () => {
@@ -143,13 +144,13 @@ describe("object", () => {
 
     schema.fields[0]?.validation?.(fooRule);
 
-    expect(fooRule.required).toHaveBeenCalled();
+    expect(fooRule.required).toHaveBeenCalledWith();
 
     const barRule = mockRule();
 
     schema.fields[1]?.validation?.(barRule);
 
-    expect(barRule.required).not.toHaveBeenCalled();
+    expect(barRule.required).not.toHaveBeenCalledWith();
 
     const value: ValidateShape<
       InferValue<typeof type>,
@@ -171,7 +172,7 @@ describe("object", () => {
       }
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("makes a reference", () => {
@@ -185,7 +186,7 @@ describe("object", () => {
       fields: [{ name: "foo", type: type.ref() }],
     });
 
-    expect(type2.schema().fields[0]).toEqual({
+    expect(type2.schema().fields[0]).toStrictEqual({
       name: "foo",
       type: "foo",
       validation: expect.any(Function),
@@ -218,7 +219,7 @@ describe("object", () => {
       }
     > = type2.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("works with shared fields", () => {
@@ -270,7 +271,7 @@ describe("object", () => {
           },
         ],
       }).mock(faker)
-    ).toEqual({
+    ).toStrictEqual({
       _type: "foo",
       foo: expect.any(Boolean),
       bar: expect.any(String),
@@ -288,17 +289,17 @@ describe("object", () => {
       return { name: "foo", fields };
     };
 
-    expect(objectNamed(objectDef()).mock(faker)).toEqual(
+    expect(objectNamed(objectDef()).mock(faker)).toStrictEqual(
       objectNamed(objectDef()).mock(faker)
     );
-    expect(objectNamed(objectDef()).mock(faker, ".foo")).toEqual(
+    expect(objectNamed(objectDef()).mock(faker, ".foo")).toStrictEqual(
       objectNamed(objectDef()).mock(faker, ".foo")
     );
 
-    expect(objectNamed(objectDef()).mock(faker, ".foo")).not.toEqual(
+    expect(objectNamed(objectDef()).mock(faker, ".foo")).not.toStrictEqual(
       objectNamed(objectDef()).mock(faker)
     );
-    expect(objectNamed(objectDef()).mock(faker)).not.toEqual(
+    expect(objectNamed(objectDef()).mock(faker)).not.toStrictEqual(
       objectNamed(objectDef()).mock(faker, ".foo")
     );
   });
@@ -408,7 +409,7 @@ describe("object", () => {
       foo: "someFoo",
     };
 
-    expect(schema.preview?.prepare?.(value)).toEqual({
+    expect(schema.preview?.prepare?.(value)).toStrictEqual({
       title: "someFoo",
       subtitle: "someBar",
     });
@@ -430,10 +431,10 @@ describe("object", () => {
 
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<[string, 0 | 1 | "foo"]>
+      [string, "foo" | 0 | 1][]
     > = type.parse({ _type: "foo", foo: true });
 
-    expect(parsedValue).toEqual(
+    expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
         ["_type", "foo"],
         ["foo", 1],
@@ -557,7 +558,7 @@ describe("object", () => {
       referencingValue,
     };
 
-    expect(deepReferencingValue).toEqual(
+    expect(deepReferencingValue).toStrictEqual(
       deepReferencingType.parse(deepReferencingValue)
     );
   });

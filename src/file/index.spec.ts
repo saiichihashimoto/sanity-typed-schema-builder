@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import type { Merge } from "type-fest";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
@@ -16,11 +17,10 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { Merge } from "type-fest";
 
 describe("file", () => {
   it("builds a sanity config", () =>
-    expect(file().schema()).toEqual({
+    expect(file().schema()).toStrictEqual({
       type: "file",
     }));
 
@@ -42,7 +42,7 @@ describe("file", () => {
       SanityFile
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into an file", () => {
@@ -60,7 +60,7 @@ describe("file", () => {
       SanityFile
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("adds fields", () => {
@@ -121,7 +121,7 @@ describe("file", () => {
       >
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("works with shared fields", () => {
@@ -171,7 +171,7 @@ describe("file", () => {
           },
         ],
       }).mock(faker)
-    ).toEqual({
+    ).toStrictEqual({
       _type: "file",
       bar: expect.any(String),
       foo: expect.any(Boolean),
@@ -182,11 +182,13 @@ describe("file", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(file().mock(faker)).toEqual(file().mock(faker));
-    expect(file().mock(faker, ".foo")).toEqual(file().mock(faker, ".foo"));
+    expect(file().mock(faker)).toStrictEqual(file().mock(faker));
+    expect(file().mock(faker, ".foo")).toStrictEqual(
+      file().mock(faker, ".foo")
+    );
 
-    expect(file().mock(faker, ".foo")).not.toEqual(file().mock(faker));
-    expect(file().mock(faker)).not.toEqual(file().mock(faker, ".foo"));
+    expect(file().mock(faker, ".foo")).not.toStrictEqual(file().mock(faker));
+    expect(file().mock(faker)).not.toStrictEqual(file().mock(faker, ".foo"));
   });
 
   it("allows defining the mocks", () =>
@@ -252,7 +254,7 @@ describe("file", () => {
 
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<[string, "file" | SanityReference]>
+      [string, SanityReference | "file"][]
     > = type.parse({
       _type: "file",
       asset: {
@@ -261,7 +263,7 @@ describe("file", () => {
       },
     });
 
-    expect(parsedValue).toEqual(
+    expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
         ["_type", "file"],
         [

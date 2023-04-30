@@ -3,6 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 import { isFunction } from "lodash/fp";
 import { z } from "zod";
 
+import type { Merge } from "type-fest";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
@@ -17,7 +18,6 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { Merge } from "type-fest";
 
 describe("document", () => {
   it("builds a sanity config", () =>
@@ -31,9 +31,10 @@ describe("document", () => {
           },
         ],
       }).schema()
-    ).toEqual({
+    ).toStrictEqual({
       name: "foo",
       type: "document",
+      preview: undefined,
       fields: [
         {
           name: "foo",
@@ -84,7 +85,7 @@ describe("document", () => {
       Merge<ParsedSanityDocument<"foo">, { foo: boolean }>
     > = type.parse(value);
 
-    expect(parsedValue).toEqual({
+    expect(parsedValue).toStrictEqual({
       ...value,
       _createdAt: new Date("2022-06-03T03:24:55.395Z"),
       _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
@@ -120,7 +121,7 @@ describe("document", () => {
       Merge<ParsedSanityDocument<"foo">, { foo: string }>
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual({
+    expect(resolvedValue).toStrictEqual({
       ...value,
       _createdAt: new Date("2022-06-03T03:24:55.395Z"),
       _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
@@ -164,14 +165,14 @@ describe("document", () => {
 
     (!isFunction(fooValidation) ? () => {} : fooValidation)(fooRule);
 
-    expect(fooRule.required).toHaveBeenCalled();
+    expect(fooRule.required).toHaveBeenCalledWith();
 
     const barRule = mockRule();
     const barValidation = schema.fields[1]?.validation;
 
     (!isFunction(barValidation) ? () => {} : barValidation)(barRule);
 
-    expect(barRule.required).not.toHaveBeenCalled();
+    expect(barRule.required).not.toHaveBeenCalledWith();
 
     const value: ValidateShape<
       InferValue<typeof type>,
@@ -201,7 +202,7 @@ describe("document", () => {
       >
     > = type.parse(value);
 
-    expect(parsedValue).toEqual({
+    expect(parsedValue).toStrictEqual({
       ...value,
       _createdAt: new Date("2022-06-03T03:24:55.395Z"),
       _updatedAt: new Date("2022-06-03T03:24:55.395Z"),
@@ -257,7 +258,7 @@ describe("document", () => {
       ],
     }).mock(faker);
 
-    expect(value).toEqual({
+    expect(value).toStrictEqual({
       _createdAt: expect.any(String),
       _id: expect.any(String),
       _rev: expect.any(String),
@@ -268,8 +269,8 @@ describe("document", () => {
     });
 
     /* eslint-disable no-underscore-dangle -- Sanity fields have underscores */
-    expect(new Date(value._createdAt).toString()).not.toEqual("Invalid Date");
-    expect(new Date(value._updatedAt).toString()).not.toEqual("Invalid Date");
+    expect(new Date(value._createdAt).toString()).not.toBe("Invalid Date");
+    expect(new Date(value._updatedAt).toString()).not.toBe("Invalid Date");
     z.string().uuid().parse(value._id);
     /* eslint-enable no-underscore-dangle */
   });
@@ -417,7 +418,7 @@ describe("document", () => {
       foo: "someFoo",
     };
 
-    expect(schema.preview?.prepare?.(value)).toEqual({
+    expect(schema.preview?.prepare?.(value)).toStrictEqual({
       title: "someFoo",
       subtitle: "someBar",
     });
@@ -439,7 +440,7 @@ describe("document", () => {
 
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<[string, 0 | 1 | string | Date]>
+      [string, Date | string | 0 | 1][]
     > = type.parse({
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
@@ -449,7 +450,7 @@ describe("document", () => {
       foo: true,
     });
 
-    expect(parsedValue).toEqual(
+    expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
         ["_createdAt", new Date("2022-06-03T03:24:55.395Z")],
         ["_id", "2106a34f-315f-44bc-929b-bf8e9a3eba0d"],

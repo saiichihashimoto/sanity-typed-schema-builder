@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+import type {
+  ReferenceDefinition,
+  ReferenceValue,
+  WeakReference,
+} from "sanity";
+import type { Merge } from "type-fest";
 import { createType } from "../types";
 
 import type { DocumentType } from "../document";
@@ -10,12 +16,6 @@ import type {
   TupleOfLength,
   TypedValues,
 } from "../types";
-import type {
-  ReferenceDefinition,
-  ReferenceValue,
-  WeakReference,
-} from "sanity";
-import type { Merge } from "type-fest";
 
 export type SanityReference<Weak extends boolean = false> = Omit<
   Weak extends false ? Omit<ReferenceValue, "_weak"> : WeakReference,
@@ -76,7 +76,7 @@ export const reference = <
               ? null
               : (resolve(mock) as InferResolvedValue<DocumentTypes[number]>);
           })
-          .find((mock) => mock) ?? null) as ResolvedValue
+          .find(Boolean) ?? null) as ResolvedValue
     ),
   ...defRaw
 }: Merge<
@@ -99,12 +99,12 @@ export const reference = <
       // eslint-disable-next-line fp/no-mutation -- Need side effects
       counter += 1;
 
-      const ref = faker.helpers.arrayElement(
+      const { _id: ref } = faker.helpers.arrayElement(
         documents.map(
           ({ getNthMock }) =>
             getNthMock(faker, counter) as unknown as { _id: string }
         )
-      )._id;
+      );
       const isBrokenRef = faker.datatype.boolean();
       const brokenRef = faker.datatype.uuid();
 

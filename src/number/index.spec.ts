@@ -15,9 +15,10 @@ import type {
 
 describe("number", () => {
   it("builds a sanity config", () =>
-    expect(number().schema()).toEqual({
+    expect(number().schema()).toStrictEqual({
       type: "number",
       validation: expect.any(Function),
+      options: undefined,
     }));
 
   it("passes through schema values", () =>
@@ -32,7 +33,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a number", () => {
@@ -44,7 +45,7 @@ describe("number", () => {
       number
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("sets min", () => {
@@ -62,7 +63,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse(0);
@@ -84,7 +85,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse(9);
@@ -106,7 +107,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse(0);
@@ -128,7 +129,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse(9);
@@ -142,7 +143,7 @@ describe("number", () => {
 
     type.schema().validation(rule);
 
-    expect(rule.integer).toHaveBeenCalled();
+    expect(rule.integer).toHaveBeenCalledWith();
 
     const value: ValidateShape<InferValue<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -150,7 +151,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse(5.5);
@@ -164,7 +165,7 @@ describe("number", () => {
 
     type.schema().validation(rule);
 
-    expect(rule.positive).toHaveBeenCalled();
+    expect(rule.positive).toHaveBeenCalledWith();
 
     const value: ValidateShape<InferValue<typeof type>, number> = 5;
     const parsedValue: ValidateShape<
@@ -172,7 +173,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse(-5);
@@ -186,7 +187,7 @@ describe("number", () => {
 
     type.schema().validation(rule);
 
-    expect(rule.negative).toHaveBeenCalled();
+    expect(rule.negative).toHaveBeenCalledWith();
 
     const value: ValidateShape<InferValue<typeof type>, number> = -5;
     const parsedValue: ValidateShape<
@@ -194,7 +195,7 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse(5);
@@ -216,18 +217,24 @@ describe("number", () => {
       number
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(0.01);
+    expect(parsedValue).toBe(0.01);
   });
 
   it("mocks a number", () =>
-    expect(number().mock(faker)).toEqual(expect.any(Number)));
+    expect(number().mock(faker)).toStrictEqual(expect.any(Number)));
 
   it("mocks the same value with the same path", () => {
-    expect(number().mock(faker)).toEqual(number().mock(faker));
-    expect(number().mock(faker, ".foo")).toEqual(number().mock(faker, ".foo"));
+    expect(number().mock(faker)).toStrictEqual(number().mock(faker));
+    expect(number().mock(faker, ".foo")).toStrictEqual(
+      number().mock(faker, ".foo")
+    );
 
-    expect(number().mock(faker, ".foo")).not.toEqual(number().mock(faker));
-    expect(number().mock(faker)).not.toEqual(number().mock(faker, ".foo"));
+    expect(number().mock(faker, ".foo")).not.toStrictEqual(
+      number().mock(faker)
+    );
+    expect(number().mock(faker)).not.toStrictEqual(
+      number().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
@@ -247,7 +254,7 @@ describe("number", () => {
       string
     > = type.parse(5);
 
-    expect(parsedValue).toEqual("5");
+    expect(parsedValue).toBe("5");
   });
 
   it("types custom validation", () => {
@@ -280,7 +287,7 @@ describe("number", () => {
       3 | 4
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
     expect([3, 4]).toContain(type.mock(faker));
 
     expect(() => {

@@ -15,7 +15,7 @@ import type {
 
 describe("text", () => {
   it("builds a sanity config", () =>
-    expect(text().schema()).toEqual({
+    expect(text().schema()).toStrictEqual({
       type: "text",
       validation: expect.any(Function),
     }));
@@ -32,7 +32,7 @@ describe("text", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a string", () => {
@@ -44,7 +44,7 @@ describe("text", () => {
       string
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("sets min", () => {
@@ -62,7 +62,7 @@ describe("text", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse("fo");
@@ -84,7 +84,7 @@ describe("text", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse("foobar");
@@ -106,7 +106,7 @@ describe("text", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse("fooo");
@@ -128,7 +128,7 @@ describe("text", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse("bar");
@@ -136,14 +136,16 @@ describe("text", () => {
   });
 
   it("mocks some paragraphs", () =>
-    expect(text().mock(faker)).toEqual(expect.any(String)));
+    expect(text().mock(faker)).toStrictEqual(expect.any(String)));
 
   it("mocks the same value with the same path", () => {
-    expect(text().mock(faker)).toEqual(text().mock(faker));
-    expect(text().mock(faker, ".foo")).toEqual(text().mock(faker, ".foo"));
+    expect(text().mock(faker)).toStrictEqual(text().mock(faker));
+    expect(text().mock(faker, ".foo")).toStrictEqual(
+      text().mock(faker, ".foo")
+    );
 
-    expect(text().mock(faker, ".foo")).not.toEqual(text().mock(faker));
-    expect(text().mock(faker)).not.toEqual(text().mock(faker, ".foo"));
+    expect(text().mock(faker, ".foo")).not.toStrictEqual(text().mock(faker));
+    expect(text().mock(faker)).not.toStrictEqual(text().mock(faker, ".foo"));
   });
 
   it("allows defining the mocks", () =>
@@ -163,7 +165,7 @@ describe("text", () => {
       number
     > = type.parse("Test string");
 
-    expect(parsedValue).toEqual(11);
+    expect(parsedValue).toBe(11);
   });
 
   it("types custom validation", () => {

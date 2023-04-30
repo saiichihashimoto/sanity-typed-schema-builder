@@ -15,7 +15,7 @@ import type {
 
 describe("url", () => {
   it("builds a sanity config", () =>
-    expect(url().schema()).toEqual({
+    expect(url().schema()).toStrictEqual({
       type: "url",
     }));
 
@@ -34,7 +34,7 @@ describe("url", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a string", () => {
@@ -49,7 +49,7 @@ describe("url", () => {
       string
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("enforces a url", () => {
@@ -63,16 +63,16 @@ describe("url", () => {
   });
 
   it("mocks a url", () =>
-    expect(z.string().url().parse(url().mock(faker))).toEqual(
+    expect(z.string().url().parse(url().mock(faker))).toStrictEqual(
       expect.any(String)
     ));
 
   it("mocks the same value with the same path", () => {
-    expect(url().mock(faker)).toEqual(url().mock(faker));
-    expect(url().mock(faker, ".foo")).toEqual(url().mock(faker, ".foo"));
+    expect(url().mock(faker)).toStrictEqual(url().mock(faker));
+    expect(url().mock(faker, ".foo")).toStrictEqual(url().mock(faker, ".foo"));
 
-    expect(url().mock(faker, ".foo")).not.toEqual(url().mock(faker));
-    expect(url().mock(faker)).not.toEqual(url().mock(faker, ".foo"));
+    expect(url().mock(faker, ".foo")).not.toStrictEqual(url().mock(faker));
+    expect(url().mock(faker)).not.toStrictEqual(url().mock(faker, ".foo"));
   });
 
   it("allows defining the mocks", () =>
@@ -96,7 +96,7 @@ describe("url", () => {
       number
     > = type.parse("https://google.com");
 
-    expect(parsedValue).toEqual(18);
+    expect(parsedValue).toBe(18);
   });
 
   it("types custom validation", () => {

@@ -15,7 +15,7 @@ import type {
 
 describe("date", () => {
   it("builds a sanity config", () =>
-    expect(date().schema()).toEqual({
+    expect(date().schema()).toStrictEqual({
       type: "date",
     }));
 
@@ -31,7 +31,7 @@ describe("date", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a string", () => {
@@ -43,25 +43,27 @@ describe("date", () => {
       string
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("mocks a string", () => {
     const value = date().mock(faker);
 
-    expect(value).toEqual(expect.any(String));
+    expect(value).toStrictEqual(expect.any(String));
 
     z.string()
-      .regex(/^\d\d\d\d-\d\d-\d\d$/)
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
       .parse(value);
   });
 
   it("mocks the same value with the same path", () => {
-    expect(date().mock(faker)).toEqual(date().mock(faker));
-    expect(date().mock(faker, ".foo")).toEqual(date().mock(faker, ".foo"));
+    expect(date().mock(faker)).toStrictEqual(date().mock(faker));
+    expect(date().mock(faker, ".foo")).toStrictEqual(
+      date().mock(faker, ".foo")
+    );
 
-    expect(date().mock(faker, ".foo")).not.toEqual(date().mock(faker));
-    expect(date().mock(faker)).not.toEqual(date().mock(faker, ".foo"));
+    expect(date().mock(faker, ".foo")).not.toStrictEqual(date().mock(faker));
+    expect(date().mock(faker)).not.toStrictEqual(date().mock(faker, ".foo"));
   });
 
   it("allows defining the mocks", () =>
@@ -82,7 +84,7 @@ describe("date", () => {
       number
     > = type.parse("2017-02-12");
 
-    expect(parsedValue).toEqual(10);
+    expect(parsedValue).toBe(10);
   });
 
   it("types custom validation", () => {

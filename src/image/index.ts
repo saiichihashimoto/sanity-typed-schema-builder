@@ -1,5 +1,9 @@
+/* eslint-disable id-length -- x & y are sanity's hotspot fields */
 import { z } from "zod";
 
+import type { Faker } from "@faker-js/faker";
+import type { ImageCrop, ImageDefinition, ImageHotspot } from "sanity";
+import type { Merge } from "type-fest";
 import {
   fieldsMock,
   fieldsSchema,
@@ -16,9 +20,6 @@ import type {
 } from "../field";
 import type { SanityReference } from "../reference";
 import type { SanityNamedTypeDef, TupleOfLength, TypedValues } from "../types";
-import type { Faker } from "@faker-js/faker";
-import type { ImageCrop, ImageDefinition, ImageHotspot } from "sanity";
-import type { Merge } from "type-fest";
 
 export type SanityImage<Hotspot extends boolean> = Hotspot extends false
   ? {
@@ -104,18 +105,18 @@ export const image = <
   Optionals extends boolean,
   Zod extends z.ZodObject<
     Merge<
-      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but FieldsArray has to be
-      FieldsZodObject<FieldsArray>,
-      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but Hotspot has to be
-      ExtraZodFields<Hotspot>
+      FieldsZodObject<// eslint-disable-next-line @typescript-eslint/no-use-before-define -- Defaulted types need to be at the bottom
+      FieldsArray>,
+      ExtraZodFields<// eslint-disable-next-line @typescript-eslint/no-use-before-define -- Defaulted types need to be at the bottom
+      Hotspot>
     >
   >,
   ZodResolved extends z.ZodObject<
     Merge<
-      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but FieldsArray has to be
-      FieldsZodResolvedObject<FieldsArray>,
-      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but Hotspot has to be
-      ExtraZodFields<Hotspot>
+      FieldsZodResolvedObject<// eslint-disable-next-line @typescript-eslint/no-use-before-define -- Defaulted types need to be at the bottom
+      FieldsArray>,
+      ExtraZodFields<// eslint-disable-next-line @typescript-eslint/no-use-before-define -- Defaulted types need to be at the bottom
+      Hotspot>
     >
   >,
   FieldsArray extends TupleOfLength<

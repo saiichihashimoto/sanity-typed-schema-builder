@@ -10,7 +10,7 @@ export type WithTypedOptionsList<
   Value,
   T extends {
     options?: {
-      list?: Array<ListValue<any>>;
+      list?: ListValue<any>[];
     };
   }
 > = Merge<

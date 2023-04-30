@@ -1,6 +1,12 @@
 import { keyBy } from "lodash/fp";
 import { z } from "zod";
 
+import type { Faker } from "@faker-js/faker";
+import type {
+  DocumentDefinition,
+  SanityDocument as SanityDocumentOriginal,
+} from "sanity";
+import type { Merge, RemoveIndexSignature } from "type-fest";
 import {
   fieldsMock,
   fieldsSchema,
@@ -21,33 +27,27 @@ import type {
   TupleOfLength,
   TypedValues,
 } from "../types";
-import type { Faker } from "@faker-js/faker";
-import type {
-  DocumentDefinition,
-  SanityDocument as SanityDocumentOriginal,
-} from "sanity";
-import type { Merge, RemoveIndexSignature } from "type-fest";
 
 type SanityDocumentDefinition<Value> = Merge<
   DocumentDefinition,
   TypedValues<Value>
 >;
 
-export interface DocumentType<
+export type DocumentType<
   DocumentName extends string,
   Value,
   ParsedValue,
   ResolvedValue
-> extends SanityType<
-    Merge<SanityDocumentDefinition<Value>, { name: DocumentName }>,
-    Value,
-    ParsedValue,
-    ResolvedValue
-  > {
+> = SanityType<
+  Merge<SanityDocumentDefinition<Value>, { name: DocumentName }>,
+  Value,
+  ParsedValue,
+  ResolvedValue
+> & {
   getMockById: (id: string) => Value | undefined;
   getNthMock: (faker: Faker, n: number) => Value;
   name: DocumentName;
-}
+};
 
 export type SanityDocument<DocumentName extends string = string> = Merge<
   RemoveIndexSignature<SanityDocumentOriginal>,
@@ -64,20 +64,20 @@ export type ParsedSanityDocument<DocumentName extends string = string> = Merge<
   }
 >;
 
-interface ExtraZodFields<DocumentName extends string> {
+type ExtraZodFields<DocumentName extends string> = {
   _createdAt: z.ZodType<Date, any, string>;
   _id: z.ZodString;
   _rev: z.ZodString;
   _type: z.ZodLiteral<DocumentName>;
   _updatedAt: z.ZodType<Date, any, string>;
-}
+};
 
 const extraZodFields = <DocumentNames extends string>(name: DocumentNames) => ({
-  _createdAt: z.string().transform((v) => new Date(v)),
+  _createdAt: z.string().transform((date) => new Date(date)),
   _id: z.string(),
   _rev: z.string(),
   _type: z.literal(name),
-  _updatedAt: z.string().transform((v) => new Date(v)),
+  _updatedAt: z.string().transform((date) => new Date(date)),
 });
 
 export const document = <
@@ -99,7 +99,7 @@ export const document = <
   ParsedValue = z.output<Zod>,
   ResolvedValue = z.output<ZodResolved>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {}
+  Select extends { [key: string]: string } = {}
 >({
   name,
   fields,
@@ -142,29 +142,36 @@ export const document = <
 >): DocumentType<DocumentName, z.input<Zod>, ParsedValue, ResolvedValue> => {
   /* eslint-disable fp/no-let -- Need side effects */
   let counter = 0;
-  let mocks: Array<z.input<Zod>> = [];
-  let mocksById: Record<string, z.input<Zod>> = {};
+  let mocks: z.input<Zod>[] = [];
+  let mocksById: { [key: string]: z.input<Zod> } = {};
   /* eslint-enable fp/no-let */
 
-  const getNthMock = (faker: Faker, n: number) => {
-    const newMocks = new Array(Math.max(0, n + 1 - mocks.length))
+  const getNthMock = (faker: Faker, index: number) => {
+    const newMocks = Array.from({
+      length: Math.max(0, index + 1 - mocks.length),
+    })
       .fill("test")
       .map(() => mock(faker, ""));
 
-    if (newMocks.length) {
+    if (newMocks.length > 0) {
       /* eslint-disable fp/no-mutation -- Need side effects */
       mocks = [...mocks, ...newMocks];
       mocksById = {
         ...mocksById,
-        ...keyBy((doc) => (doc as { _id: string })._id, newMocks),
+        ...keyBy(
+          (doc) =>
+            // eslint-disable-next-line no-underscore-dangle -- Sanity uses _id
+            (doc as { _id: string })._id,
+          newMocks
+        ),
       };
       /* eslint-enable fp/no-mutation */
     }
 
-    return mocks[n]!;
+    return mocks[index]!;
   };
 
-  // @ts-expect-error FIXME fieldsSchema type doesn't work in document, but works in other object-like schemas
+  // @ts-expect-error -- FIXME fieldsSchema type doesn't work in document, but works in other object-like schemas
   return {
     getMockById: (id: string) => mocksById[id],
     getNthMock,

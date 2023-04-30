@@ -31,9 +31,10 @@ describe("reference", () => {
           }),
         ],
       }).schema()
-    ).toEqual({
+    ).toStrictEqual({
       type: "reference",
       to: [{ type: "foo" }],
+      weak: undefined,
     }));
 
   it("passes through schema values", () =>
@@ -78,7 +79,7 @@ describe("reference", () => {
       SanityReference
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a document mock", () => {
@@ -96,18 +97,21 @@ describe("reference", () => {
       to: [docType],
     });
 
-    const docMock = docType.resolve(docType.mock(faker));
+    const mock = docType.mock(faker);
+
+    const docMock = docType.resolve(mock);
+    const { _id: mockId } = docMock;
 
     const value: ValidateShape<InferValue<typeof type>, SanityReference> = {
       _type: "reference",
-      _ref: docMock._id,
+      _ref: mockId,
     };
     const resolvedValue: ValidateShape<
       InferResolvedValue<typeof type>,
       InferResolvedValue<typeof docType>
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(docMock);
+    expect(resolvedValue).toStrictEqual(docMock);
   });
 
   it("mocks a reference to a document mock", () => {
@@ -125,13 +129,15 @@ describe("reference", () => {
       to: [docType],
     });
 
-    expect(type.mock(faker)).toEqual({
-      _ref: docType.mock(faker)._id,
+    const { _id: mockId } = docType.mock(faker);
+
+    expect(type.mock(faker)).toStrictEqual({
+      _ref: mockId,
       _type: "reference",
     });
 
     // eslint-disable-next-line no-underscore-dangle -- references have a _ref property
-    expect(docType.mock(faker)._id).toEqual(type.mock(faker)._ref);
+    expect(docType.mock(faker)._id).toStrictEqual(type.mock(faker)._ref);
   });
 
   it("adds weak", () => {
@@ -159,7 +165,7 @@ describe("reference", () => {
       SanityReference<true>
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     const resolvedValue: ValidateShape<
       InferResolvedValue<typeof type>,
@@ -232,7 +238,7 @@ describe("reference", () => {
       _type: "reference",
     });
 
-    expect(parsedValue).toEqual("ffda9bed-b959-4100-abeb-9f1e241e9445");
+    expect(parsedValue).toBe("ffda9bed-b959-4100-abeb-9f1e241e9445");
   });
 
   it("types custom validation", () => {

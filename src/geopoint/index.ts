@@ -1,9 +1,9 @@
 import { z } from "zod";
 
+import type { GeopointDefinition, GeopointValue } from "sanity";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { GeopointDefinition, GeopointValue } from "sanity";
 
 const zod: z.ZodType<GeopointValue, any, GeopointValue> = z.object({
   _type: z.literal("geopoint"),
@@ -19,8 +19,8 @@ export const geopoint = <
   mock = (faker) => ({
     _type: "geopoint",
     alt: faker.datatype.number({ min: 0, max: 1000 }),
-    lat: parseFloat(faker.address.latitude()),
-    lng: parseFloat(faker.address.longitude()),
+    lat: Number.parseFloat(faker.address.latitude()),
+    lng: Number.parseFloat(faker.address.longitude()),
   }),
   zod: zodFn = (zod) =>
     zod as unknown as z.ZodType<ParsedValue, any, GeopointValue>,

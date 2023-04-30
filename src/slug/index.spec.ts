@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import type { SlugValue } from "sanity";
 import { mockRule } from "../test-utils";
 
 import { slug } from ".";
@@ -11,11 +12,10 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { SlugValue } from "sanity";
 
 describe("slug", () => {
   it("builds a sanity config", () =>
-    expect(slug().schema()).toEqual({
+    expect(slug().schema()).toStrictEqual({
       type: "slug",
     }));
 
@@ -34,7 +34,7 @@ describe("slug", () => {
       string
     > = type.parse(value);
 
-    expect(parsedValue).toEqual("foo");
+    expect(parsedValue).toBe("foo");
   });
 
   it("resolves into a string", () => {
@@ -49,21 +49,23 @@ describe("slug", () => {
       string
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual("foo");
+    expect(resolvedValue).toBe("foo");
   });
 
   it("mocks a slug", () =>
-    expect(slug().mock(faker)).toEqual({
+    expect(slug().mock(faker)).toStrictEqual({
       _type: "slug",
       current: expect.any(String),
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(slug().mock(faker)).toEqual(slug().mock(faker));
-    expect(slug().mock(faker, ".foo")).toEqual(slug().mock(faker, ".foo"));
+    expect(slug().mock(faker)).toStrictEqual(slug().mock(faker));
+    expect(slug().mock(faker, ".foo")).toStrictEqual(
+      slug().mock(faker, ".foo")
+    );
 
-    expect(slug().mock(faker, ".foo")).not.toEqual(slug().mock(faker));
-    expect(slug().mock(faker)).not.toEqual(slug().mock(faker, ".foo"));
+    expect(slug().mock(faker, ".foo")).not.toStrictEqual(slug().mock(faker));
+    expect(slug().mock(faker)).not.toStrictEqual(slug().mock(faker, ".foo"));
   });
 
   it("allows defining the mocks", () =>
@@ -90,7 +92,7 @@ describe("slug", () => {
       "slug"
     > = type.parse({ _type: "slug", current: "a-slug" });
 
-    expect(parsedValue).toEqual("slug");
+    expect(parsedValue).toBe("slug");
   });
 
   it("types custom validation", () => {

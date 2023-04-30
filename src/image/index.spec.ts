@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import type { Merge } from "type-fest";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
@@ -12,11 +13,10 @@ import type { SanityImage } from ".";
 import type { SanityReference } from "../reference";
 import type { ValidateShape } from "../test-utils";
 import type { InferParsedValue, InferValue } from "../types";
-import type { Merge } from "type-fest";
 
 describe("image", () => {
   it("builds a sanity config", () =>
-    expect(image().schema()).toEqual({
+    expect(image().schema()).toStrictEqual({
       type: "image",
       options: {
         hotspot: false,
@@ -41,7 +41,7 @@ describe("image", () => {
       SanityImage<false>
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("adds hotspot", () => {
@@ -71,7 +71,7 @@ describe("image", () => {
       SanityImage<true>
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("allows undefined hotspot and crop on new images", () => {
@@ -89,7 +89,7 @@ describe("image", () => {
       SanityImage<true>
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("passes through hotspot to options object", () => {
@@ -157,7 +157,7 @@ describe("image", () => {
       >
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("works with shared fields", () => {
@@ -207,7 +207,7 @@ describe("image", () => {
           },
         ],
       }).mock(faker)
-    ).toEqual({
+    ).toStrictEqual({
       _type: "image",
       bar: expect.any(String),
       foo: expect.any(Boolean),
@@ -218,11 +218,13 @@ describe("image", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(image().mock(faker)).toEqual(image().mock(faker));
-    expect(image().mock(faker, ".foo")).toEqual(image().mock(faker, ".foo"));
+    expect(image().mock(faker)).toStrictEqual(image().mock(faker));
+    expect(image().mock(faker, ".foo")).toStrictEqual(
+      image().mock(faker, ".foo")
+    );
 
-    expect(image().mock(faker, ".foo")).not.toEqual(image().mock(faker));
-    expect(image().mock(faker)).not.toEqual(image().mock(faker, ".foo"));
+    expect(image().mock(faker, ".foo")).not.toStrictEqual(image().mock(faker));
+    expect(image().mock(faker)).not.toStrictEqual(image().mock(faker, ".foo"));
   });
 
   it("allows defining the mocks", () =>
@@ -288,7 +290,7 @@ describe("image", () => {
 
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<[string, "image" | SanityReference]>
+      [string, SanityReference | "image"][]
     > = type.parse({
       _type: "image",
       asset: {
@@ -297,7 +299,7 @@ describe("image", () => {
       },
     });
 
-    expect(parsedValue).toEqual(
+    expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
         ["_type", "image"],
         [

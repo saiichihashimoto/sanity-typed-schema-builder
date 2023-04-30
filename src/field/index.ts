@@ -1,13 +1,6 @@
 import { flow, fromPairs } from "lodash/fp";
 import { z } from "zod";
 
-import type {
-  InferResolvedValue,
-  InferValue,
-  NamedSchemaFields,
-  SanityType,
-  TupleOfLength,
-} from "../types";
 import type { Faker } from "@faker-js/faker";
 import type {
   FieldDefinition,
@@ -16,6 +9,13 @@ import type {
   PreviewValue,
 } from "sanity";
 import type { Merge } from "type-fest";
+import type {
+  InferResolvedValue,
+  InferValue,
+  NamedSchemaFields,
+  SanityType,
+  TupleOfLength,
+} from "../types";
 
 export type FieldOptions<
   Name extends string,
@@ -115,12 +115,9 @@ export const fieldsMock =
     ) as z.input<z.ZodObject<FieldsZodObject<FieldsArray>>>;
 
 export type Preview<
-  Value extends Record<string, unknown>,
+  Value extends { [key: string]: unknown },
   Select extends NonNullable<PreviewConfig["select"]>
 > =
-  | {
-      select: PreviewValue;
-    }
   | {
       prepare: (
         object: Merge<
@@ -132,6 +129,9 @@ export type Preview<
         viewOptions?: PrepareViewOptions
       ) => PreviewValue;
       select?: Select;
+    }
+  | {
+      select: PreviewValue;
     };
 
 export const fieldsSchema = <
@@ -140,7 +140,7 @@ export const fieldsSchema = <
     FieldOptions<Names, z.ZodTypeAny, any, any>,
     1
   >,
-  Value extends Record<string, unknown>,
+  Value extends { [key: string]: unknown },
   Select extends NonNullable<PreviewConfig["select"]>
 >(
   fields: FieldsArray,
