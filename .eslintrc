@@ -1,0 +1,268 @@
+{
+  "env": { "es6": true },
+  "plugins": [
+    "eslint-comments",
+    "fp",
+    "import",
+    "lodash-fp",
+    "node",
+    "promise",
+    "sort-keys-fix",
+    "unicorn"
+  ],
+  "settings": {
+    "import/extensions": [".js", ".ts"],
+    "import/resolver": {
+      "node": {
+        "extensions": [".mjs", ".js", ".json", ".node", ".ts"]
+      }
+    }
+  },
+  "extends": [
+    "plugin:eslint-comments/recommended",
+    "plugin:fp/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:lodash-fp/recommended",
+    "plugin:node/recommended",
+    "plugin:promise/recommended",
+    "airbnb",
+    "prettier"
+  ],
+  "rules": {
+    "eslint-comments/no-unused-disable": "error",
+    "eslint-comments/require-description": [
+      "error",
+      { "ignore": ["eslint-enable"] }
+    ],
+    "fp/no-mutation": [
+      "error",
+      {
+        "exceptions": [
+          { "object": "err", "property": "name" },
+          { "property": "current" },
+          { "property": "displayName" }
+        ]
+      }
+    ],
+    "fp/no-nil": "off",
+    "fp/no-rest-parameters": "off",
+    "fp/no-throw": "off",
+    "fp/no-unused-expression": "off",
+    "func-style": ["error", "expression"],
+    "import/extensions": [
+      "error",
+      "always",
+      {
+        "js": "never",
+        "json": "always",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "import/no-unused-modules": [
+      "error",
+      {
+        "ignoreExports": ["**/*.spec.*", "**/*.js", "src/index.ts"],
+        "missingExports": true,
+        "unusedExports": true
+      }
+    ],
+    "import/order": [
+      "error",
+      {
+        "alphabetize": { "caseInsensitive": true, "order": "asc" },
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "type",
+          "object"
+        ],
+        "newlines-between": "always"
+      }
+    ],
+    "import/prefer-default-export": "off",
+    "lodash-fp/consistent-compose": ["error", "flow"],
+    "lodash-fp/no-extraneous-partials": "error",
+    "lodash-fp/no-for-each": "error",
+    "lodash-fp/preferred-alias": "error",
+    "newline-before-return": "error",
+    "no-console": "error",
+    "no-nested-ternary": "off",
+    "no-promise-executor-return": "off",
+    "no-shadow": "off",
+    "no-void": ["error", { "allowAsStatement": true }],
+    "node/no-missing-import": "off",
+    "node/no-unpublished-import": "off",
+    "node/no-unpublished-require": "off",
+    "node/no-unsupported-features/es-syntax": "off",
+    "promise/prefer-await-to-then": "error",
+    "sort-imports": ["error", { "ignoreDeclarationSort": true }],
+    "unicorn/expiring-todo-comments": "error",
+    "unicorn/prefer-ternary": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.js"],
+      "env": { "commonjs": true, "es6": false },
+      "rules": {
+        "fp/no-mutation": ["error", { "commonjs": true }],
+        "global-require": "off"
+      }
+    },
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": ["./tsconfig.json"]
+      },
+      "plugins": ["@typescript-eslint", "typescript-sort-keys"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:typescript-sort-keys/recommended"
+      ],
+      "rules": {
+        "@typescript-eslint/array-type": [
+          "error",
+          {
+            "default": "array-simple",
+            "readonly": "array-simple"
+          }
+        ],
+        "@typescript-eslint/consistent-indexed-object-style": "error",
+        "@typescript-eslint/consistent-type-assertions": [
+          "error",
+          { "assertionStyle": "as", "objectLiteralTypeAssertions": "never" }
+        ],
+        "@typescript-eslint/consistent-type-definitions": [
+          "error",
+          "interface"
+        ],
+        "@typescript-eslint/consistent-type-imports": "error",
+        "@typescript-eslint/member-delimiter-style": "error",
+        "@typescript-eslint/method-signature-style": "error",
+        "@typescript-eslint/no-confusing-non-null-assertion": "error",
+        "@typescript-eslint/no-confusing-void-expression": [
+          "error",
+          { "ignoreArrowShorthand": true, "ignoreVoidOperator": true }
+        ],
+        "@typescript-eslint/no-empty-function": [
+          "error",
+          {
+            "allow": ["arrowFunctions", "functions", "methods"]
+          }
+        ],
+        "@typescript-eslint/no-empty-interface": [
+          "error",
+          { "allowSingleExtends": true }
+        ],
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-meaningless-void-operator": [
+          "error",
+          { "checkNever": false }
+        ],
+        "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
+        "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-unnecessary-boolean-literal-compare": [
+          "error",
+          {
+            "allowComparingNullableBooleansToFalse": false,
+            "allowComparingNullableBooleansToTrue": false
+          }
+        ],
+        "@typescript-eslint/no-unnecessary-condition": [
+          "error",
+          { "allowConstantLoopConditions": true }
+        ],
+
+        "@typescript-eslint/no-unnecessary-type-assertion": "error",
+
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "args": "after-used",
+            "ignoreRestSiblings": true,
+            "vars": "all"
+          }
+        ],
+        "@typescript-eslint/non-nullable-type-assertion-style": "error",
+        "@typescript-eslint/prefer-nullish-coalescing": [
+          "error",
+          {
+            "ignoreConditionalTests": false,
+            "ignoreMixedLogicalExpressions": false
+          }
+        ],
+        "@typescript-eslint/prefer-optional-chain": "error",
+        "@typescript-eslint/prefer-reduce-type-parameter": "error",
+        "@typescript-eslint/prefer-ts-expect-error": "error",
+        "@typescript-eslint/promise-function-async": "error",
+        "@typescript-eslint/type-annotation-spacing": "error",
+        "@typescript-eslint/unified-signatures": "error",
+        "no-underscore-dangle": [
+          "error",
+          {
+            "allow": ["_id"],
+            "allowAfterSuper": false,
+            "allowAfterThis": false,
+            "allowAfterThisConstructor": false,
+            "allowFunctionParams": true,
+            "enforceInMethodNames": true
+          }
+        ],
+        "no-unused-vars": "off",
+        "no-void": "off"
+      }
+    },
+    {
+      "files": ["**/*.d.ts"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": ["./tsconfig.json"]
+      },
+      "plugins": ["@typescript-eslint"],
+      "rules": {
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          { "disallowTypeAnnotations": false }
+        ]
+      }
+    },
+    {
+      "files": ["**/*.spec.*", "./src/test-utils.ts", "./*.ts", "**/*.js"],
+      "rules": {
+        "import/no-extraneous-dependencies": [
+          "error",
+          {
+            "bundledDependencies": false,
+            "devDependencies": true,
+            "optionalDependencies": false,
+            "peerDependencies": false
+          }
+        ]
+      }
+    },
+    {
+      "files": ["**/*.spec.*"],
+      "env": { "jest/globals": true, "jest": true },
+      "plugins": ["jest"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/unbound-method": "off",
+        "fp/no-events": "off",
+        "fp/no-let": "off",
+        "fp/no-mutation": "off",
+        "global-require": "off",
+        "jest/no-done-callback": "off",
+        "jest/no-jest-import": "off",
+        "lodash-fp/no-for-each": "off"
+      }
+    }
+  ]
+}

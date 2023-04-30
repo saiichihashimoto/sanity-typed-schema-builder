@@ -1,4 +1,4 @@
-const eslintCmd = "eslint --config ./.eslintrc.js --ignore-pattern '!.*' --fix";
+const eslintCmd = "eslint --config ./.eslintrc --ignore-pattern '!.*' --fix";
 const prettierCmd = "prettier --write --ignore-unknown";
 
 /**
@@ -11,7 +11,7 @@ const config = {
   // TODO [sort-package-json@>=1.49.0] sort-package-json>=1.49.0 bails on sorting scripts if npm-run-all is a dependency, which it is and we use it extensively. 1.52.0 looks like a solve but is not. https://github.com/keithamus/sort-package-json/issues/242
   "**/package.json": ["sort-package-json"],
   "{prettier.config.js,**/package.json}": () => [`${prettierCmd} .`],
-  "{.eslintrc.js,**/package.json}": () => [`${eslintCmd} .`],
+  "{.eslintrc*,**/package.json}": () => [`${eslintCmd} .`],
   ...(process.env.NO_FIX
     ? {}
     : {
