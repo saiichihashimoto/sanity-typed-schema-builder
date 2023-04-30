@@ -6,7 +6,8 @@
     "sanity",
     "schema",
     "typescript",
-    "builder"
+    "builder",
+    "zod"
   ],
   "homepage": "https://saiichihashimoto.github.io/sanity-typed-schema-builder",
   "repository": "github:saiichihashimoto/sanity-typed-schema-builder",
