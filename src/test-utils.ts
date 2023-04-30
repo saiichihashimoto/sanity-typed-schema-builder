@@ -36,8 +36,7 @@ export type ValidateShape<Received, Expected extends Received> = IsEqual<
   : ValidateError<Received, Expected>;
 
 export const mockRule = () => {
-  const rule: Rule &
-    GetRule<ArrayDefinition> &
+  const rule: GetRule<ArrayDefinition> &
     GetRule<BlockDefinition> &
     GetRule<BooleanDefinition> &
     GetRule<DateDefinition> &
@@ -53,7 +52,8 @@ export const mockRule = () => {
     GetRule<SlugDefinition> &
     GetRule<StringDefinition> &
     GetRule<TextDefinition> &
-    GetRule<UrlDefinition> = {
+    GetRule<UrlDefinition> &
+    Rule = {
     _fieldRules: undefined,
     _level: undefined,
     _message: undefined,
@@ -93,7 +93,7 @@ export const mockRule = () => {
     uppercase: jest.fn(() => rule),
     uri: jest.fn(() => rule),
     valid: jest.fn(() => rule),
-    validate: jest.fn(async () => Promise.resolve([])),
+    validate: jest.fn(async () => []),
     valueOfField: jest.fn(() => ({ type: Symbol("Mock Value"), path: [] })),
     warning: jest.fn(() => rule),
   };

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { FileDefinition } from "sanity";
+import type { Merge } from "type-fest";
 import {
   fieldsMock,
   fieldsSchema,
@@ -16,13 +18,11 @@ import type {
 } from "../field";
 import type { SanityReference } from "../reference";
 import type { SanityTypeDef, TupleOfLength, TypedValues } from "../types";
-import type { FileDefinition } from "sanity";
-import type { Merge } from "type-fest";
 
-export interface SanityFile {
+export type SanityFile = {
   _type: "file";
   asset: SanityReference;
-}
+};
 
 const extraZodFields = {
   _type: z.literal("file"),
@@ -36,14 +36,17 @@ export const file = <
   Optionals extends boolean,
   Zod extends z.ZodObject<
     Merge<
-      // eslint-disable-next-line no-use-before-define -- Zod can't be optional, but FieldsArray has to be
-      FieldsZodObject<FieldsArray>,
+      FieldsZodObject<// eslint-disable-next-line @typescript-eslint/no-use-before-define -- Defaulted types need to be at the bottom
+      FieldsArray>,
       typeof extraZodFields
     >
   >,
   ZodResolved extends z.ZodObject<
-    // eslint-disable-next-line no-use-before-define -- ZodResolved can't be optional, but FieldsArray has to be
-    Merge<FieldsZodResolvedObject<FieldsArray>, typeof extraZodFields>
+    Merge<
+      FieldsZodResolvedObject<// eslint-disable-next-line @typescript-eslint/no-use-before-define -- Defaulted types need to be at the bottom
+      FieldsArray>,
+      typeof extraZodFields
+    >
   >,
   FieldsArray extends TupleOfLength<
     FieldOptions<Names, Zods, ResolvedValues, Optionals>,

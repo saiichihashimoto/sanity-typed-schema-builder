@@ -1,6 +1,13 @@
 import { flow, map } from "lodash/fp";
 import { z } from "zod";
 
+import type {
+  ArrayDefinition,
+  ArrayRule,
+  IntrinsicDefinitions,
+  TypeAliasDefinition,
+} from "sanity";
+import type { Merge } from "type-fest";
 import { createType, zodDiscriminatedUnionMaybe } from "../types";
 
 import type {
@@ -13,13 +20,6 @@ import type {
   TupleOfLength,
   TypedValues,
 } from "../types";
-import type {
-  ArrayDefinition,
-  ArrayRule,
-  IntrinsicDefinitions,
-  TypeAliasDefinition,
-} from "sanity";
-import type { Merge } from "type-fest";
 
 type AddKey<T> = T extends object ? Merge<T, { _key: string }> : T;
 
@@ -42,7 +42,7 @@ const zodArrayOfLength =
     max?: Max;
     min?: Min;
   }) =>
-  <Input, Output>(zods: Array<z.ZodType<Output, any, Input>>) =>
+  <Input, Output>(zods: z.ZodType<Output, any, Input>[]) =>
     flow(
       flow(
         (value: typeof zods) => value,

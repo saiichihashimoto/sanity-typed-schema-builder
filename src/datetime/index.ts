@@ -1,10 +1,10 @@
 import { flow } from "lodash/fp";
 import { z } from "zod";
 
+import type { DatetimeDefinition } from "sanity";
 import { createType } from "../types";
 
 import type { GetRule, SanityTypeDef } from "../types";
-import type { DatetimeDefinition } from "sanity";
 
 export const datetime = <ParsedValue = Date, ResolvedValue = Date>({
   max,

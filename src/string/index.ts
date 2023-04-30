@@ -1,12 +1,12 @@
 import { flow, map } from "lodash/fp";
 import { z } from "zod";
 
+import type { StringDefinition } from "sanity";
 import { listMock, listValueToValue } from "../list";
 import { createType, zodUnion } from "../types";
 
 import type { WithTypedOptionsList } from "../list";
 import type { GetRule, SanityTypeDef } from "../types";
-import type { StringDefinition } from "sanity";
 
 export const string = <
   TypedValue extends string,

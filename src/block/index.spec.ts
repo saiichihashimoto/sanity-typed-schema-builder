@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import type { PortableTextBlock } from "@portabletext/types";
 import { mockRule } from "../test-utils";
 
 import { block } from ".";
@@ -11,11 +12,10 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { PortableTextBlock } from "@portabletext/types";
 
 describe("block", () => {
   it("builds a sanity config", () =>
-    expect(block().schema()).toEqual({ type: "block" }));
+    expect(block().schema()).toStrictEqual({ type: "block" }));
 
   it("passes through schema values", () =>
     expect(block({ hidden: false }).schema()).toHaveProperty("hidden", false));
@@ -40,7 +40,7 @@ describe("block", () => {
       PortableTextBlock
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a block", () => {
@@ -63,11 +63,11 @@ describe("block", () => {
       PortableTextBlock
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("mocks block content", () =>
-    expect(block().mock(faker)).toEqual({
+    expect(block().mock(faker)).toStrictEqual({
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -81,11 +81,13 @@ describe("block", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(block().mock(faker)).toEqual(block().mock(faker));
-    expect(block().mock(faker, ".foo")).toEqual(block().mock(faker, ".foo"));
+    expect(block().mock(faker)).toStrictEqual(block().mock(faker));
+    expect(block().mock(faker, ".foo")).toStrictEqual(
+      block().mock(faker, ".foo")
+    );
 
-    expect(block().mock(faker, ".foo")).not.toEqual(block().mock(faker));
-    expect(block().mock(faker)).not.toEqual(block().mock(faker, ".foo"));
+    expect(block().mock(faker, ".foo")).not.toStrictEqual(block().mock(faker));
+    expect(block().mock(faker)).not.toStrictEqual(block().mock(faker, ".foo"));
   });
 
   it("allows defining the mocks", () =>
@@ -187,7 +189,7 @@ describe("block", () => {
       ],
     });
 
-    expect(parsedValue).toEqual("block");
+    expect(parsedValue).toBe("block");
   });
 
   it("types custom validation", () => {

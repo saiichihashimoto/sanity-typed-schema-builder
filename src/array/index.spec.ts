@@ -18,7 +18,7 @@ import type {
 
 describe("array", () => {
   it("builds a sanity config", () =>
-    expect(array({ of: [boolean()] }).schema()).toEqual({
+    expect(array({ of: [boolean()] }).schema()).toStrictEqual({
       type: "array",
       of: [{ type: "boolean" }],
       validation: expect.any(Function),
@@ -51,8 +51,8 @@ describe("array", () => {
       number[]
     > = type.resolve(value);
 
-    expect(parsedValue).toEqual(["true"]);
-    expect(resolvedValue).toEqual([4]);
+    expect(parsedValue).toStrictEqual(["true"]);
+    expect(resolvedValue).toStrictEqual([4]);
   });
 
   it("adds keyed nonprimitive types", () => {
@@ -90,34 +90,34 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      Array<{
+      {
         _key: string;
         foo: boolean;
-      }>
+      }[]
     > = [
       { _key: "a", foo: true },
       { _key: "b", foo: false },
     ];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<{
+      {
         _key: string;
         foo: string;
-      }>
+      }[]
     > = type.parse(value);
     const resolvedValue: ValidateShape<
       InferResolvedValue<typeof type>,
-      Array<{
+      {
         _key: string;
         foo: number;
-      }>
+      }[]
     > = type.resolve(value);
 
-    expect(parsedValue).toEqual([
+    expect(parsedValue).toStrictEqual([
       { _key: "a", foo: "true" },
       { _key: "b", foo: "false" },
     ]);
-    expect(resolvedValue).toEqual([
+    expect(resolvedValue).toStrictEqual([
       { _key: "a", foo: 4 },
       { _key: "b", foo: 5 },
     ]);
@@ -142,14 +142,14 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      Array<boolean | string>
+      (boolean | string)[]
     > = [true, "a"];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<boolean | string>
+      (boolean | string)[]
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => type.parse([5])).toThrow(
       JSON.stringify(
@@ -229,7 +229,7 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      Array<
+      (
         | {
             _key: string;
             _type: "a";
@@ -240,7 +240,7 @@ describe("array", () => {
             _type: "b";
             foo: string;
           }
-      >
+      )[]
     > = [
       {
         _key: "1",
@@ -255,7 +255,7 @@ describe("array", () => {
     ];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      Array<
+      (
         | {
             _key: string;
             _type: "a";
@@ -266,10 +266,10 @@ describe("array", () => {
             _type: "b";
             foo: string;
           }
-      >
+      )[]
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     // Discriminated union should show that "_type" is invalid
     expect(() =>
@@ -339,7 +339,7 @@ describe("array", () => {
       [boolean, boolean, ...boolean[]]
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse([true]);
@@ -357,14 +357,14 @@ describe("array", () => {
 
     const value: ValidateShape<
       InferValue<typeof type>,
-      [] | [boolean] | [boolean, boolean] | [boolean, boolean, boolean]
+      [] | [boolean, boolean, boolean] | [boolean, boolean] | [boolean]
     > = [true, false, true];
     const parsedValue: ValidateShape<
       InferParsedValue<typeof type>,
-      [] | [boolean] | [boolean, boolean] | [boolean, boolean, boolean]
+      [] | [boolean, boolean, boolean] | [boolean, boolean] | [boolean]
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse([true, false, true, false]);
@@ -389,7 +389,7 @@ describe("array", () => {
       [boolean, boolean]
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
 
     expect(() => {
       type.parse([true]);
@@ -416,7 +416,7 @@ describe("array", () => {
       number
     > = type.parse([true, false]);
 
-    expect(parsedValue).toEqual(1);
+    expect(parsedValue).toBe(1);
   });
 
   it("types custom validation", () => {
@@ -443,16 +443,16 @@ describe("array", () => {
         Rule.custom((value) => {
           const elements: ValidateShape<
             typeof value,
-            | Array<
-                | {
-                    _key: string;
-                    foo: boolean;
-                  }
+            | (
                 | {
                     _key: string;
                     bar: boolean;
                   }
-              >
+                | {
+                    _key: string;
+                    foo: boolean;
+                  }
+              )[]
             | undefined
           > = value;
 

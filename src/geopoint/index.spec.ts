@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import type { GeopointValue } from "sanity";
 import { mockRule } from "../test-utils";
 
 import { geopoint } from ".";
@@ -11,11 +12,10 @@ import type {
   InferResolvedValue,
   InferValue,
 } from "../types";
-import type { GeopointValue } from "sanity";
 
 describe("geopoint", () => {
   it("builds a sanity config", () =>
-    expect(geopoint().schema()).toEqual({
+    expect(geopoint().schema()).toStrictEqual({
       type: "geopoint",
     }));
 
@@ -39,7 +39,7 @@ describe("geopoint", () => {
       GeopointValue
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a geopoint", () => {
@@ -56,11 +56,11 @@ describe("geopoint", () => {
       GeopointValue
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("mocks a geopoint", () =>
-    expect(geopoint().mock(faker)).toEqual({
+    expect(geopoint().mock(faker)).toStrictEqual({
       _type: "geopoint",
       lat: expect.any(Number),
       lng: expect.any(Number),
@@ -68,13 +68,17 @@ describe("geopoint", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(geopoint().mock(faker)).toEqual(geopoint().mock(faker));
-    expect(geopoint().mock(faker, ".foo")).toEqual(
+    expect(geopoint().mock(faker)).toStrictEqual(geopoint().mock(faker));
+    expect(geopoint().mock(faker, ".foo")).toStrictEqual(
       geopoint().mock(faker, ".foo")
     );
 
-    expect(geopoint().mock(faker, ".foo")).not.toEqual(geopoint().mock(faker));
-    expect(geopoint().mock(faker)).not.toEqual(geopoint().mock(faker, ".foo"));
+    expect(geopoint().mock(faker, ".foo")).not.toStrictEqual(
+      geopoint().mock(faker)
+    );
+    expect(geopoint().mock(faker)).not.toStrictEqual(
+      geopoint().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
@@ -126,7 +130,7 @@ describe("geopoint", () => {
       alt: 13.37,
     });
 
-    expect(parsedValue).toEqual(58.63169011423141);
+    expect(parsedValue).toBe(58.63169011423141);
   });
 
   it("types custom validation", () => {

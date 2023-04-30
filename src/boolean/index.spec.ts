@@ -14,7 +14,7 @@ import type {
 
 describe("boolean", () => {
   it("builds a sanity config", () =>
-    expect(boolean().schema()).toEqual({
+    expect(boolean().schema()).toStrictEqual({
       type: "boolean",
     }));
 
@@ -33,7 +33,7 @@ describe("boolean", () => {
       boolean
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(value);
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("resolves into a boolean", () => {
@@ -45,20 +45,24 @@ describe("boolean", () => {
       boolean
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(value);
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("mocks a boolean", () =>
-    expect(boolean().mock(faker)).toEqual(expect.any(Boolean)));
+    expect(boolean().mock(faker)).toStrictEqual(expect.any(Boolean)));
 
   it("mocks the same value with the same path", () => {
-    expect(boolean().mock(faker)).toEqual(boolean().mock(faker));
-    expect(boolean().mock(faker, ".foo")).toEqual(
+    expect(boolean().mock(faker)).toStrictEqual(boolean().mock(faker));
+    expect(boolean().mock(faker, ".foo")).toStrictEqual(
       boolean().mock(faker, ".foo")
     );
 
-    expect(boolean().mock(faker, ".foo")).not.toEqual(boolean().mock(faker));
-    expect(boolean().mock(faker)).not.toEqual(boolean().mock(faker, ".foo"));
+    expect(boolean().mock(faker, ".foo")).not.toStrictEqual(
+      boolean().mock(faker)
+    );
+    expect(boolean().mock(faker)).not.toStrictEqual(
+      boolean().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
@@ -78,7 +82,7 @@ describe("boolean", () => {
       string
     > = type.parse(true);
 
-    expect(parsedValue).toEqual("true");
+    expect(parsedValue).toBe("true");
   });
 
   it("types custom validation", () => {

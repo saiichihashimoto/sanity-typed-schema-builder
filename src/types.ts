@@ -50,20 +50,21 @@ export const zodDiscriminatedUnionMaybe =
             string,
             z.Primitive
           >,
-          ...(zods.slice(2) as unknown as Array<
-            z.ZodDiscriminatedUnionOption<string, z.Primitive>
-          >),
+          ...(zods.slice(2) as unknown as z.ZodDiscriminatedUnionOption<
+            string,
+            z.Primitive
+          >[]),
         ]) as unknown as Zods)
       : (z.union([zods[0]!, zods[1]!, ...zods.slice(2)]) as unknown as Zods);
 
-export interface SanityType<Definition, Value, ParsedValue, ResolvedValue> {
+export type SanityType<Definition, Value, ParsedValue, ResolvedValue> = {
   mock: (faker: Faker, path?: string) => Value;
   parse: (data: unknown) => ParsedValue;
   resolve: (data: unknown) => ResolvedValue;
   schema: () => Definition;
   zod: z.ZodType<ParsedValue, any, Value>;
   zodResolved: z.ZodType<ResolvedValue, any, Value>;
-}
+};
 
 export type InferValue<T extends SanityType<any, any, any, any>> =
   T extends SanityType<any, infer Value, any, any> ? Value : never;
@@ -79,7 +80,7 @@ export type InferResolvedValue<T extends SanityType<any, any, any, any>> =
 const createMocker = <MockType>(
   mockFn: (faker: Faker, path: string) => MockType
 ) => {
-  const fakers: Record<string, Faker> = {};
+  const fakers: { [key: string]: Faker } = {};
 
   return (faker: Faker, path = ""): MockType => {
     // @ts-expect-error -- We need faker to not be bundled with the library while getting both the class to create new instances and faker.locales.
@@ -88,9 +89,10 @@ const createMocker = <MockType>(
     if (!(path in fakers)) {
       // eslint-disable-next-line fp/no-mutation -- Need to set fakers
       fakers[path] = new FakerClass({ locales: faker.locales });
+      // eslint-disable-next-line fp/no-unused-expression -- seed is a mutation
       fakers[path]!.seed(
-        Array.from(path).reduce(
-          // eslint-disable-next-line no-bitwise -- copied from somewhere
+        [...path].reduce(
+          // eslint-disable-next-line no-bitwise, unicorn/prefer-math-trunc, unicorn/prefer-code-point, id-length -- copied from somewhere
           (s, c) => (Math.imul(31, s) + c.charCodeAt(0)) | 0,
           0
         )
@@ -132,17 +134,15 @@ export type GetRule<T> = T extends {
   ? Rule
   : never;
 
-// eslint-disable-next-line import/no-unused-modules -- Users of TypedValues need access to TypedValueRule or they get a really weird error. Unclear why.
-export interface TypedValueRule<Value>
-  extends RuleDef<TypedValueRule<Value>, Value> {}
+export type TypedValueRule<Value> = RuleDef<TypedValueRule<Value>, Value>;
 
-export interface TypedValues<
+export type TypedValues<
   Value,
   Rule extends RuleDef<Rule, any> = TypedValueRule<Value>
-> {
+> = {
   initialValue?: InitialValueProperty<any, Value>;
   validation?: ValidationBuilder<Rule, Value>;
-}
+};
 
 export type NamedSchemaFields = "description" | "name" | "title";
 

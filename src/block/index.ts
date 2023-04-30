@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-import { createType } from "../types";
-
-import type { SanityTypeDef, TypedValues } from "../types";
 import type {
   ArbitraryTypedObject,
   PortableTextBlock,
@@ -14,6 +11,8 @@ import type {
 } from "@portabletext/types";
 import type { BlockDefinition } from "sanity";
 import type { Merge } from "type-fest";
+import type { SanityTypeDef, TypedValues } from "../types";
+import { createType } from "../types";
 
 export type SanityBlock<
   M extends PortableTextMarkDefinition = PortableTextMarkDefinition,

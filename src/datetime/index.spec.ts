@@ -14,7 +14,7 @@ import type {
 
 describe("datetime", () => {
   it("builds a sanity config", () =>
-    expect(datetime().schema()).toEqual({
+    expect(datetime().schema()).toStrictEqual({
       type: "datetime",
       validation: expect.any(Function),
     }));
@@ -37,7 +37,7 @@ describe("datetime", () => {
       Date
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(new Date(value));
+    expect(parsedValue).toStrictEqual(new Date(value));
   });
 
   it("resolves into a Date", () => {
@@ -52,7 +52,7 @@ describe("datetime", () => {
       Date
     > = type.resolve(value);
 
-    expect(resolvedValue).toEqual(new Date(value));
+    expect(resolvedValue).toStrictEqual(new Date(value));
   });
 
   it("enforces a valid Date", () => {
@@ -83,7 +83,7 @@ describe("datetime", () => {
       Date
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(new Date(value));
+    expect(parsedValue).toStrictEqual(new Date(value));
 
     expect(() => {
       type.parse("2022-06-03T03:24:55.390Z");
@@ -108,7 +108,7 @@ describe("datetime", () => {
       Date
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(new Date(value));
+    expect(parsedValue).toStrictEqual(new Date(value));
 
     expect(() => {
       type.parse("2022-06-03T03:24:55.399Z");
@@ -137,14 +137,14 @@ describe("datetime", () => {
       Date
     > = type.parse(value);
 
-    expect(parsedValue).toEqual(new Date(value));
+    expect(parsedValue).toStrictEqual(new Date(value));
   });
 
   it("mocks a string", () => {
     const value = datetime().mock(faker);
 
-    expect(value).toEqual(expect.any(String));
-    expect(new Date(value).toString()).not.toEqual("Invalid Date");
+    expect(value).toStrictEqual(expect.any(String));
+    expect(new Date(value).toString()).not.toBe("Invalid Date");
   });
 
   it("allows defining the mocks", () =>
@@ -162,13 +162,17 @@ describe("datetime", () => {
     ));
 
   it("mocks the same value with the same path", () => {
-    expect(datetime().mock(faker)).toEqual(datetime().mock(faker));
-    expect(datetime().mock(faker, ".foo")).toEqual(
+    expect(datetime().mock(faker)).toStrictEqual(datetime().mock(faker));
+    expect(datetime().mock(faker, ".foo")).toStrictEqual(
       datetime().mock(faker, ".foo")
     );
 
-    expect(datetime().mock(faker, ".foo")).not.toEqual(datetime().mock(faker));
-    expect(datetime().mock(faker)).not.toEqual(datetime().mock(faker, ".foo"));
+    expect(datetime().mock(faker, ".foo")).not.toStrictEqual(
+      datetime().mock(faker)
+    );
+    expect(datetime().mock(faker)).not.toStrictEqual(
+      datetime().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the zod", () => {
@@ -181,7 +185,7 @@ describe("datetime", () => {
       number
     > = type.parse("2022-06-03T03:24:55.395Z");
 
-    expect(parsedValue).toEqual(24);
+    expect(parsedValue).toBe(24);
   });
 
   it("types custom validation", () => {

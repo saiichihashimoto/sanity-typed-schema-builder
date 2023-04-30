@@ -1,9 +1,9 @@
 import { z } from "zod";
 
+import type { SlugDefinition, SlugValue } from "sanity";
 import { createType } from "../types";
 
 import type { SanityTypeDef } from "../types";
-import type { SlugDefinition, SlugValue } from "sanity";
 
 const zod: z.ZodType<SlugValue, any, SlugValue> = z.object({
   _type: z.literal("slug"),

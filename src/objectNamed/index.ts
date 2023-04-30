@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { ObjectDefinition } from "sanity";
+import type { Merge } from "type-fest";
 import {
   fieldsMock,
   fieldsSchema,
@@ -15,12 +17,10 @@ import type {
   Preview,
 } from "../field";
 import type { SanityNamedTypeDef, TupleOfLength, TypedValues } from "../types";
-import type { ObjectDefinition } from "sanity";
-import type { Merge } from "type-fest";
 
-interface ExtraZodFields<ObjectNames extends string> {
+type ExtraZodFields<ObjectNames extends string> = {
   _type: z.ZodLiteral<ObjectNames>;
-}
+};
 
 export const objectNamed = <
   ObjectNames extends string,
@@ -41,7 +41,7 @@ export const objectNamed = <
   ParsedValue = z.output<Zod>,
   ResolvedValue = z.output<ZodResolved>,
   // eslint-disable-next-line @typescript-eslint/ban-types -- All other values assume keys
-  Select extends Record<string, string> = {}
+  Select extends { [key: string]: string } = {}
 >({
   name,
   fields,
