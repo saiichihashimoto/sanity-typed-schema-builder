@@ -1,3 +1,6 @@
+**/dist/**
+*lock.json
+.husky/_/**
 .next
 .vercel
-dist
+tsup.config.bundled_*.mjs

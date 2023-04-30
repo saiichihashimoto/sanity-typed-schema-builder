@@ -1,0 +1,6 @@
+{
+  "doctor": true,
+  "peer": true,
+  "upgrade": true,
+  "verbose": true
+}

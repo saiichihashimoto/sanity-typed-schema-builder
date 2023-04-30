@@ -1,9 +1,11 @@
 # sanity-typed-schema-builder
 
-[![Created by Saiichi Hashimoto](https://img.shields.io/badge/created%20by-Saiichi%20Hashimoto-4BBAAB)](http://saiichihashimoto.com)
-[![License](https://img.shields.io/github/license/saiichihashimoto/sanity-typed-schema-builder)](https://github.com/saiichihashimoto/sanity-typed-schema-builder/blob/master/LICENSE)
-[![npm](https://img.shields.io/npm/dw/sanity-typed-schema-builder)](https://www.npmjs.com/package/sanity-typed-schema-builder)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/saiichihashimoto/sanity-typed-schema-builder)](https://github.com/saiichihashimoto/sanity-typed-schema-builder)
+[![NPM Downloads](https://img.shields.io/npm/dw/sanity-typed-schema-builder?style=flat&logo=npm)](https://www.npmjs.com/package/sanity-typed-schema-builder)
+[![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/m/saiichihashimoto/sanity-typed-schema-builder?style=flat&logo=github)](https://github.com/saiichihashimoto/sanity-typed-schema-builder/pulls?q=is%3Apr+is%3Aclosed)
+[![GitHub Repo stars](https://img.shields.io/github/stars/saiichihashimoto/sanity-typed-schema-builder?style=flat&logo=github)](https://github.com/saiichihashimoto/sanity-typed-schema-builder/stargazers)
+[![GitHub contributors](https://img.shields.io/github/contributors/saiichihashimoto/sanity-typed-schema-builder?style=flat&logo=github)](https://github.com/saiichihashimoto/sanity-typed-schema-builder/graphs/contributors)
+[![Minified Size](https://img.shields.io/bundlephobia/min/sanity-typed-schema-builder?style=flat)](https://www.npmjs.com/package/sanity-typed-schema-builder?activeTab=code)
+[![License](https://img.shields.io/github/license/saiichihashimoto/sanity-typed-schema-builder?style=flat)](https://github.com/saiichihashimoto/sanity-typed-schema-builder/blob/main/LICENSE)
 
 Build [Sanity schemas](https://www.sanity.io/docs/content-modelling) declaratively and get typescript types of schema values for free!
 

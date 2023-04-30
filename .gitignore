@@ -1,10 +1,12 @@
-**/.DS_Store
 *.tsbuildinfo
+.DS_Store
 .env.*.local
 .env.local
 .idea
 .next
+.turbo
 .vercel
 Brewfile.lock.json
 dist
 node_modules
+tsup.config.bundled_*.mjs
