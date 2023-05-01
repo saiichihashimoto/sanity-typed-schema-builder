@@ -1,9 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/eslintrc.json",
   "root": true,
-  "ignorePatterns": [
-    "!.*"
-  ],
+  "ignorePatterns": ["!.*"],
   "plugins": [
     "eslint-comments",
     "fp",
@@ -30,20 +28,10 @@
     "sourceType": "module"
   },
   "settings": {
-    "import/extensions": [
-      ".js",
-      ".jsx",
-      ".ts",
-      ".tsx"
-    ],
+    "import/extensions": [".js", ".jsx", ".ts", ".tsx"],
     "import/resolver": {
       "node": {
-        "extensions": [
-          ".js",
-          ".jsx",
-          ".ts",
-          ".tsx"
-        ]
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
     },
     "react": {
@@ -54,17 +42,11 @@
     "es6": true
   },
   "rules": {
-    "arrow-body-style": [
-      "error",
-      "as-needed"
-    ],
+    "arrow-body-style": ["error", "as-needed"],
     "curly": "error",
     "dot-notation": "error",
     "eqeqeq": "error",
-    "func-style": [
-      "error",
-      "expression"
-    ],
+    "func-style": ["error", "expression"],
     "id-length": "error",
     "no-buffer-constructor": "off",
     "no-caller": "error",
@@ -126,18 +108,13 @@
     "eslint-comments/require-description": [
       "error",
       {
-        "ignore": [
-          "eslint-enable"
-        ]
+        "ignore": ["eslint-enable"]
       }
     ],
     "fp/no-nil": "off",
     "fp/no-rest-parameters": "off",
     "fp/no-throw": "off",
-    "import/extensions": [
-      "error",
-      "never"
-    ],
+    "import/extensions": ["error", "never"],
     "import/no-absolute-path": "error",
     "import/no-amd": "error",
     "import/no-anonymous-default-export": "error",
@@ -158,10 +135,7 @@
     "import/no-useless-path-segments": "error",
     "import/no-webpack-loader-syntax": "error",
     "import/prefer-default-export": "off",
-    "lodash-fp/consistent-compose": [
-      "error",
-      "flow"
-    ],
+    "lodash-fp/consistent-compose": ["error", "flow"],
     "lodash-fp/no-single-composition": "off",
     "lodash-fp/preferred-alias": [
       "error",
@@ -213,13 +187,8 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.js",
-        "**/*.jsx"
-      ],
-      "extends": [
-        "plugin:node/recommended-script"
-      ],
+      "files": ["**/*.js", "**/*.jsx"],
+      "extends": ["plugin:node/recommended-script"],
       "env": {
         "commonjs": true,
         "es6": false
@@ -232,21 +201,13 @@
           }
         ],
         "import/no-commonjs": "off",
-        "node/exports-style": [
-          "error",
-          "module.exports"
-        ],
+        "node/exports-style": ["error", "module.exports"],
         "unicorn/prefer-module": "off"
       }
     },
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx"
-      ],
-      "plugins": [
-        "@typescript-eslint"
-      ],
+      "files": ["**/*.ts", "**/*.tsx"],
+      "plugins": ["@typescript-eslint"],
       "extends": [
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/strict",
@@ -255,10 +216,7 @@
       ],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "project": [
-          "./tsconfig.json",
-          "./@types/tsconfig.json"
-        ]
+        "project": ["./tsconfig.json", "./@types/tsconfig.json"]
       },
       "rules": {
         "no-loop-func": "off",
@@ -279,10 +237,7 @@
           "error",
           "index-signature"
         ],
-        "@typescript-eslint/consistent-type-definitions": [
-          "error",
-          "type"
-        ],
+        "@typescript-eslint/consistent-type-definitions": ["error", "type"],
         "@typescript-eslint/consistent-type-exports": "error",
         "@typescript-eslint/consistent-type-imports": [
           "error",
@@ -319,25 +274,13 @@
         "@typescript-eslint/return-await": "error",
         "@typescript-eslint/sort-type-constituents": "error",
         "@typescript-eslint/switch-exhaustiveness-check": "error",
-        "import/consistent-type-specifier-style": [
-          "error",
-          "prefer-top-level"
-        ]
+        "import/consistent-type-specifier-style": ["error", "prefer-top-level"]
       }
     },
     {
-      "files": [
-        "**/*.jsx",
-        "**/*.tsx"
-      ],
-      "plugins": [
-        "react",
-        "react-hooks"
-      ],
-      "extends": [
-        "plugin:react/recommended",
-        "plugin:react-hooks/recommended"
-      ],
+      "files": ["**/*.jsx", "**/*.tsx"],
+      "plugins": ["react", "react-hooks"],
+      "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended"],
       "parserOptions": {
         "ecmaFeatures": {
           "jsx": true
@@ -345,14 +288,8 @@
       }
     },
     {
-      "files": [
-        "**/*.spec.*",
-        "**/*.test.*",
-        "**/test-utils.ts"
-      ],
-      "extends": [
-        "plugin:jest/recommended"
-      ],
+      "files": ["**/*.spec.*", "**/*.test.*", "**/test-utils.ts"],
+      "extends": ["plugin:jest/recommended"],
       "env": {
         "jest": true
       },
@@ -376,10 +313,7 @@
         "jest/expect-expect": [
           "error",
           {
-            "assertFunctionNames": [
-              "expect",
-              "expectExample"
-            ]
+            "assertFunctionNames": ["expect", "expectExample"]
           }
         ],
         "jest/no-alias-methods": "error",
@@ -409,18 +343,11 @@
       }
     },
     {
-      "files": [
-        "**/*.d.ts"
-      ],
-      "plugins": [
-        "@typescript-eslint"
-      ],
+      "files": ["**/*.d.ts"],
+      "plugins": ["@typescript-eslint"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "project": [
-          "./tsconfig.json",
-          "./@types/tsconfig.json"
-        ]
+        "project": ["./tsconfig.json", "./@types/tsconfig.json"]
       },
       "rules": {
         "@typescript-eslint/consistent-type-definitions": [
@@ -438,12 +365,8 @@
       }
     },
     {
-      "files": [
-        "**/*"
-      ],
-      "extends": [
-        "prettier"
-      ]
+      "files": ["**/*"],
+      "extends": ["prettier"]
     }
   ]
 }
