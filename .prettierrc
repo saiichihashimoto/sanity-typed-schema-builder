@@ -3,19 +3,11 @@
   "pluginSearchDirs": false,
   "plugins": [
     "@trivago/prettier-plugin-sort-imports",
-    "@standard-configs/prettier-plugin",
-    "prettier-plugin-sh"
+    "prettier-plugin-sh",
+    "@standard-configs/prettier-plugin"
   ],
   "quoteProps": "consistent",
   "importOrder": ["^src/(.*)$", "^[./]"],
   "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true,
-  "overrides": [
-    {
-      "files": ["*ignore"],
-      "options": {
-        "parser": "ignore"
-      }
-    }
-  ]
+  "importOrderSortSpecifiers": true
 }
