@@ -1,8 +1,7 @@
+import type { DateDefinition } from "sanity";
 import { z } from "zod";
 
-import type { DateDefinition } from "sanity";
 import { createType } from "../types";
-
 import type { SanityTypeDef } from "../types";
 
 export const date = <ParsedValue = string, ResolvedValue = string>({

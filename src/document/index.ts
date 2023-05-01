@@ -1,26 +1,25 @@
-import { keyBy } from "lodash/fp";
-import { z } from "zod";
-
 import type { Faker } from "@faker-js/faker";
+import { keyBy } from "lodash/fp";
 import type {
   DocumentDefinition,
   SanityDocument as SanityDocumentOriginal,
 } from "sanity";
 import type { Merge, RemoveIndexSignature } from "type-fest";
+import { z } from "zod";
+
 import {
   fieldsMock,
   fieldsSchema,
   fieldsZodObject,
   fieldsZodResolvedObject,
 } from "../field";
-import { createType } from "../types";
-
 import type {
   FieldOptions,
   FieldsZodObject,
   FieldsZodResolvedObject,
   Preview,
 } from "../field";
+import { createType } from "../types";
 import type {
   SanityNamedTypeDef,
   SanityType,

@@ -1,8 +1,7 @@
+import type { BooleanDefinition } from "sanity";
 import { z } from "zod";
 
-import type { BooleanDefinition } from "sanity";
 import { createType } from "../types";
-
 import type { SanityTypeDef } from "../types";
 
 export const boolean = <ParsedValue = boolean, ResolvedValue = boolean>({

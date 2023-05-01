@@ -1,23 +1,28 @@
-const eslintCmd = "eslint --config ./.eslintrc --ignore-pattern '!.*' --fix";
-const prettierCmd = "prettier --write --ignore-unknown";
+const eslintCmd = `cross-env TIMING=1 eslint --quiet --ext .js,.jsx,.ts,.tsx ${
+  process.env.NO_FIX ? "" : "--fix"
+}`;
+const prettierCmd = `prettier --ignore-unknown ${
+  process.env.NO_FIX ? "--check" : "--write"
+}`;
+
+// TODO NO_FIX should also not `git add` https://github.com/okonet/lint-staged/issues/1262
+// TODO globally run commands should `git add .` BEFORE command brings back stash https://github.com/okonet/lint-staged/issues/1253
 
 /**
- * @type {{ [glob: string]: (string[] | ((filenames: string[]) => (string[] | Promise<string[]>))) }}}
- * */
+ * @type {import('lint-staged').Config}
+ */
 const config = {
   "*.{gif,jpeg,jpg,png,svg}": ["imagemin-lint-staged"],
-  "*.{js,ts,tsx}": [eslintCmd],
-  "**/*": [prettierCmd],
-  // TODO [sort-package-json@>=1.49.0] sort-package-json>=1.49.0 bails on sorting scripts if npm-run-all is a dependency, which it is and we use it extensively. 1.52.0 looks like a solve but is not. https://github.com/keithamus/sort-package-json/issues/242
-  "**/package.json": ["sort-package-json"],
-  "{prettier.config.js,**/package.json}": () => [`${prettierCmd} .`],
-  "{.eslintrc*,**/package.json}": () => [`${eslintCmd} .`],
+  "*.{js,jsx,ts,tsx}": [eslintCmd],
+  "*.*": [prettierCmd],
+  "{.eslint*,package.json}": () => [`${eslintCmd} .`],
+  "{.prettier*,package.json}": () => [`${prettierCmd} .`],
   ...(process.env.NO_FIX
     ? {}
     : {
         "{.env*,.gitattributes}": (files) =>
           files.map((file) => `sort -o ${file} ${file}`),
-        Brewfile: (files) =>
+        "Brewfile": (files) =>
           files.map((file) =>
             [
               `cat ${file}`,

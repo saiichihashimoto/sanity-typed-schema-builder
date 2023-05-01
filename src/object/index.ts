@@ -1,21 +1,20 @@
-import { z } from "zod";
-
 import type { ObjectDefinition } from "sanity";
 import type { Merge } from "type-fest";
+import { z } from "zod";
+
 import {
   fieldsMock,
   fieldsSchema,
   fieldsZodObject,
   fieldsZodResolvedObject,
 } from "../field";
-import { createType } from "../types";
-
 import type {
   FieldOptions,
   FieldsZodObject,
   FieldsZodResolvedObject,
   Preview,
 } from "../field";
+import { createType } from "../types";
 import type { SanityTypeDef, TupleOfLength, TypedValues } from "../types";
 
 export const object = <

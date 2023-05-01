@@ -1,11 +1,10 @@
 import { flow, map } from "lodash/fp";
+import type { NumberDefinition } from "sanity";
 import { z } from "zod";
 
-import type { NumberDefinition } from "sanity";
 import { listMock, listValueToValue } from "../list";
-import { createType, zodUnion } from "../types";
-
 import type { WithTypedOptionsList } from "../list";
+import { createType, zodUnion } from "../types";
 import type { GetRule, SanityTypeDef } from "../types";
 
 export const number = <

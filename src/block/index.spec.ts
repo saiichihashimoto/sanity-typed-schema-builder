@@ -1,11 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
-
 import type { PortableTextBlock } from "@portabletext/types";
-import { mockRule } from "../test-utils";
 
 import { block } from ".";
-
+import { mockRule } from "../test-utils";
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,

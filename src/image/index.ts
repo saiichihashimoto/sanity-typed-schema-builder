@@ -1,24 +1,23 @@
 /* eslint-disable id-length -- x & y are sanity's hotspot fields */
-import { z } from "zod";
-
 import type { Faker } from "@faker-js/faker";
 import type { ImageCrop, ImageDefinition, ImageHotspot } from "sanity";
 import type { Merge } from "type-fest";
+import { z } from "zod";
+
 import {
   fieldsMock,
   fieldsSchema,
   fieldsZodObject,
   fieldsZodResolvedObject,
 } from "../field";
-import { referenceZod } from "../reference";
-import { createType } from "../types";
-
 import type {
   FieldOptions,
   FieldsZodObject,
   FieldsZodResolvedObject,
 } from "../field";
+import { referenceZod } from "../reference";
 import type { SanityReference } from "../reference";
+import { createType } from "../types";
 import type { SanityNamedTypeDef, TupleOfLength, TypedValues } from "../types";
 
 export type SanityImage<Hotspot extends boolean> = Hotspot extends false

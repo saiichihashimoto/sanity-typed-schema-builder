@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json.schemastore.org/prettierrc",
+  "pluginSearchDirs": false,
+  "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-sh"],
+  "quoteProps": "consistent",
+  "importOrder": ["^src/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}

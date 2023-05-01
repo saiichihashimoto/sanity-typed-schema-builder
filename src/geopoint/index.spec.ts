@@ -1,11 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
-
 import type { GeopointValue } from "sanity";
-import { mockRule } from "../test-utils";
 
 import { geopoint } from ".";
-
+import { mockRule } from "../test-utils";
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,

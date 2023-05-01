@@ -1,14 +1,12 @@
 import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 
+import { array } from ".";
 import { boolean } from "../boolean";
 import { object } from "../object";
 import { objectNamed } from "../objectNamed";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-
-import { array } from ".";
-
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,

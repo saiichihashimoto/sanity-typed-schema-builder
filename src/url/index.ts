@@ -1,8 +1,7 @@
+import type { UrlDefinition } from "sanity";
 import { z } from "zod";
 
-import type { UrlDefinition } from "sanity";
 import { createType } from "../types";
-
 import type { SanityTypeDef } from "../types";
 
 const zod = z.string().url();
