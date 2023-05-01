@@ -1,17 +1,15 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 import { isFunction } from "lodash/fp";
+import type { Merge } from "type-fest";
 import { z } from "zod";
 
-import type { Merge } from "type-fest";
+import { document } from ".";
+import type { ParsedSanityDocument, SanityDocument } from ".";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-
-import { document } from ".";
-
-import type { ParsedSanityDocument, SanityDocument } from ".";
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,

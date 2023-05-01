@@ -1,9 +1,8 @@
 import { flow } from "lodash/fp";
+import type { TextDefinition } from "sanity";
 import { z } from "zod";
 
-import type { TextDefinition } from "sanity";
 import { createType } from "../types";
-
 import type { GetRule, SanityTypeDef } from "../types";
 
 export const text = <ParsedValue = string, ResolvedValue = string>({

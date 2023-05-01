@@ -1,22 +1,21 @@
-import { z } from "zod";
-
 import type { FileDefinition } from "sanity";
 import type { Merge } from "type-fest";
+import { z } from "zod";
+
 import {
   fieldsMock,
   fieldsSchema,
   fieldsZodObject,
   fieldsZodResolvedObject,
 } from "../field";
-import { referenceZod } from "../reference";
-import { createType } from "../types";
-
 import type {
   FieldOptions,
   FieldsZodObject,
   FieldsZodResolvedObject,
 } from "../field";
+import { referenceZod } from "../reference";
 import type { SanityReference } from "../reference";
+import { createType } from "../types";
 import type { SanityTypeDef, TupleOfLength, TypedValues } from "../types";
 
 export type SanityFile = {

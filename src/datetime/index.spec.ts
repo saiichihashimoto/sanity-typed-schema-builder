@@ -1,10 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
-import { mockRule } from "../test-utils";
-
 import { datetime } from ".";
-
+import { mockRule } from "../test-utils";
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,

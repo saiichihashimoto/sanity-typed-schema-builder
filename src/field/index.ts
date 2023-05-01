@@ -1,7 +1,5 @@
-import { flow, fromPairs } from "lodash/fp";
-import { z } from "zod";
-
 import type { Faker } from "@faker-js/faker";
+import { flow, fromPairs } from "lodash/fp";
 import type {
   FieldDefinition,
   PrepareViewOptions,
@@ -9,6 +7,8 @@ import type {
   PreviewValue,
 } from "sanity";
 import type { Merge } from "type-fest";
+import { z } from "zod";
+
 import type {
   InferResolvedValue,
   InferValue,

@@ -1,9 +1,8 @@
 import { flow } from "lodash/fp";
+import type { DatetimeDefinition } from "sanity";
 import { z } from "zod";
 
-import type { DatetimeDefinition } from "sanity";
 import { createType } from "../types";
-
 import type { GetRule, SanityTypeDef } from "../types";
 
 export const datetime = <ParsedValue = Date, ResolvedValue = Date>({

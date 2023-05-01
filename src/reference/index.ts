@@ -1,14 +1,13 @@
-import { z } from "zod";
-
 import type {
   ReferenceDefinition,
   ReferenceValue,
   WeakReference,
 } from "sanity";
 import type { Merge } from "type-fest";
-import { createType } from "../types";
+import { z } from "zod";
 
 import type { DocumentType } from "../document";
+import { createType } from "../types";
 import type {
   InferResolvedValue,
   InferValue,

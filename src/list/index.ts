@@ -1,6 +1,5 @@
-import { flow, isObject, map } from "lodash/fp";
-
 import type { Faker } from "@faker-js/faker";
+import { flow, isObject, map } from "lodash/fp";
 import type { Merge } from "type-fest";
 import type { TupleOfLength } from "types";
 

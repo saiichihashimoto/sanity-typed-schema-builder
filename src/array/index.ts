@@ -1,6 +1,4 @@
 import { flow, map } from "lodash/fp";
-import { z } from "zod";
-
 import type {
   ArrayDefinition,
   ArrayRule,
@@ -8,8 +6,9 @@ import type {
   TypeAliasDefinition,
 } from "sanity";
 import type { Merge } from "type-fest";
-import { createType, zodDiscriminatedUnionMaybe } from "../types";
+import { z } from "zod";
 
+import { createType, zodDiscriminatedUnionMaybe } from "../types";
 import type {
   InferParsedValue,
   InferResolvedValue,

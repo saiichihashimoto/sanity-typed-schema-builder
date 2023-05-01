@@ -1,14 +1,12 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
-
 import type { Merge } from "type-fest";
+
+import { object } from ".";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-
-import { object } from ".";
-
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,

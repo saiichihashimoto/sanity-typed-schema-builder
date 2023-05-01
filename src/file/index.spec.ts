@@ -1,16 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
-
 import type { Merge } from "type-fest";
-import { boolean } from "../boolean";
-import { sharedFields } from "../field";
-import { string } from "../string";
-import { mockRule } from "../test-utils";
 
 import { file } from ".";
-
 import type { SanityFile } from ".";
+import { boolean } from "../boolean";
+import { sharedFields } from "../field";
 import type { SanityReference } from "../reference";
+import { string } from "../string";
+import { mockRule } from "../test-utils";
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,

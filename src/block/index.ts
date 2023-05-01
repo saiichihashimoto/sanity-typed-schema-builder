@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import type {
   ArbitraryTypedObject,
   PortableTextBlock,
@@ -11,6 +9,8 @@ import type {
 } from "@portabletext/types";
 import type { BlockDefinition } from "sanity";
 import type { Merge } from "type-fest";
+import { z } from "zod";
+
 import type { SanityTypeDef, TypedValues } from "../types";
 import { createType } from "../types";
 

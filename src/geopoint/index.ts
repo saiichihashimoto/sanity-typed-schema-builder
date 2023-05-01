@@ -1,8 +1,7 @@
+import type { GeopointDefinition, GeopointValue } from "sanity";
 import { z } from "zod";
 
-import type { GeopointDefinition, GeopointValue } from "sanity";
 import { createType } from "../types";
-
 import type { SanityTypeDef } from "../types";
 
 const zod: z.ZodType<GeopointValue, any, GeopointValue> = z.object({

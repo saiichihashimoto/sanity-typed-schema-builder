@@ -1,13 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 
+import { reference } from ".";
+import type { SanityReference } from ".";
 import { boolean } from "../boolean";
 import { document } from "../document";
 import { mockRule } from "../test-utils";
-
-import { reference } from ".";
-
-import type { SanityReference } from ".";
 import type { ValidateShape } from "../test-utils";
 import type {
   InferParsedValue,
