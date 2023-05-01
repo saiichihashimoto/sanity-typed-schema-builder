@@ -1,12 +1,24 @@
 {
-  "checkers": ["typescript"],
+  "checkers": [
+    "typescript"
+  ],
   "packageManager": "npm",
-  "mutate": ["src/**/*.ts", "!**/*.{d,spec}.ts"],
-  "reporters": ["clear-text", "progress"],
+  "mutate": [
+    "src/**/*.ts",
+    "!**/*.{d,spec}.ts"
+  ],
+  "reporters": [
+    "clear-text",
+    "progress"
+  ],
   "testRunner": "jest",
   "tsconfigFile": "tsconfig.json",
   "jest": {
     "configFile": "jest.config.js"
   },
-  "thresholds": { "high": 100, "low": 100, "break": 100 }
+  "thresholds": {
+    "high": 100,
+    "low": 100,
+    "break": 100
+  }
 }
