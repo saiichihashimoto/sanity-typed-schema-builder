@@ -1,9 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "composite": true,
-    "baseUrl": "./src/",
+    "baseUrl": "./src",
     "rootDir": "./src",
-    "outDir": "./dist/",
+    "outDir": "./dist",
     "target": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -11,18 +11,18 @@
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "incremental": true,
     "esModuleInterop": true,
-    "module": "CommonJS",
+    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "sourceMap": true,
     "jsx": "preserve",
-    "strictNullChecks": true,
     "noErrorTruncation": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "noImplicitReturns": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["dist", "node_modules"]
 }
