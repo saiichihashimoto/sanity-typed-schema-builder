@@ -41,18 +41,11 @@ export const zodDiscriminatedUnionMaybe =
       ? zods[0]!
       : zods.every(isZodObjectWithDiscriminator(discriminator))
       ? (z.discriminatedUnion(discriminator, [
-          zods[0]! as unknown as z.ZodDiscriminatedUnionOption<
-            string,
-            z.Primitive
-          >,
-          zods[1]! as unknown as z.ZodDiscriminatedUnionOption<
-            string,
-            z.Primitive
-          >,
-          ...(zods.slice(2) as unknown as z.ZodDiscriminatedUnionOption<
-            string,
-            z.Primitive
-          >[]),
+          zods[0]! as unknown as z.ZodDiscriminatedUnionOption<string>,
+          zods[1]! as unknown as z.ZodDiscriminatedUnionOption<string>,
+          ...(zods.slice(
+            2
+          ) as unknown as z.ZodDiscriminatedUnionOption<string>[]),
         ]) as unknown as Zods)
       : (z.union([zods[0]!, zods[1]!, ...zods.slice(2)]) as unknown as Zods);
 
