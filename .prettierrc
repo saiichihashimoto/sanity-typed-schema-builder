@@ -7,17 +7,12 @@
     "prettier-plugin-sh"
   ],
   "quoteProps": "consistent",
-  "importOrder": [
-    "^src/(.*)$",
-    "^[./]"
-  ],
+  "importOrder": ["^src/(.*)$", "^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
   "overrides": [
     {
-      "files": [
-        "*ignore"
-      ],
+      "files": ["*ignore"],
       "options": {
         "parser": "ignore"
       }

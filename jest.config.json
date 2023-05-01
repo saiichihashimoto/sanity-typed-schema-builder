@@ -5,8 +5,6 @@
   "passWithNoTests": true,
   "preset": "ts-jest",
   "restoreMocks": true,
-  "testMatch": [
-    "**/?(*.)+(spec|test).[jt]s?(x)"
-  ],
+  "testMatch": ["**/?(*.)+(spec|test).[jt]s?(x)"],
   "verbose": true
 }
