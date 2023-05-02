@@ -1,38 +1,16 @@
 # https://github.com/probot/settings
+_extends: .github
 repository:
   name: sanity-typed-schema-builder
   description: Build Sanity schemas declaratively and get typescript types of schema values for free!
   homepage: https://saiichihashimoto.github.io/sanity-typed-schema-builder
   topics: sanity, schema, typescript, builder, zod
   private: false
-  has_issues: true
-  has_projects: false
-  has_wiki: false
-  default_branch: main
-  allow_squash_merge: false
-  allow_merge_commit: true
-  allow_rebase_merge: false
-  delete_branch_on_merge: true
-  enable_automated_security_fixes: false
-  enable_vulnerability_alerts: true
-labels:
-  - name: released
-  - name: automerge
-    color: "#8250df"
-    description: Automatically merges the PR if all status checks pass.
-  - name: dependabot
-    color: "#0365d6"
-    description: Automatically generated PRs that update dependency versions
 branches:
   - name: main
     protection:
-      required_pull_request_reviews: null
       required_status_checks:
-        strict: true
         contexts:
           - Build
           - Lint
           - Test
-      enforce_admins: true
-      restrictions: null
-      required_conversation_resolution: true
