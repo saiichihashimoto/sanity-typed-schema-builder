@@ -30,7 +30,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@faker-js/faker": "7.3.0",
+    "@faker-js/faker": "7.6.0",
     "@jest/globals": "29.5.0",
     "@jest/types": "29.5.0",
     "@standard-configs/prettier-plugin": "1.0.11",
