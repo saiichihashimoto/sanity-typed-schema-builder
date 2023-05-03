@@ -63,7 +63,7 @@
     "lint-staged": "13.0.3",
     "prettier": "2.8.8",
     "prettier-plugin-sh": "0.12.8",
-    "sanity": "3.2.0",
+    "sanity": "3.9.1",
     "semantic-release": "21.0.2",
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
