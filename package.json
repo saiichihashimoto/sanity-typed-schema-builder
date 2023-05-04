@@ -23,7 +23,7 @@
     "test": "jest --color"
   },
   "dependencies": {
-    "@portabletext/types": "1.0.3",
+    "@portabletext/types": "2.0.2",
     "@types/lodash": "4.14.194",
     "lodash": "4.17.21",
     "type-fest": "2.19.0",
