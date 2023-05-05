@@ -1,30 +1,32 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
+import type {
+  ParsedSanityDocument,
+  SanityDocument,
+} from "@sanity-typed/schema-builder";
 import { isFunction } from "lodash/fp";
 import type { Merge } from "type-fest";
 import { z } from "zod";
 
-import { document } from ".";
-import type { ParsedSanityDocument, SanityDocument } from ".";
-import { boolean } from "../boolean";
 import { sharedFields } from "../field";
-import { string } from "../string";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("document", () => {
   it("builds a sanity config", () =>
     expect(
-      document({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-        ],
-      }).schema()
+      s
+        .document({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+          ],
+        })
+        .schema()
     ).toStrictEqual({
       name: "foo",
       type: "document",
@@ -40,25 +42,27 @@ describe("document", () => {
 
   it("passes through schema values", () =>
     expect(
-      document({
-        name: "foo",
-        title: "Foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-        ],
-      }).schema()
+      s
+        .document({
+          name: "foo",
+          title: "Foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+          ],
+        })
+        .schema()
     ).toHaveProperty("title", "Foo"));
 
   it("parses into an document", () => {
-    const type = document({
+    const type = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
@@ -70,7 +74,7 @@ describe("document", () => {
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -93,12 +97,12 @@ describe("document", () => {
   });
 
   it("resolves into an object", () => {
-    const type = document({
+    const type = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean({
+          type: s.boolean({
             zodResolved: (zod) => zod.transform(() => "foo"),
           }),
         },
@@ -112,7 +116,7 @@ describe("document", () => {
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const resolvedValue = type.resolve(value);
 
     type Assertions = [
@@ -136,17 +140,17 @@ describe("document", () => {
   });
 
   it("allows optional fields", () => {
-    const type = document({
+    const type = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: s.string(),
         },
       ],
     });
@@ -187,7 +191,7 @@ describe("document", () => {
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -222,18 +226,18 @@ describe("document", () => {
     const fields = sharedFields([
       {
         name: "foo",
-        type: boolean(),
+        type: s.boolean(),
       },
     ]);
 
-    const type = document({
+    const type = s.document({
       name: "foo",
       fields: [
         ...fields,
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: s.string(),
         },
       ],
     });
@@ -253,19 +257,21 @@ describe("document", () => {
   });
 
   it("mocks the field values", () => {
-    const value = document({
-      name: "foo",
-      fields: [
-        {
-          name: "foo",
-          type: boolean(),
-        },
-        {
-          name: "bar",
-          type: string(),
-        },
-      ],
-    }).mock(faker);
+    const value = s
+      .document({
+        name: "foo",
+        fields: [
+          {
+            name: "foo",
+            type: s.boolean(),
+          },
+          {
+            name: "bar",
+            type: s.string(),
+          },
+        ],
+      })
+      .mock(faker);
 
     expect(value).toStrictEqual({
       _createdAt: expect.any(String),
@@ -305,59 +311,63 @@ describe("document", () => {
         bar: "bar",
       },
     ] as const).toContainEqual(
-      document({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-          {
-            name: "bar",
-            type: string(),
-          },
-        ],
-        mock: (faker) =>
-          faker.helpers.arrayElement([
+      s
+        .document({
+          name: "foo",
+          fields: [
             {
-              _createdAt: "2022-06-03T03:24:55.395Z",
-              _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
-              _rev: "somerevstring",
-              _type: "foo",
-              _updatedAt: "2022-06-03T03:24:55.395Z",
-              foo: true,
-              bar: "foo",
+              name: "foo",
+              type: s.boolean(),
             },
             {
-              _createdAt: "2022-06-03T03:24:55.395Z",
-              _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
-              _rev: "somerevstring",
-              _type: "foo",
-              _updatedAt: "2022-06-03T03:24:55.395Z",
-              foo: false,
-              bar: "bar",
+              name: "bar",
+              type: s.string(),
             },
-          ] as const),
-      }).mock(faker)
+          ],
+          mock: (faker) =>
+            faker.helpers.arrayElement([
+              {
+                _createdAt: "2022-06-03T03:24:55.395Z",
+                _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
+                _rev: "somerevstring",
+                _type: "foo",
+                _updatedAt: "2022-06-03T03:24:55.395Z",
+                foo: true,
+                bar: "foo",
+              },
+              {
+                _createdAt: "2022-06-03T03:24:55.395Z",
+                _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
+                _rev: "somerevstring",
+                _type: "foo",
+                _updatedAt: "2022-06-03T03:24:55.395Z",
+                foo: false,
+                bar: "bar",
+              },
+            ] as const),
+        })
+        .mock(faker)
     ));
 
   it("sets preview.select", () =>
     expect(
-      document({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
+      s
+        .document({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+          ],
+          preview: {
+            select: {
+              title: "someTitle",
+              media: "someMedia",
+            },
           },
-        ],
-        preview: {
-          select: {
-            title: "someTitle",
-            media: "someMedia",
-          },
-        },
-      }).schema()
+        })
+        .schema()
     ).toHaveProperty("preview", {
       select: {
         title: "someTitle",
@@ -366,17 +376,17 @@ describe("document", () => {
     }));
 
   it("types prepare function", () => {
-    const type = document({
+    const type = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: string(),
+          type: s.string(),
         },
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: s.string(),
         },
       ],
       preview: {
@@ -425,12 +435,12 @@ describe("document", () => {
   });
 
   it("allows defining the zod", () => {
-    const type = document({
+    const type = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean({
+          type: s.boolean({
             zod: (zod) => zod.transform((value) => (value ? 1 : 0)),
           }),
         },
@@ -465,17 +475,17 @@ describe("document", () => {
   });
 
   it("types custom validation", () => {
-    const type = document({
+    const type = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
-          type: string(),
+          type: s.string(),
         },
       ],
       validation: (Rule) =>

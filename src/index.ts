@@ -1,8 +1,2 @@
-export type { SanityBlock } from "./block";
-export type { SanityDocument, ParsedSanityDocument } from "./document";
-export type { sharedFields } from "./field";
-export type { SanityFile } from "./file";
-export type { SanityImage } from "./image";
-export type { SanityReference } from "./reference";
-
-export * as s from "./builder";
+export type * from "@sanity-typed/schema-builder";
+export * from "@sanity-typed/schema-builder";

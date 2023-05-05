@@ -1,30 +1,29 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
+import type { SanityReference } from "@sanity-typed/schema-builder";
 
-import { reference } from ".";
-import type { SanityReference } from ".";
-import { boolean } from "../boolean";
-import { document } from "../document";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferResolvedValue, InferValue } from "../types";
 
 describe("reference", () => {
   it("builds a sanity config", () =>
     expect(
-      reference({
-        to: [
-          document({
-            name: "foo",
-            fields: [
-              {
-                name: "foo",
-                type: boolean(),
-              },
-            ],
-          }),
-        ],
-      }).schema()
+      s
+        .reference({
+          to: [
+            s.document({
+              name: "foo",
+              fields: [
+                {
+                  name: "foo",
+                  type: s.boolean(),
+                },
+              ],
+            }),
+          ],
+        })
+        .schema()
     ).toStrictEqual({
       type: "reference",
       to: [{ type: "foo" }],
@@ -33,38 +32,40 @@ describe("reference", () => {
 
   it("passes through schema values", () =>
     expect(
-      reference({
-        to: [
-          document({
-            name: "foo",
-            fields: [
-              {
-                name: "foo",
-                type: boolean(),
-              },
-            ],
-          }),
-        ],
-        hidden: false,
-      }).schema()
+      s
+        .reference({
+          to: [
+            s.document({
+              name: "foo",
+              fields: [
+                {
+                  name: "foo",
+                  type: s.boolean(),
+                },
+              ],
+            }),
+          ],
+          hidden: false,
+        })
+        .schema()
     ).toHaveProperty("hidden", false));
 
   it("parses into a reference", () => {
-    const type = reference({
+    const type = s.reference({
       to: [
-        document({
+        s.document({
           name: "foo",
           fields: [
             {
               name: "foo",
-              type: boolean(),
+              type: s.boolean(),
             },
           ],
         }),
       ],
     });
 
-    const value = { _type: "reference", _ref: "somereference" } as InferValue<
+    const value = { _type: "reference", _ref: "somereference" } as s.infer<
       typeof type
     >;
     const parsedValue = type.parse(value);
@@ -78,17 +79,17 @@ describe("reference", () => {
   });
 
   it("resolves into a document mock", () => {
-    const docType = document({
+    const docType = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean({}),
+          type: s.boolean({}),
         },
       ],
     });
 
-    const type = reference({
+    const type = s.reference({
       to: [docType],
     });
 
@@ -97,31 +98,29 @@ describe("reference", () => {
     const docMock = docType.resolve(mock);
     const { _id: mockId } = docMock;
 
-    const value = { _type: "reference", _ref: mockId } as InferValue<
-      typeof type
-    >;
+    const value = { _type: "reference", _ref: mockId } as s.infer<typeof type>;
     const resolvedValue = type.resolve(value);
 
     type Assertions = [
       Expect<Equal<typeof value, SanityReference>>,
-      Expect<Equal<typeof resolvedValue, InferResolvedValue<typeof docType>>>
+      Expect<Equal<typeof resolvedValue, s.resolved<typeof docType>>>
     ];
 
     expect(resolvedValue).toStrictEqual(docMock);
   });
 
   it("mocks a reference to a document mock", () => {
-    const docType = document({
+    const docType = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
 
-    const type = reference({
+    const type = s.reference({
       to: [docType],
     });
 
@@ -134,22 +133,22 @@ describe("reference", () => {
   });
 
   it("adds weak", () => {
-    const docType = document({
+    const docType = s.document({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean({}),
+          type: s.boolean({}),
         },
       ],
     });
 
-    const type = reference({
+    const type = s.reference({
       weak: true,
       to: [docType],
     });
 
-    const value = type.mock(faker) as InferValue<typeof type>;
+    const value = type.mock(faker) as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
@@ -159,9 +158,7 @@ describe("reference", () => {
     type Assertions = [
       Expect<Equal<typeof value, SanityReference<true>>>,
       Expect<Equal<typeof parsedValue, SanityReference<true>>>,
-      Expect<
-        Equal<typeof resolvedValue, InferResolvedValue<typeof docType> | null>
-      >
+      Expect<Equal<typeof resolvedValue, s.resolved<typeof docType> | null>>
     ];
 
     const docMock = docType.resolve(docType.mock(faker));
@@ -180,41 +177,43 @@ describe("reference", () => {
         _type: "reference",
       },
     ]).toContainEqual(
-      reference({
-        to: [
-          document({
-            name: "foo",
-            fields: [
+      s
+        .reference({
+          to: [
+            s.document({
+              name: "foo",
+              fields: [
+                {
+                  name: "foo",
+                  type: s.boolean(),
+                },
+              ],
+            }),
+          ],
+          mock: (faker) =>
+            faker.helpers.arrayElement([
               {
-                name: "foo",
-                type: boolean(),
+                _ref: "ffda9bed-b959-4100-abeb-9f1e241e9445",
+                _type: "reference",
               },
-            ],
-          }),
-        ],
-        mock: (faker) =>
-          faker.helpers.arrayElement([
-            {
-              _ref: "ffda9bed-b959-4100-abeb-9f1e241e9445",
-              _type: "reference",
-            },
-            {
-              _ref: "93f3af18-337a-4df7-a8de-fbaa6609fd0a",
-              _type: "reference",
-            },
-          ]),
-      }).mock(faker)
+              {
+                _ref: "93f3af18-337a-4df7-a8de-fbaa6609fd0a",
+                _type: "reference",
+              },
+            ]),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = reference({
+    const type = s.reference({
       to: [
-        document({
+        s.document({
           name: "foo",
           fields: [
             {
               name: "foo",
-              type: boolean(),
+              type: s.boolean(),
             },
           ],
         }),
@@ -234,14 +233,14 @@ describe("reference", () => {
   });
 
   it("types custom validation", () => {
-    const type = reference({
+    const type = s.reference({
       to: [
-        document({
+        s.document({
           name: "foo",
           fields: [
             {
               name: "foo",
-              type: boolean(),
+              type: s.boolean(),
             },
           ],
         }),

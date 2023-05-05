@@ -1,22 +1,24 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
 import type { PortableTextBlock } from "@portabletext/types";
+import { s } from "@sanity-typed/schema-builder";
+import type { SanityBlock } from "@sanity-typed/schema-builder";
 
-import { block } from ".";
-import type { SanityBlock } from ".";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("block", () => {
   it("builds a sanity config", () =>
-    expect(block().schema()).toStrictEqual({ type: "block" }));
+    expect(s.block().schema()).toStrictEqual({ type: "block" }));
 
   it("passes through schema values", () =>
-    expect(block({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(s.block({ hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
   it("parses into a block", () => {
-    const type = block();
+    const type = s.block();
 
     const value = {
       style: "normal",
@@ -29,7 +31,7 @@ describe("block", () => {
           marks: [],
         },
       ],
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -41,7 +43,7 @@ describe("block", () => {
   });
 
   it("resolves into a block", () => {
-    const type = block();
+    const type = s.block();
 
     const value = {
       style: "normal",
@@ -54,7 +56,7 @@ describe("block", () => {
           marks: [],
         },
       ],
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const resolvedValue = type.resolve(value);
 
     type Assertions = [
@@ -66,7 +68,7 @@ describe("block", () => {
   });
 
   it("mocks block content", () =>
-    expect(block().mock(faker)).toStrictEqual({
+    expect(s.block().mock(faker)).toStrictEqual({
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -80,13 +82,17 @@ describe("block", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(block().mock(faker)).toStrictEqual(block().mock(faker));
-    expect(block().mock(faker, ".foo")).toStrictEqual(
-      block().mock(faker, ".foo")
+    expect(s.block().mock(faker)).toStrictEqual(s.block().mock(faker));
+    expect(s.block().mock(faker, ".foo")).toStrictEqual(
+      s.block().mock(faker, ".foo")
     );
 
-    expect(block().mock(faker, ".foo")).not.toStrictEqual(block().mock(faker));
-    expect(block().mock(faker)).not.toStrictEqual(block().mock(faker, ".foo"));
+    expect(s.block().mock(faker, ".foo")).not.toStrictEqual(
+      s.block().mock(faker)
+    );
+    expect(s.block().mock(faker)).not.toStrictEqual(
+      s.block().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
@@ -126,49 +132,51 @@ describe("block", () => {
         ],
       },
     ]).toContainEqual(
-      block({
-        mock: (faker) =>
-          faker.helpers.arrayElement([
-            {
-              style: "normal",
-              _type: "block",
-              markDefs: [],
-              children: [
-                {
-                  _type: "span",
-                  text: "That was ",
-                  marks: [],
-                },
-                {
-                  _type: "span",
-                  text: "bold",
-                  marks: ["strong"],
-                },
-                {
-                  _type: "span",
-                  text: " of you.",
-                  marks: [],
-                },
-              ],
-            },
-            {
-              style: "normal",
-              _type: "block",
-              markDefs: [],
-              children: [
-                {
-                  _type: "span",
-                  text: "Amazing, actually.",
-                  marks: [],
-                },
-              ],
-            },
-          ]),
-      }).mock(faker)
+      s
+        .block({
+          mock: (faker) =>
+            faker.helpers.arrayElement([
+              {
+                style: "normal",
+                _type: "block",
+                markDefs: [],
+                children: [
+                  {
+                    _type: "span",
+                    text: "That was ",
+                    marks: [],
+                  },
+                  {
+                    _type: "span",
+                    text: "bold",
+                    marks: ["strong"],
+                  },
+                  {
+                    _type: "span",
+                    text: " of you.",
+                    marks: [],
+                  },
+                ],
+              },
+              {
+                style: "normal",
+                _type: "block",
+                markDefs: [],
+                children: [
+                  {
+                    _type: "span",
+                    text: "Amazing, actually.",
+                    marks: [],
+                  },
+                ],
+              },
+            ]),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = block({
+    const type = s.block({
       zod: (zod) => zod.transform(({ _type }) => _type),
     });
 
@@ -191,7 +199,7 @@ describe("block", () => {
   });
 
   it("types custom validation", () => {
-    const type = block({
+    const type = s.block({
       validation: (Rule) =>
         Rule.custom((value) => {
           type Assertions = [
