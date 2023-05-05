@@ -6,12 +6,8 @@ import type { SanityReference } from ".";
 import { boolean } from "../boolean";
 import { document } from "../document";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferResolvedValue, InferValue } from "../types";
 
 describe("reference", () => {
   it("builds a sanity config", () =>
@@ -68,14 +64,15 @@ describe("reference", () => {
       ],
     });
 
-    const value: ValidateShape<InferValue<typeof type>, SanityReference> = {
-      _type: "reference",
-      _ref: "somereference",
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      SanityReference
-    > = type.parse(value);
+    const value = { _type: "reference", _ref: "somereference" } as InferValue<
+      typeof type
+    >;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityReference>>,
+      Expect<Equal<typeof parsedValue, SanityReference>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -100,14 +97,15 @@ describe("reference", () => {
     const docMock = docType.resolve(mock);
     const { _id: mockId } = docMock;
 
-    const value: ValidateShape<InferValue<typeof type>, SanityReference> = {
-      _type: "reference",
-      _ref: mockId,
-    };
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      InferResolvedValue<typeof docType>
-    > = type.resolve(value);
+    const value = { _type: "reference", _ref: mockId } as InferValue<
+      typeof type
+    >;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityReference>>,
+      Expect<Equal<typeof resolvedValue, InferResolvedValue<typeof docType>>>
+    ];
 
     expect(resolvedValue).toStrictEqual(docMock);
   });
@@ -133,9 +131,6 @@ describe("reference", () => {
       _ref: mockId,
       _type: "reference",
     });
-
-    // eslint-disable-next-line no-underscore-dangle -- references have a _ref property
-    expect(docType.mock(faker)._id).toStrictEqual(type.mock(faker)._ref);
   });
 
   it("adds weak", () => {
@@ -154,21 +149,20 @@ describe("reference", () => {
       to: [docType],
     });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      SanityReference<true>
-    > = type.mock(faker);
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      SanityReference<true>
-    > = type.parse(value);
+    const value = type.mock(faker) as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      InferResolvedValue<typeof docType> | null
-    > = type.resolve(value);
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityReference<true>>>,
+      Expect<Equal<typeof parsedValue, SanityReference<true>>>,
+      Expect<
+        Equal<typeof resolvedValue, InferResolvedValue<typeof docType> | null>
+      >
+    ];
 
     const docMock = docType.resolve(docType.mock(faker));
 
@@ -228,13 +222,13 @@ describe("reference", () => {
       zod: (zod) => zod.transform(({ _ref }) => _ref),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse({
+    const value = {
       _ref: "ffda9bed-b959-4100-abeb-9f1e241e9445",
       _type: "reference",
-    });
+    };
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, string>>];
 
     expect(parsedValue).toBe("ffda9bed-b959-4100-abeb-9f1e241e9445");
   });
@@ -254,14 +248,13 @@ describe("reference", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const reference: ValidateShape<
-            typeof value,
-            SanityReference | undefined
-          > = value;
+          type Assertions = [
+            Expect<Equal<typeof value, SanityReference | undefined>>
+          ];
 
           return (
             // eslint-disable-next-line no-underscore-dangle -- Need _ref
-            (reference?._ref.length ?? 0) > 50 || "Needs to be 50 characters"
+            (value?._ref.length ?? 0) > 50 || "Needs to be 50 characters"
           );
         }),
     });

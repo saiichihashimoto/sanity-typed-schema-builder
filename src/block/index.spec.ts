@@ -3,13 +3,10 @@ import { describe, expect, it } from "@jest/globals";
 import type { PortableTextBlock } from "@portabletext/types";
 
 import { block } from ".";
+import type { SanityBlock } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("block", () => {
   it("builds a sanity config", () =>
@@ -21,7 +18,7 @@ describe("block", () => {
   it("parses into a block", () => {
     const type = block();
 
-    const value: ValidateShape<InferValue<typeof type>, PortableTextBlock> = {
+    const value = {
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -32,11 +29,13 @@ describe("block", () => {
           marks: [],
         },
       ],
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      PortableTextBlock
-    > = type.parse(value);
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, PortableTextBlock>>,
+      Expect<Equal<typeof parsedValue, PortableTextBlock>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -44,7 +43,7 @@ describe("block", () => {
   it("resolves into a block", () => {
     const type = block();
 
-    const value: ValidateShape<InferValue<typeof type>, PortableTextBlock> = {
+    const value = {
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -55,11 +54,13 @@ describe("block", () => {
           marks: [],
         },
       ],
-    };
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      PortableTextBlock
-    > = type.resolve(value);
+    } as InferValue<typeof type>;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, PortableTextBlock>>,
+      Expect<Equal<typeof resolvedValue, PortableTextBlock>>
+    ];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -171,10 +172,7 @@ describe("block", () => {
       zod: (zod) => zod.transform(({ _type }) => _type),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse({
+    const parsedValue = type.parse({
       style: "normal",
       _type: "block",
       markDefs: [],
@@ -187,16 +185,21 @@ describe("block", () => {
       ],
     });
 
+    type Assertions = [Expect<Equal<typeof parsedValue, string>>];
+
     expect(parsedValue).toBe("block");
   });
 
   it("types custom validation", () => {
     const type = block({
       validation: (Rule) =>
-        Rule.custom(
-          (block) =>
-            (block?.children.length ?? 0) > 0 || "Needs to have children"
-        ),
+        Rule.custom((value) => {
+          type Assertions = [
+            Expect<Equal<typeof value, SanityBlock | undefined>>
+          ];
+
+          return (value?.children.length ?? 0) > 0 || "Needs to have children";
+        }),
     });
 
     const rule = mockRule();

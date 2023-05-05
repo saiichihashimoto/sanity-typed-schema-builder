@@ -4,12 +4,8 @@ import { z } from "zod";
 
 import { number } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("number", () => {
   it("builds a sanity config", () =>
@@ -25,11 +21,10 @@ describe("number", () => {
   it("parses into a number", () => {
     const type = number();
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 5;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, number>>];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -37,11 +32,10 @@ describe("number", () => {
   it("resolves into a number", () => {
     const type = number();
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      number
-    > = type.resolve(value);
+    const value = 5;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [Expect<Equal<typeof resolvedValue, number>>];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -55,11 +49,8 @@ describe("number", () => {
 
     expect(rule.min).toHaveBeenCalledWith(1);
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 5;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -77,11 +68,8 @@ describe("number", () => {
 
     expect(rule.max).toHaveBeenCalledWith(6);
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 5;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -99,11 +87,8 @@ describe("number", () => {
 
     expect(rule.greaterThan).toHaveBeenCalledWith(1);
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 5;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -121,11 +106,8 @@ describe("number", () => {
 
     expect(rule.lessThan).toHaveBeenCalledWith(6);
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 5;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -143,11 +125,8 @@ describe("number", () => {
 
     expect(rule.integer).toHaveBeenCalledWith();
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 5;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -165,11 +144,8 @@ describe("number", () => {
 
     expect(rule.positive).toHaveBeenCalledWith();
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 5;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -187,11 +163,8 @@ describe("number", () => {
 
     expect(rule.negative).toHaveBeenCalledWith();
 
-    const value: ValidateShape<InferValue<typeof type>, number> = -5;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = -5;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -209,11 +182,8 @@ describe("number", () => {
 
     expect(rule.precision).toHaveBeenCalledWith(2);
 
-    const value: ValidateShape<InferValue<typeof type>, number> = 0.011;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse(value);
+    const value = 0.011;
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toBe(0.01);
   });
@@ -247,10 +217,10 @@ describe("number", () => {
       zod: (zod) => zod.transform((value) => `${value}`),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(5);
+    const value = 5;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, string>>];
 
     expect(parsedValue).toBe("5");
   });
@@ -259,9 +229,9 @@ describe("number", () => {
     const type = number({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const number: ValidateShape<typeof value, number | undefined> = value;
+          type Assertions = [Expect<Equal<typeof value, number | undefined>>];
 
-          return (number ?? 0) > 50 || "Needs to be more than 50";
+          return (value ?? 0) > 50 || "Needs to be more than 50";
         }),
     });
 
@@ -279,11 +249,15 @@ describe("number", () => {
       },
     });
 
-    const value: ValidateShape<InferValue<typeof type>, 3 | 4> = 3;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      3 | 4
-    > = type.parse(value);
+    const value = 3 as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, 3 | 4>>,
+      Expect<Equal<typeof parsedValue, 3 | 4>>,
+      Expect<Equal<typeof resolvedValue, 3 | 4>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
     expect([3, 4]).toContain(type.mock(faker));

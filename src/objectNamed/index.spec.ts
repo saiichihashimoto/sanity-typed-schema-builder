@@ -1,18 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
-import type { Merge } from "type-fest";
 
 import { objectNamed } from ".";
 import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("object", () => {
   it("builds a sanity config", () =>
@@ -64,17 +59,13 @@ describe("object", () => {
       ],
     });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      { _type: "foo"; foo: boolean }
-    > = {
-      _type: "foo",
-      foo: true,
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      { _type: "foo"; foo: boolean }
-    > = type.parse(value);
+    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, { _type: "foo"; foo: boolean }>>,
+      Expect<Equal<typeof parsedValue, { _type: "foo"; foo: boolean }>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -92,17 +83,13 @@ describe("object", () => {
       ],
     });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      { _type: "foo"; foo: boolean }
-    > = {
-      _type: "foo",
-      foo: true,
-    };
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      { _type: "foo"; foo: string }
-    > = type.resolve(value);
+    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, { _type: "foo"; foo: boolean }>>,
+      Expect<Equal<typeof resolvedValue, { _type: "foo"; foo: string }>>
+    ];
 
     expect(resolvedValue).toStrictEqual({ _type: "foo", foo: "foo" });
   });
@@ -150,25 +137,23 @@ describe("object", () => {
 
     expect(barRule.required).not.toHaveBeenCalledWith();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _type: "foo";
-        bar?: string;
-        foo: boolean;
-      }
-    > = {
-      _type: "foo",
-      foo: true,
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      {
-        _type: "foo";
-        bar?: string;
-        foo: boolean;
-      }
-    > = type.parse(value);
+    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          { _type: "foo"; bar?: string | undefined; foo: boolean }
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          { _type: "foo"; bar?: string | undefined; foo: boolean }
+        >
+      >
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -184,38 +169,37 @@ describe("object", () => {
       fields: [{ name: "foo", type: type.ref() }],
     });
 
-    expect(type2.schema().fields[0]).toStrictEqual({
+    const schema = type2.schema();
+
+    expect(schema.fields[0]).toStrictEqual({
       name: "foo",
       type: "foo",
       validation: expect.any(Function),
     });
 
-    const value: ValidateShape<
-      InferValue<typeof type2>,
-      {
-        _type: "bar";
-        foo: {
-          _type: "foo";
-          hello: string;
-        };
-      }
-    > = {
+    const value = {
       _type: "bar",
       foo: {
         _type: "foo",
         hello: "world",
       },
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type2>,
-      {
-        _type: "bar";
-        foo: {
-          _type: "foo";
-          hello: string;
-        };
-      }
-    > = type2.parse(value);
+    } as InferValue<typeof type2>;
+    const parsedValue = type2.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          { _type: "bar"; foo: { _type: "foo"; hello: string } }
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          { _type: "bar"; foo: { _type: "foo"; hello: string } }
+        >
+      >
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -240,7 +224,9 @@ describe("object", () => {
       ],
     });
 
-    expect(type.schema()).toHaveProperty("fields", [
+    const schema = type.schema();
+
+    expect(schema).toHaveProperty("fields", [
       {
         name: "foo",
         type: "boolean",
@@ -252,6 +238,38 @@ describe("object", () => {
         validation: expect.any(Function),
       },
     ]);
+
+    const fooRule = mockRule();
+
+    schema.fields[0]?.validation?.(fooRule);
+
+    expect(fooRule.required).toHaveBeenCalledWith();
+
+    const barRule = mockRule();
+
+    schema.fields[1]?.validation?.(barRule);
+
+    expect(barRule.required).not.toHaveBeenCalledWith();
+
+    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          { _type: "foo"; bar?: string | undefined; foo: boolean }
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          { _type: "foo"; bar?: string | undefined; foo: boolean }
+        >
+      >
+    ];
+
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("mocks the field values", () =>
@@ -370,19 +388,16 @@ describe("object", () => {
           bleh: "foo",
         },
         prepare: (selection) => {
-          const value: ValidateShape<
-            typeof selection,
-            Merge<
-              {
-                _type: "foo";
-                bar?: string;
-                foo: string;
-              },
-              { bleh: unknown }
+          type Assertions = [
+            Expect<
+              Equal<
+                typeof selection,
+                { _type: "foo"; bar?: string; bleh: unknown; foo: string }
+              >
             >
-          > = selection;
+          ];
 
-          const { foo, bar } = value;
+          const { foo, bar } = selection;
 
           return {
             title: foo,
@@ -394,14 +409,7 @@ describe("object", () => {
 
     const schema = type.schema();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _type: "foo";
-        bar?: string;
-        foo: string;
-      }
-    > = {
+    const value = {
       _type: "foo",
       bar: "someBar",
       foo: "someFoo",
@@ -427,10 +435,13 @@ describe("object", () => {
       zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      [string, "foo" | 0 | 1][]
-    > = type.parse({ _type: "foo", foo: true });
+    const value = { _type: "foo", foo: true };
+
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof parsedValue, [string, "foo" | 0 | 1][]>>
+    ];
 
     expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
@@ -456,17 +467,16 @@ describe("object", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const objectNamed: ValidateShape<
-            typeof value,
-            | {
-                _type: "foo";
-                bar: string;
-                foo?: boolean;
-              }
-            | undefined
-          > = value;
+          type Assertions = [
+            Expect<
+              Equal<
+                typeof value,
+                { _type: "foo"; bar: string; foo?: boolean } | undefined
+              >
+            >
+          ];
 
-          return !objectNamed?.bar || "Needs an empty bar";
+          return !value?.bar || "Needs an empty bar";
         }),
     });
 
@@ -490,13 +500,7 @@ describe("object", () => {
       ],
     });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _type: "type";
-        value: string;
-      }
-    > = {
+    const value = {
       _type: "type",
       value: "foo",
     };
@@ -513,19 +517,10 @@ describe("object", () => {
       ],
     });
 
-    const referencingValue: ValidateShape<
-      InferValue<typeof referencingType>,
-      {
-        _type: "referencingType";
-        value: {
-          _type: "type";
-          value: string;
-        };
-      }
-    > = {
+    const referencingValue = {
       _type: "referencingType",
       value,
-    };
+    } as InferValue<typeof referencingType>;
 
     const deepReferencingType = objectNamed({
       name: "deepReferencingType",
@@ -539,22 +534,31 @@ describe("object", () => {
     });
 
     // TS2589: Type instantiation is excessively deep and possibly infinite.
-    const deepReferencingValue: ValidateShape<
-      InferValue<typeof deepReferencingType>,
-      {
-        _type: "deepReferencingType";
-        referencingValue: {
-          _type: "referencingType";
-          value: {
-            _type: "type";
-            value: string;
-          };
-        };
-      }
-    > = {
+    const deepReferencingValue = {
       _type: "deepReferencingType",
       referencingValue,
-    };
+    } as InferValue<typeof deepReferencingType>;
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof referencingValue,
+          { _type: "referencingType"; value: { _type: "type"; value: string } }
+        >
+      >,
+      Expect<
+        Equal<
+          typeof deepReferencingValue,
+          {
+            _type: "deepReferencingType";
+            referencingValue: {
+              _type: "referencingType";
+              value: { _type: "type"; value: string };
+            };
+          }
+        >
+      >
+    ];
 
     expect(deepReferencingValue).toStrictEqual(
       deepReferencingType.parse(deepReferencingValue)

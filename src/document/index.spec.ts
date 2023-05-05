@@ -10,12 +10,8 @@ import { boolean } from "../boolean";
 import { sharedFields } from "../field";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("document", () => {
   it("builds a sanity config", () =>
@@ -67,21 +63,27 @@ describe("document", () => {
       ],
     });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      Merge<SanityDocument<"foo">, { foo: boolean }>
-    > = {
+    const value = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Merge<ParsedSanityDocument<"foo">, { foo: boolean }>
-    > = type.parse(value);
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<typeof value, Merge<SanityDocument<"foo">, { foo: boolean }>>
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          Merge<ParsedSanityDocument<"foo">, { foo: boolean }>
+        >
+      >
+    ];
 
     expect(parsedValue).toStrictEqual({
       ...value,
@@ -103,21 +105,27 @@ describe("document", () => {
       ],
     });
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      Merge<SanityDocument<"foo">, { foo: boolean }>
-    > = {
+    const value = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
-    };
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      Merge<ParsedSanityDocument<"foo">, { foo: string }>
-    > = type.resolve(value);
+    } as InferValue<typeof type>;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<
+        Equal<typeof value, Merge<SanityDocument<"foo">, { foo: boolean }>>
+      >,
+      Expect<
+        Equal<
+          typeof resolvedValue,
+          Merge<ParsedSanityDocument<"foo">, { foo: string }>
+        >
+      >
+    ];
 
     expect(resolvedValue).toStrictEqual({
       ...value,
@@ -172,33 +180,36 @@ describe("document", () => {
 
     expect(barRule.required).not.toHaveBeenCalledWith();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      Merge<
-        SanityDocument<"foo">,
-        {
-          bar?: string;
-          foo: boolean;
-        }
-      >
-    > = {
+    const value = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Merge<
-        ParsedSanityDocument<"foo">,
-        {
-          bar?: string;
-          foo: boolean;
-        }
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          Merge<
+            SanityDocument<"foo">,
+            { bar?: string | undefined; foo: boolean }
+          >
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          Merge<
+            ParsedSanityDocument<"foo">,
+            { bar?: string | undefined; foo: boolean }
+          >
+        >
       >
-    > = type.parse(value);
+    ];
 
     expect(parsedValue).toStrictEqual({
       ...value,
@@ -373,19 +384,19 @@ describe("document", () => {
           bleh: "foo",
         },
         prepare: (selection) => {
-          const value: ValidateShape<
-            typeof selection,
-            Merge<
-              SanityDocument<"foo">,
-              {
-                bar?: string;
-                bleh: unknown;
-                foo: string;
-              }
+          type Assertions = [
+            Expect<
+              Equal<
+                typeof selection,
+                Merge<
+                  SanityDocument<"foo">,
+                  { bar?: string; bleh: unknown; foo: string }
+                >
+              >
             >
-          > = selection;
+          ];
 
-          const { foo, bar } = value;
+          const { foo, bar } = selection;
 
           return {
             title: foo,
@@ -397,16 +408,7 @@ describe("document", () => {
 
     const schema = type.schema();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      Merge<
-        SanityDocument<"foo">,
-        {
-          bar?: string;
-          foo: string;
-        }
-      >
-    > = {
+    const value = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
@@ -436,17 +438,19 @@ describe("document", () => {
       zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      [string, Date | string | 0 | 1][]
-    > = type.parse({
+    const value = {
       _createdAt: "2022-06-03T03:24:55.395Z",
       _id: "2106a34f-315f-44bc-929b-bf8e9a3eba0d",
       _rev: "somerevstring",
       _type: "foo",
       _updatedAt: "2022-06-03T03:24:55.395Z",
       foo: true,
-    });
+    };
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof parsedValue, [string, Date | string | 0 | 1][]>>
+    ];
 
     expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
@@ -476,21 +480,25 @@ describe("document", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const document: ValidateShape<
-            typeof value,
-            | {
-                _createdAt: string;
-                _id: string;
-                _rev: string;
-                _type: "foo";
-                _updatedAt: string;
-                bar: string;
-                foo?: boolean;
-              }
-            | undefined
-          > = value;
+          type Assertions = [
+            Expect<
+              Equal<
+                typeof value,
+                | {
+                    _createdAt: string;
+                    _id: string;
+                    _rev: string;
+                    _type: "foo";
+                    _updatedAt: string;
+                    bar: string;
+                    foo?: boolean | undefined;
+                  }
+                | undefined
+              >
+            >
+          ];
 
-          return !document?.bar || "Needs an empty bar";
+          return !value?.bar || "Needs an empty bar";
         }),
     });
 

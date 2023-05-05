@@ -9,12 +9,8 @@ import { sharedFields } from "../field";
 import type { SanityReference } from "../reference";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("file", () => {
   it("builds a sanity config", () =>
@@ -28,17 +24,19 @@ describe("file", () => {
   it("parses into an file", () => {
     const type = file();
 
-    const value: ValidateShape<InferValue<typeof type>, SanityFile> = {
+    const value = {
       _type: "file",
       asset: {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      SanityFile
-    > = type.parse(value);
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityFile>>,
+      Expect<Equal<typeof parsedValue, SanityFile>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -46,17 +44,19 @@ describe("file", () => {
   it("resolves into an file", () => {
     const type = file();
 
-    const value: ValidateShape<InferValue<typeof type>, SanityFile> = {
+    const value = {
       _type: "file",
       asset: {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    };
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      SanityFile
-    > = type.resolve(value);
+    } as InferValue<typeof type>;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityFile>>,
+      Expect<Equal<typeof resolvedValue, SanityFile>>
+    ];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -91,33 +91,27 @@ describe("file", () => {
       },
     ]);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      Merge<
-        SanityFile,
-        {
-          bar?: boolean;
-          foo: boolean;
-        }
-      >
-    > = {
+    const value = {
       foo: true,
       _type: "file",
       asset: {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Merge<
-        SanityFile,
-        {
-          bar?: boolean;
-          foo: boolean;
-        }
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<typeof value, Merge<SanityFile, { bar?: boolean; foo: boolean }>>
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          Merge<SanityFile, { bar?: boolean; foo: boolean }>
+        >
       >
-    > = type.parse(value);
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -136,12 +130,14 @@ describe("file", () => {
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: boolean(),
         },
       ],
     });
 
-    expect(type.schema()).toHaveProperty("fields", [
+    const schema = type.schema();
+
+    expect(schema).toHaveProperty("fields", [
       {
         name: "foo",
         type: "boolean",
@@ -149,10 +145,34 @@ describe("file", () => {
       },
       {
         name: "bar",
-        type: "string",
+        type: "boolean",
         validation: expect.any(Function),
       },
     ]);
+
+    const value = {
+      foo: true,
+      _type: "file",
+      asset: {
+        _type: "reference",
+        _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+      },
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<typeof value, Merge<SanityFile, { bar?: boolean; foo: boolean }>>
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          Merge<SanityFile, { bar?: boolean; foo: boolean }>
+        >
+      >
+    ];
+
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("mocks the field values", () =>
@@ -250,16 +270,18 @@ describe("file", () => {
       zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      [string, SanityReference | "file"][]
-    > = type.parse({
+    const value = {
       _type: "file",
       asset: {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    });
+    };
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof parsedValue, [string, SanityReference | "file"][]>>
+    ];
 
     expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
@@ -290,19 +312,16 @@ describe("file", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const file: ValidateShape<
-            typeof value,
-            | Merge<
-                SanityFile,
-                {
-                  bar: string;
-                  foo?: boolean;
-                }
+          type Assertions = [
+            Expect<
+              Equal<
+                typeof value,
+                Merge<SanityFile, { bar: string; foo?: boolean }> | undefined
               >
-            | undefined
-          > = value;
+            >
+          ];
 
-          return !file?.bar || "Needs an empty bar";
+          return !value?.bar || "Needs an empty bar";
         }),
     });
 

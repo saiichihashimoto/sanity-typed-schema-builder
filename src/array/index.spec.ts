@@ -7,12 +7,8 @@ import { object } from "../object";
 import { objectNamed } from "../objectNamed";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("array", () => {
   it("builds a sanity config", () =>
@@ -39,15 +35,15 @@ describe("array", () => {
       ],
     });
 
-    const value: ValidateShape<InferValue<typeof type>, boolean[]> = [true];
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string[]
-    > = type.parse(value);
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      number[]
-    > = type.resolve(value);
+    const value = [true] as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, boolean[]>>,
+      Expect<Equal<typeof parsedValue, string[]>>,
+      Expect<Equal<typeof resolvedValue, number[]>>
+    ];
 
     expect(parsedValue).toStrictEqual(["true"]);
     expect(resolvedValue).toStrictEqual([4]);
@@ -86,30 +82,18 @@ describe("array", () => {
       },
     ]);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      {
-        _key: string;
-        foo: boolean;
-      }[]
-    > = [
+    const value = [
       { _key: "a", foo: true },
       { _key: "b", foo: false },
+    ] as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, { _key: string; foo: boolean }[]>>,
+      Expect<Equal<typeof parsedValue, { _key: string; foo: string }[]>>,
+      Expect<Equal<typeof resolvedValue, { _key: string; foo: number }[]>>
     ];
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      {
-        _key: string;
-        foo: string;
-      }[]
-    > = type.parse(value);
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      {
-        _key: string;
-        foo: number;
-      }[]
-    > = type.resolve(value);
 
     expect(parsedValue).toStrictEqual([
       { _key: "a", foo: "true" },
@@ -138,14 +122,13 @@ describe("array", () => {
       },
     ]);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      (boolean | string)[]
-    > = [true, "a"];
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      (boolean | string)[]
-    > = type.parse(value);
+    const value = [true, "a"] as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, (boolean | string)[]>>,
+      Expect<Equal<typeof parsedValue, (boolean | string)[]>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -225,21 +208,7 @@ describe("array", () => {
       },
     ]);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      (
-        | {
-            _key: string;
-            _type: "a";
-            foo: boolean;
-          }
-        | {
-            _key: string;
-            _type: "b";
-            foo: string;
-          }
-      )[]
-    > = [
+    const value = [
       {
         _key: "1",
         _type: "a",
@@ -250,22 +219,29 @@ describe("array", () => {
         _type: "b",
         foo: "hello",
       },
+    ] as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          (
+            | { _key: string; _type: "a"; foo: boolean }
+            | { _key: string; _type: "b"; foo: string }
+          )[]
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          (
+            | { _key: string; _type: "a"; foo: boolean }
+            | { _key: string; _type: "b"; foo: string }
+          )[]
+        >
+      >
     ];
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      (
-        | {
-            _key: string;
-            _type: "a";
-            foo: boolean;
-          }
-        | {
-            _key: string;
-            _type: "b";
-            foo: string;
-          }
-      )[]
-    > = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -328,14 +304,13 @@ describe("array", () => {
 
     expect(rule.min).toHaveBeenCalledWith(2);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      [boolean, boolean, ...boolean[]]
-    > = [true, false];
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      [boolean, boolean, ...boolean[]]
-    > = type.parse(value);
+    const value = [true, false] as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, [boolean, boolean, ...boolean[]]>>,
+      Expect<Equal<typeof parsedValue, [boolean, boolean, ...boolean[]]>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -353,14 +328,23 @@ describe("array", () => {
 
     expect(rule.max).toHaveBeenCalledWith(3);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      [] | [boolean, boolean, boolean] | [boolean, boolean] | [boolean]
-    > = [true, false, true];
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      [] | [boolean, boolean, boolean] | [boolean, boolean] | [boolean]
-    > = type.parse(value);
+    const value = [true, false, true] as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          [] | [boolean, boolean, boolean] | [boolean, boolean] | [boolean]
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          [] | [boolean, boolean, boolean] | [boolean, boolean] | [boolean]
+        >
+      >
+    ];
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -378,14 +362,13 @@ describe("array", () => {
 
     expect(rule.length).toHaveBeenCalledWith(2);
 
-    const value: ValidateShape<InferValue<typeof type>, [boolean, boolean]> = [
-      true,
-      false,
+    const value = [true, false] as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, [boolean, boolean]>>,
+      Expect<Equal<typeof parsedValue, [boolean, boolean]>>
     ];
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      [boolean, boolean]
-    > = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -409,10 +392,9 @@ describe("array", () => {
         ),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse([true, false]);
+    const parsedValue = type.parse([true, false]);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, number>>];
 
     expect(parsedValue).toBe(1);
   });
@@ -439,22 +421,20 @@ describe("array", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const elements: ValidateShape<
-            typeof value,
-            | (
-                | {
-                    _key: string;
-                    bar: boolean;
-                  }
-                | {
-                    _key: string;
-                    foo: boolean;
-                  }
-              )[]
-            | undefined
-          > = value;
+          type Assertions = [
+            Expect<
+              Equal<
+                typeof value,
+                | (
+                    | { _key: string; bar: boolean }
+                    | { _key: string; foo: boolean }
+                  )[]
+                | undefined
+              >
+            >
+          ];
 
-          return (elements?.length ?? 0) > 50 || "Needs to be 50 characters";
+          return (value?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

@@ -4,12 +4,7 @@ import { z } from "zod";
 
 import { url } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
 
 describe("url", () => {
   it("builds a sanity config", () =>
@@ -23,14 +18,10 @@ describe("url", () => {
   it("parses into a string", () => {
     const type = url();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      string
-    > = "https://example.com/img.jpg";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    const value = "https://example.com/img.jpg";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, string>>];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -38,14 +29,10 @@ describe("url", () => {
   it("resolves into a string", () => {
     const type = url();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      string
-    > = "https://example.com/img.jpg";
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      string
-    > = type.resolve(value);
+    const value = "https://example.com/img.jpg";
+    const resolvedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof resolvedValue, string>>];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -53,10 +40,8 @@ describe("url", () => {
   it("enforces a url", () => {
     const type = url();
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "not a url";
-
     expect(() => {
-      type.parse(value);
+      type.parse("not a url");
     }).toThrow(z.ZodError);
   });
 
@@ -89,10 +74,10 @@ describe("url", () => {
       zod: (zod) => zod.transform((value) => value.length),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse("https://google.com");
+    const value = "https://google.com";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, number>>];
 
     expect(parsedValue).toBe(18);
   });
@@ -101,9 +86,9 @@ describe("url", () => {
     const type = url({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const url: ValidateShape<typeof value, string | undefined> = value;
+          type Assertions = [Expect<Equal<typeof value, string | undefined>>];
 
-          return (url?.length ?? 0) > 50 || "Needs to be 50 characters";
+          return (value?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

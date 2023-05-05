@@ -4,12 +4,8 @@ import type { GeopointValue } from "sanity";
 
 import { geopoint } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("geopoint", () => {
   it("builds a sanity config", () =>
@@ -26,16 +22,18 @@ describe("geopoint", () => {
   it("parses into a geopoint", () => {
     const type = geopoint();
 
-    const value: ValidateShape<InferValue<typeof type>, GeopointValue> = {
+    const value = {
       _type: "geopoint",
       lat: 58.63169011423141,
       lng: 9.089101352587932,
       alt: 13.37,
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      GeopointValue
-    > = type.parse(value);
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, GeopointValue>>,
+      Expect<Equal<typeof parsedValue, GeopointValue>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -43,16 +41,18 @@ describe("geopoint", () => {
   it("resolves into a geopoint", () => {
     const type = geopoint();
 
-    const value: ValidateShape<InferValue<typeof type>, GeopointValue> = {
+    const value = {
       _type: "geopoint",
       lat: 58.63169011423141,
       lng: 9.089101352587932,
       alt: 13.37,
-    };
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      GeopointValue
-    > = type.resolve(value);
+    } as InferValue<typeof type>;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, GeopointValue>>,
+      Expect<Equal<typeof resolvedValue, GeopointValue>>
+    ];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -118,15 +118,14 @@ describe("geopoint", () => {
       zod: (zod) => zod.transform(({ lat }) => lat),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse({
+    const parsedValue = type.parse({
       _type: "geopoint",
       lat: 58.63169011423141,
       lng: 9.089101352587932,
       alt: 13.37,
     });
+
+    type Assertions = [Expect<Equal<typeof parsedValue, number>>];
 
     expect(parsedValue).toBe(58.63169011423141);
   });
@@ -135,12 +134,11 @@ describe("geopoint", () => {
     const type = geopoint({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const geopoint: ValidateShape<
-            typeof value,
-            GeopointValue | undefined
-          > = value;
+          type Assertions = [
+            Expect<Equal<typeof value, GeopointValue | undefined>>
+          ];
 
-          return (geopoint?.lat ?? 0) > 50 || "Needs to be greater than 50";
+          return (value?.lat ?? 0) > 50 || "Needs to be greater than 50";
         }),
     });
 

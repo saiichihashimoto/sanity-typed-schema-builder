@@ -3,12 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { datetime } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
 
 describe("datetime", () => {
   it("builds a sanity config", () =>
@@ -26,14 +21,10 @@ describe("datetime", () => {
   it("parses into a Date", () => {
     const type = datetime();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      string
-    > = "2022-06-03T03:24:55.395Z";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Date
-    > = type.parse(value);
+    const value = "2022-06-03T03:24:55.395Z";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, Date>>];
 
     expect(parsedValue).toStrictEqual(new Date(value));
   });
@@ -41,14 +32,10 @@ describe("datetime", () => {
   it("resolves into a Date", () => {
     const type = datetime();
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      string
-    > = "2022-06-03T03:24:55.395Z";
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      Date
-    > = type.resolve(value);
+    const value = "2022-06-03T03:24:55.395Z";
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [Expect<Equal<typeof resolvedValue, Date>>];
 
     expect(resolvedValue).toStrictEqual(new Date(value));
   });
@@ -56,7 +43,7 @@ describe("datetime", () => {
   it("enforces a valid Date", () => {
     const type = datetime();
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "not a date";
+    const value = "not a date";
 
     expect(() => {
       type.parse(value);
@@ -72,16 +59,9 @@ describe("datetime", () => {
 
     expect(rule.min).toHaveBeenCalledWith("2022-06-03T03:24:55.394Z");
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      string
-    > = "2022-06-03T03:24:55.395Z";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Date
-    > = type.parse(value);
+    const value = "2022-06-03T03:24:55.395Z";
 
-    expect(parsedValue).toStrictEqual(new Date(value));
+    expect(type.parse(value)).toStrictEqual(new Date(value));
 
     expect(() => {
       type.parse("2022-06-03T03:24:55.390Z");
@@ -97,16 +77,9 @@ describe("datetime", () => {
 
     expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.396Z");
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      string
-    > = "2022-06-03T03:24:55.395Z";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Date
-    > = type.parse(value);
+    const value = "2022-06-03T03:24:55.395Z";
 
-    expect(parsedValue).toStrictEqual(new Date(value));
+    expect(type.parse(value)).toStrictEqual(new Date(value));
 
     expect(() => {
       type.parse("2022-06-03T03:24:55.399Z");
@@ -126,16 +99,9 @@ describe("datetime", () => {
     expect(rule.min).toHaveBeenCalledWith("2022-06-03T03:24:55.395Z");
     expect(rule.max).toHaveBeenCalledWith("2022-06-03T03:24:55.395Z");
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      string
-    > = "2022-06-03T03:24:55.395Z";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Date
-    > = type.parse(value);
+    const value = "2022-06-03T03:24:55.395Z";
 
-    expect(parsedValue).toStrictEqual(new Date(value));
+    expect(type.parse(value)).toStrictEqual(new Date(value));
   });
 
   it("mocks a string", () => {
@@ -178,10 +144,10 @@ describe("datetime", () => {
       zod: (zod) => zod.transform((value) => value.length),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse("2022-06-03T03:24:55.395Z");
+    const value = "2022-06-03T03:24:55.395Z";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, number>>];
 
     expect(parsedValue).toBe(24);
   });
@@ -190,10 +156,9 @@ describe("datetime", () => {
     const type = datetime({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const datetime: ValidateShape<typeof value, string | undefined> =
-            value;
+          type Assertions = [Expect<Equal<typeof value, string | undefined>>];
 
-          return (datetime?.length ?? 0) > 50 || "Needs to be 50 characters";
+          return (value?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 
