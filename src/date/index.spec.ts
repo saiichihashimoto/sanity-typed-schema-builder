@@ -4,12 +4,7 @@ import { z } from "zod";
 
 import { date } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
 
 describe("date", () => {
   it("builds a sanity config", () =>
@@ -23,11 +18,10 @@ describe("date", () => {
   it("parses into a string", () => {
     const type = date();
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "2017-02-12";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    const value = "2017-02-12";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, string>>];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -35,11 +29,10 @@ describe("date", () => {
   it("resolves into a string", () => {
     const type = date();
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "2017-02-12";
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      string
-    > = type.resolve(value);
+    const value = "2017-02-12";
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [Expect<Equal<typeof resolvedValue, string>>];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -77,10 +70,10 @@ describe("date", () => {
       zod: (zod) => zod.transform((value) => value.length),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse("2017-02-12");
+    const value = "2017-02-12";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, number>>];
 
     expect(parsedValue).toBe(10);
   });
@@ -89,9 +82,9 @@ describe("date", () => {
     const type = date({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const date: ValidateShape<typeof value, string | undefined> = value;
+          type Assertions = [Expect<Equal<typeof value, string | undefined>>];
 
-          return (date?.length ?? 0) > 50 || "Needs to be 50 characters";
+          return (value?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 

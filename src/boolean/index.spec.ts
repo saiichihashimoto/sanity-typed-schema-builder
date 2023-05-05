@@ -3,12 +3,7 @@ import { describe, expect, it } from "@jest/globals";
 
 import { boolean } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
 
 describe("boolean", () => {
   it("builds a sanity config", () =>
@@ -25,11 +20,10 @@ describe("boolean", () => {
   it("parses into a boolean", () => {
     const type = boolean();
 
-    const value: ValidateShape<InferValue<typeof type>, boolean> = true;
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      boolean
-    > = type.parse(value);
+    const value = true;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, boolean>>];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -37,11 +31,10 @@ describe("boolean", () => {
   it("resolves into a boolean", () => {
     const type = boolean();
 
-    const value: ValidateShape<InferValue<typeof type>, boolean> = true;
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      boolean
-    > = type.resolve(value);
+    const value = true;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [Expect<Equal<typeof resolvedValue, boolean>>];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -75,10 +68,10 @@ describe("boolean", () => {
       zod: (zod) => zod.transform((value) => value.toString()),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(true);
+    const value = true;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, string>>];
 
     expect(parsedValue).toBe("true");
   });
@@ -87,11 +80,9 @@ describe("boolean", () => {
     const type = boolean({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const boolean: ValidateShape<typeof value, boolean | undefined> =
-            value;
+          type Assertions = [Expect<Equal<typeof value, boolean | undefined>>];
 
-          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- I want the logical or
-          return boolean || "Needs to be true";
+          return value || "Needs to be true";
         }),
     });
 

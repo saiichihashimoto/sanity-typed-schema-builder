@@ -9,8 +9,8 @@ import { sharedFields } from "../field";
 import type { SanityReference } from "../reference";
 import { string } from "../string";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type { InferParsedValue, InferValue } from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("image", () => {
   it("builds a sanity config", () =>
@@ -27,25 +27,47 @@ describe("image", () => {
   it("parses into an image", () => {
     const type = image();
 
-    const value: ValidateShape<InferValue<typeof type>, SanityImage<false>> = {
+    const value = {
       _type: "image",
       asset: {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      SanityImage<false>
-    > = type.parse(value);
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityImage<false>>>,
+      Expect<Equal<typeof parsedValue, SanityImage<false>>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
+  });
+
+  it("resolves into an image", () => {
+    const type = image();
+
+    const value = {
+      _type: "image",
+      asset: {
+        _type: "reference",
+        _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+      },
+    } as InferValue<typeof type>;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityImage<false>>>,
+      Expect<Equal<typeof resolvedValue, SanityImage<false>>>
+    ];
+
+    expect(resolvedValue).toStrictEqual(value);
   });
 
   it("adds hotspot", () => {
     const type = image({ hotspot: true });
 
-    const value: ValidateShape<InferValue<typeof type>, SanityImage<true>> = {
+    const value = {
       _type: "image",
       asset: {
         _type: "reference",
@@ -63,11 +85,13 @@ describe("image", () => {
         height: 0.3248351648351647,
         width: 0.28124999999999994,
       },
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      SanityImage<true>
-    > = type.parse(value);
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SanityImage<true>>>,
+      Expect<Equal<typeof parsedValue, SanityImage<true>>>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -75,17 +99,14 @@ describe("image", () => {
   it("allows undefined hotspot and crop on new images", () => {
     const type = image({ hotspot: true });
 
-    const value: ValidateShape<InferValue<typeof type>, SanityImage<true>> = {
+    const value = {
       _type: "image",
       asset: {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
     };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      SanityImage<true>
-    > = type.parse(value);
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -127,33 +148,30 @@ describe("image", () => {
       },
     ]);
 
-    const value: ValidateShape<
-      InferValue<typeof type>,
-      Merge<
-        SanityImage<false>,
-        {
-          bar?: boolean;
-          foo: boolean;
-        }
-      >
-    > = {
+    const value = {
       foo: true,
       _type: "image",
       asset: {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      Merge<
-        SanityImage<false>,
-        {
-          bar?: boolean;
-          foo: boolean;
-        }
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          Merge<SanityImage<false>, { bar?: boolean; foo: boolean }>
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          Merge<SanityImage<false>, { bar?: boolean; foo: boolean }>
+        >
       >
-    > = type.parse(value);
+    ];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -172,12 +190,14 @@ describe("image", () => {
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: boolean(),
         },
       ],
     });
 
-    expect(type.schema()).toHaveProperty("fields", [
+    const schema = type.schema();
+
+    expect(schema).toHaveProperty("fields", [
       {
         name: "foo",
         type: "boolean",
@@ -185,10 +205,37 @@ describe("image", () => {
       },
       {
         name: "bar",
-        type: "string",
+        type: "boolean",
         validation: expect.any(Function),
       },
     ]);
+
+    const value = {
+      foo: true,
+      _type: "image",
+      asset: {
+        _type: "reference",
+        _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+      },
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<
+        Equal<
+          typeof value,
+          Merge<SanityImage<false>, { bar?: boolean; foo: boolean }>
+        >
+      >,
+      Expect<
+        Equal<
+          typeof parsedValue,
+          Merge<SanityImage<false>, { bar?: boolean; foo: boolean }>
+        >
+      >
+    ];
+
+    expect(parsedValue).toStrictEqual(value);
   });
 
   it("mocks the field values", () =>
@@ -286,16 +333,18 @@ describe("image", () => {
       zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      [string, SanityReference | "image"][]
-    > = type.parse({
+    const value = {
       _type: "image",
       asset: {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
-    });
+    };
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof parsedValue, [string, SanityReference | "image"][]>>
+    ];
 
     expect(parsedValue).toStrictEqual(
       expect.arrayContaining([
@@ -326,19 +375,17 @@ describe("image", () => {
       ],
       validation: (Rule) =>
         Rule.custom((value) => {
-          const image: ValidateShape<
-            typeof value,
-            | Merge<
-                SanityImage<false>,
-                {
-                  bar: string;
-                  foo?: boolean;
-                }
+          type Assertions = [
+            Expect<
+              Equal<
+                typeof value,
+                | Merge<SanityImage<false>, { bar: string; foo?: boolean }>
+                | undefined
               >
-            | undefined
-          > = value;
+            >
+          ];
 
-          return !image?.bar || "Needs an empty bar";
+          return !value?.bar || "Needs an empty bar";
         }),
     });
 

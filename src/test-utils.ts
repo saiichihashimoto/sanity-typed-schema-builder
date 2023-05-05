@@ -18,22 +18,16 @@ import type {
   TextDefinition,
   UrlDefinition,
 } from "sanity";
-import type { Simplify } from "type-fest";
-// TODO [type-fest@>=3.5.0]: IsEqual is available directly from type-fest
-import type { IsEqual } from "type-fest/source/internal";
 import type { GetRule } from "types";
 
-type ValidateError<Received, Expected> = Simplify<{
-  expected: Expected;
-  received: Received;
-}>;
+// https://twitter.com/mattpocockuk/status/1646452585006604291
+export type Expect<T extends true> = T;
 
-export type ValidateShape<Received, Expected extends Received> = IsEqual<
-  Expected,
-  Received
-> extends true
-  ? Received
-  : ValidateError<Received, Expected>;
+export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <
+  T
+>() => T extends Y ? 1 : 2
+  ? true
+  : false;
 
 export const mockRule = () => {
   const rule: GetRule<ArrayDefinition> &

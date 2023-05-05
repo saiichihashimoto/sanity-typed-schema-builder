@@ -4,12 +4,8 @@ import type { SlugValue } from "sanity";
 
 import { slug } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("slug", () => {
   it("builds a sanity config", () =>
@@ -23,14 +19,16 @@ describe("slug", () => {
   it("parses into a string", () => {
     const type = slug();
 
-    const value: ValidateShape<InferValue<typeof type>, SlugValue> = {
+    const value = {
       _type: "slug",
       current: "foo",
-    };
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    } as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SlugValue>>,
+      Expect<Equal<typeof parsedValue, string>>
+    ];
 
     expect(parsedValue).toBe("foo");
   });
@@ -38,14 +36,16 @@ describe("slug", () => {
   it("resolves into a string", () => {
     const type = slug();
 
-    const value: ValidateShape<InferValue<typeof type>, SlugValue> = {
+    const value = {
       _type: "slug",
       current: "foo",
-    };
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      string
-    > = type.resolve(value);
+    } as InferValue<typeof type>;
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, SlugValue>>,
+      Expect<Equal<typeof resolvedValue, string>>
+    ];
 
     expect(resolvedValue).toBe("foo");
   });
@@ -85,10 +85,10 @@ describe("slug", () => {
       zod: (zod) => zod.transform(({ _type }) => _type),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      "slug"
-    > = type.parse({ _type: "slug", current: "a-slug" });
+    const value = { _type: "slug", current: "a-slug" };
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, "slug">>];
 
     expect(parsedValue).toBe("slug");
   });
@@ -97,11 +97,12 @@ describe("slug", () => {
     const type = slug({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const slug: ValidateShape<typeof value, SlugValue | undefined> =
-            value;
+          type Assertions = [
+            Expect<Equal<typeof value, SlugValue | undefined>>
+          ];
 
           return (
-            (slug?.current?.length ?? 0) > 50 || "Needs to be 50 characters"
+            (value?.current?.length ?? 0) > 50 || "Needs to be 50 characters"
           );
         }),
     });

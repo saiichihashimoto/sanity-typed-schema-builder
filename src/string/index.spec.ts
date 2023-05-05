@@ -4,12 +4,8 @@ import { z } from "zod";
 
 import { string } from ".";
 import { mockRule } from "../test-utils";
-import type { ValidateShape } from "../test-utils";
-import type {
-  InferParsedValue,
-  InferResolvedValue,
-  InferValue,
-} from "../types";
+import type { Equal, Expect } from "../test-utils";
+import type { InferValue } from "../types";
 
 describe("string", () => {
   it("builds a sanity config", () =>
@@ -25,11 +21,10 @@ describe("string", () => {
   it("parses into a string", () => {
     const type = string();
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    const value = "foo";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, string>>];
 
     expect(parsedValue).toStrictEqual(value);
   });
@@ -37,11 +32,10 @@ describe("string", () => {
   it("resolves into a string", () => {
     const type = string();
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
-    const resolvedValue: ValidateShape<
-      InferResolvedValue<typeof type>,
-      string
-    > = type.resolve(value);
+    const value = "foo";
+    const resolvedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof resolvedValue, string>>];
 
     expect(resolvedValue).toStrictEqual(value);
   });
@@ -55,11 +49,8 @@ describe("string", () => {
 
     expect(rule.min).toHaveBeenCalledWith(3);
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    const value = "foo";
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -77,11 +68,8 @@ describe("string", () => {
 
     expect(rule.max).toHaveBeenCalledWith(4);
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    const value = "foo";
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -99,11 +87,8 @@ describe("string", () => {
 
     expect(rule.length).toHaveBeenCalledWith(3);
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    const value = "foo";
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -121,11 +106,8 @@ describe("string", () => {
 
     expect(rule.regex).toHaveBeenCalledWith(/^foo$/);
 
-    const value: ValidateShape<InferValue<typeof type>, string> = "foo";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      string
-    > = type.parse(value);
+    const value = "foo";
+    const parsedValue = type.parse(value);
 
     expect(parsedValue).toStrictEqual(value);
 
@@ -163,10 +145,10 @@ describe("string", () => {
       zod: (zod) => zod.transform((value) => value.length),
     });
 
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      number
-    > = type.parse("Test string");
+    const value = "Test String";
+    const parsedValue = type.parse(value);
+
+    type Assertions = [Expect<Equal<typeof parsedValue, number>>];
 
     expect(parsedValue).toBe(11);
   });
@@ -175,9 +157,9 @@ describe("string", () => {
     const type = string({
       validation: (Rule) =>
         Rule.custom((value) => {
-          const string: ValidateShape<typeof value, string | undefined> = value;
+          type Assertions = [Expect<Equal<typeof value, string | undefined>>];
 
-          return (string?.length ?? 0) > 50 || "Needs to be 50 characters";
+          return (value?.length ?? 0) > 50 || "Needs to be 50 characters";
         }),
     });
 
@@ -195,11 +177,15 @@ describe("string", () => {
       },
     });
 
-    const value: ValidateShape<InferValue<typeof type>, "bar" | "foo"> = "foo";
-    const parsedValue: ValidateShape<
-      InferParsedValue<typeof type>,
-      "bar" | "foo"
-    > = type.parse(value);
+    const value = "foo" as InferValue<typeof type>;
+    const parsedValue = type.parse(value);
+    const resolvedValue = type.resolve(value);
+
+    type Assertions = [
+      Expect<Equal<typeof value, "bar" | "foo">>,
+      Expect<Equal<typeof parsedValue, "bar" | "foo">>,
+      Expect<Equal<typeof resolvedValue, "bar" | "foo">>
+    ];
 
     expect(parsedValue).toStrictEqual(value);
     expect(["foo", "bar"]).toContain(type.mock(faker));
