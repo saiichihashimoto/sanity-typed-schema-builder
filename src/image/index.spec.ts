@@ -1,20 +1,19 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
+import type {
+  SanityImage,
+  SanityReference,
+} from "@sanity-typed/schema-builder";
 import type { Merge } from "type-fest";
 
-import { image } from ".";
-import type { SanityImage } from ".";
-import { boolean } from "../boolean";
 import { sharedFields } from "../field";
-import type { SanityReference } from "../reference";
-import { string } from "../string";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("image", () => {
   it("builds a sanity config", () =>
-    expect(image().schema()).toStrictEqual({
+    expect(s.image().schema()).toStrictEqual({
       type: "image",
       options: {
         hotspot: false,
@@ -22,10 +21,13 @@ describe("image", () => {
     }));
 
   it("passes through schema values", () =>
-    expect(image({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(s.image({ hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
   it("parses into an image", () => {
-    const type = image();
+    const type = s.image();
 
     const value = {
       _type: "image",
@@ -33,7 +35,7 @@ describe("image", () => {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -45,7 +47,7 @@ describe("image", () => {
   });
 
   it("resolves into an image", () => {
-    const type = image();
+    const type = s.image();
 
     const value = {
       _type: "image",
@@ -53,7 +55,7 @@ describe("image", () => {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const resolvedValue = type.resolve(value);
 
     type Assertions = [
@@ -65,7 +67,7 @@ describe("image", () => {
   });
 
   it("adds hotspot", () => {
-    const type = image({ hotspot: true });
+    const type = s.image({ hotspot: true });
 
     const value = {
       _type: "image",
@@ -85,7 +87,7 @@ describe("image", () => {
         height: 0.3248351648351647,
         width: 0.28124999999999994,
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -97,7 +99,7 @@ describe("image", () => {
   });
 
   it("allows undefined hotspot and crop on new images", () => {
-    const type = image({ hotspot: true });
+    const type = s.image({ hotspot: true });
 
     const value = {
       _type: "image",
@@ -112,23 +114,23 @@ describe("image", () => {
   });
 
   it("passes through hotspot to options object", () => {
-    const type = image({ hotspot: true });
+    const type = s.image({ hotspot: true });
 
     expect(type.schema()).toHaveProperty("options");
     expect(type.schema().options).toHaveProperty("hotspot", true);
   });
 
   it("adds fields", () => {
-    const type = image({
+    const type = s.image({
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
@@ -155,7 +157,7 @@ describe("image", () => {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -180,17 +182,17 @@ describe("image", () => {
     const fields = sharedFields([
       {
         name: "foo",
-        type: boolean(),
+        type: s.boolean(),
       },
     ]);
 
-    const type = image({
+    const type = s.image({
       fields: [
         ...fields,
         {
           name: "bar",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
@@ -217,7 +219,7 @@ describe("image", () => {
         _type: "reference",
         _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -240,18 +242,20 @@ describe("image", () => {
 
   it("mocks the field values", () =>
     expect(
-      image({
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-          {
-            name: "bar",
-            type: string(),
-          },
-        ],
-      }).mock(faker)
+      s
+        .image({
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+            {
+              name: "bar",
+              type: s.string(),
+            },
+          ],
+        })
+        .mock(faker)
     ).toStrictEqual({
       _type: "image",
       bar: expect.any(String),
@@ -263,13 +267,17 @@ describe("image", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(image().mock(faker)).toStrictEqual(image().mock(faker));
-    expect(image().mock(faker, ".foo")).toStrictEqual(
-      image().mock(faker, ".foo")
+    expect(s.image().mock(faker)).toStrictEqual(s.image().mock(faker));
+    expect(s.image().mock(faker, ".foo")).toStrictEqual(
+      s.image().mock(faker, ".foo")
     );
 
-    expect(image().mock(faker, ".foo")).not.toStrictEqual(image().mock(faker));
-    expect(image().mock(faker)).not.toStrictEqual(image().mock(faker, ".foo"));
+    expect(s.image().mock(faker, ".foo")).not.toStrictEqual(
+      s.image().mock(faker)
+    );
+    expect(s.image().mock(faker)).not.toStrictEqual(
+      s.image().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
@@ -293,43 +301,45 @@ describe("image", () => {
         bar: "bar",
       },
     ] as const).toContainEqual(
-      image({
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-          {
-            name: "bar",
-            type: string(),
-          },
-        ],
-        mock: (faker) =>
-          faker.helpers.arrayElement([
+      s
+        .image({
+          fields: [
             {
-              _type: "image",
-              asset: {
-                _type: "reference",
-                _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
-              },
-              foo: true,
-              bar: "foo",
+              name: "foo",
+              type: s.boolean(),
             },
             {
-              _type: "image",
-              asset: {
-                _type: "reference",
-                _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
-              },
-              foo: false,
-              bar: "bar",
+              name: "bar",
+              type: s.string(),
             },
-          ] as const),
-      }).mock(faker)
+          ],
+          mock: (faker) =>
+            faker.helpers.arrayElement([
+              {
+                _type: "image",
+                asset: {
+                  _type: "reference",
+                  _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+                },
+                foo: true,
+                bar: "foo",
+              },
+              {
+                _type: "image",
+                asset: {
+                  _type: "reference",
+                  _ref: "image-S2od0Kd5mpOa4Y0Wlku8RvXE",
+                },
+                foo: false,
+                bar: "bar",
+              },
+            ] as const),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = image({
+    const type = s.image({
       zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
@@ -361,16 +371,16 @@ describe("image", () => {
   });
 
   it("types custom validation", () => {
-    const type = image({
+    const type = s.image({
       fields: [
         {
           name: "foo",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
-          type: string(),
+          type: s.string(),
         },
       ],
       validation: (Rule) =>

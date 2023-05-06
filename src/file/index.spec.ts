@@ -1,28 +1,24 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
+import type { SanityFile, SanityReference } from "@sanity-typed/schema-builder";
 import type { Merge } from "type-fest";
 
-import { file } from ".";
-import type { SanityFile } from ".";
-import { boolean } from "../boolean";
 import { sharedFields } from "../field";
-import type { SanityReference } from "../reference";
-import { string } from "../string";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("file", () => {
   it("builds a sanity config", () =>
-    expect(file().schema()).toStrictEqual({
+    expect(s.file().schema()).toStrictEqual({
       type: "file",
     }));
 
   it("passes through schema values", () =>
-    expect(file({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(s.file({ hidden: false }).schema()).toHaveProperty("hidden", false));
 
   it("parses into an file", () => {
-    const type = file();
+    const type = s.file();
 
     const value = {
       _type: "file",
@@ -30,7 +26,7 @@ describe("file", () => {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -42,7 +38,7 @@ describe("file", () => {
   });
 
   it("resolves into an file", () => {
-    const type = file();
+    const type = s.file();
 
     const value = {
       _type: "file",
@@ -50,7 +46,7 @@ describe("file", () => {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const resolvedValue = type.resolve(value);
 
     type Assertions = [
@@ -62,16 +58,16 @@ describe("file", () => {
   });
 
   it("adds fields", () => {
-    const type = file({
+    const type = s.file({
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
@@ -98,7 +94,7 @@ describe("file", () => {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -120,17 +116,17 @@ describe("file", () => {
     const fields = sharedFields([
       {
         name: "foo",
-        type: boolean(),
+        type: s.boolean(),
       },
     ]);
 
-    const type = file({
+    const type = s.file({
       fields: [
         ...fields,
         {
           name: "bar",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
@@ -157,7 +153,7 @@ describe("file", () => {
         _type: "reference",
         _ref: "file-5igDD9UuXffIucwZpyVthr0c",
       },
-    } as InferValue<typeof type>;
+    } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -177,18 +173,20 @@ describe("file", () => {
 
   it("mocks the field values", () =>
     expect(
-      file({
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-          {
-            name: "bar",
-            type: string(),
-          },
-        ],
-      }).mock(faker)
+      s
+        .file({
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+            {
+              name: "bar",
+              type: s.string(),
+            },
+          ],
+        })
+        .mock(faker)
     ).toStrictEqual({
       _type: "file",
       bar: expect.any(String),
@@ -200,13 +198,17 @@ describe("file", () => {
     }));
 
   it("mocks the same value with the same path", () => {
-    expect(file().mock(faker)).toStrictEqual(file().mock(faker));
-    expect(file().mock(faker, ".foo")).toStrictEqual(
-      file().mock(faker, ".foo")
+    expect(s.file().mock(faker)).toStrictEqual(s.file().mock(faker));
+    expect(s.file().mock(faker, ".foo")).toStrictEqual(
+      s.file().mock(faker, ".foo")
     );
 
-    expect(file().mock(faker, ".foo")).not.toStrictEqual(file().mock(faker));
-    expect(file().mock(faker)).not.toStrictEqual(file().mock(faker, ".foo"));
+    expect(s.file().mock(faker, ".foo")).not.toStrictEqual(
+      s.file().mock(faker)
+    );
+    expect(s.file().mock(faker)).not.toStrictEqual(
+      s.file().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
@@ -230,43 +232,45 @@ describe("file", () => {
         bar: "bar",
       },
     ] as const).toContainEqual(
-      file({
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-          {
-            name: "bar",
-            type: string(),
-          },
-        ],
-        mock: (faker) =>
-          faker.helpers.arrayElement([
+      s
+        .file({
+          fields: [
             {
-              _type: "file",
-              asset: {
-                _type: "reference",
-                _ref: "file-5igDD9UuXffIucwZpyVthr0c",
-              },
-              foo: true,
-              bar: "foo",
+              name: "foo",
+              type: s.boolean(),
             },
             {
-              _type: "file",
-              asset: {
-                _type: "reference",
-                _ref: "file-5igDD9UuXffIucwZpyVthr0c",
-              },
-              foo: false,
-              bar: "bar",
+              name: "bar",
+              type: s.string(),
             },
-          ] as const),
-      }).mock(faker)
+          ],
+          mock: (faker) =>
+            faker.helpers.arrayElement([
+              {
+                _type: "file",
+                asset: {
+                  _type: "reference",
+                  _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+                },
+                foo: true,
+                bar: "foo",
+              },
+              {
+                _type: "file",
+                asset: {
+                  _type: "reference",
+                  _ref: "file-5igDD9UuXffIucwZpyVthr0c",
+                },
+                foo: false,
+                bar: "bar",
+              },
+            ] as const),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = file({
+    const type = s.file({
       zod: (zod) => zod.transform((value) => Object.entries(value)),
     });
 
@@ -298,16 +302,16 @@ describe("file", () => {
   });
 
   it("types custom validation", () => {
-    const type = file({
+    const type = s.file({
       fields: [
         {
           name: "foo",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
-          type: string(),
+          type: s.string(),
         },
       ],
       validation: (Rule) =>

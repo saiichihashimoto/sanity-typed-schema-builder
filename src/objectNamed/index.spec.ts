@@ -1,26 +1,25 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
 
-import { objectNamed } from ".";
-import { boolean } from "../boolean";
 import { sharedFields } from "../field";
-import { string } from "../string";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("object", () => {
   it("builds a sanity config", () =>
     expect(
-      objectNamed({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-        ],
-      }).schema()
+      s
+        .objectNamed({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+          ],
+        })
+        .schema()
     ).toStrictEqual({
       name: "foo",
       type: "object",
@@ -36,30 +35,32 @@ describe("object", () => {
 
   it("passes through schema values", () =>
     expect(
-      objectNamed({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-        ],
-        hidden: false,
-      }).schema()
+      s
+        .objectNamed({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+          ],
+          hidden: false,
+        })
+        .schema()
     ).toHaveProperty("hidden", false));
 
   it("parses into an object", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
 
-    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const value = { _type: "foo", foo: true } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -71,19 +72,19 @@ describe("object", () => {
   });
 
   it("resolves into an object", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean({
+          type: s.boolean({
             zodResolved: (zod) => zod.transform(() => "foo"),
           }),
         },
       ],
     });
 
-    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const value = { _type: "foo", foo: true } as s.infer<typeof type>;
     const resolvedValue = type.resolve(value);
 
     type Assertions = [
@@ -95,17 +96,17 @@ describe("object", () => {
   });
 
   it("allows optional fields", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: s.string(),
         },
       ],
     });
@@ -137,7 +138,7 @@ describe("object", () => {
 
     expect(barRule.required).not.toHaveBeenCalledWith();
 
-    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const value = { _type: "foo", foo: true } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -159,12 +160,12 @@ describe("object", () => {
   });
 
   it("makes a reference", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
-      fields: [{ name: "hello", type: string() }],
+      fields: [{ name: "hello", type: s.string() }],
     });
 
-    const type2 = objectNamed({
+    const type2 = s.objectNamed({
       name: "bar",
       fields: [{ name: "foo", type: type.ref() }],
     });
@@ -183,7 +184,7 @@ describe("object", () => {
         _type: "foo",
         hello: "world",
       },
-    } as InferValue<typeof type2>;
+    } as s.infer<typeof type2>;
     const parsedValue = type2.parse(value);
 
     type Assertions = [
@@ -208,18 +209,18 @@ describe("object", () => {
     const fields = sharedFields([
       {
         name: "foo",
-        type: boolean(),
+        type: s.boolean(),
       },
     ]);
 
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
       fields: [
         ...fields,
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: s.string(),
         },
       ],
     });
@@ -251,7 +252,7 @@ describe("object", () => {
 
     expect(barRule.required).not.toHaveBeenCalledWith();
 
-    const value = { _type: "foo", foo: true } as InferValue<typeof type>;
+    const value = { _type: "foo", foo: true } as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -274,19 +275,21 @@ describe("object", () => {
 
   it("mocks the field values", () =>
     expect(
-      objectNamed({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-          {
-            name: "bar",
-            type: string(),
-          },
-        ],
-      }).mock(faker)
+      s
+        .objectNamed({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+            {
+              name: "bar",
+              type: s.string(),
+            },
+          ],
+        })
+        .mock(faker)
     ).toStrictEqual({
       _type: "foo",
       foo: expect.any(Boolean),
@@ -297,7 +300,7 @@ describe("object", () => {
     const objectDef = () => {
       const field = {
         name: "foo",
-        type: string(),
+        type: s.string(),
       };
 
       const fields: [typeof field] = [field];
@@ -305,18 +308,18 @@ describe("object", () => {
       return { name: "foo", fields };
     };
 
-    expect(objectNamed(objectDef()).mock(faker)).toStrictEqual(
-      objectNamed(objectDef()).mock(faker)
+    expect(s.objectNamed(objectDef()).mock(faker)).toStrictEqual(
+      s.objectNamed(objectDef()).mock(faker)
     );
-    expect(objectNamed(objectDef()).mock(faker, ".foo")).toStrictEqual(
-      objectNamed(objectDef()).mock(faker, ".foo")
+    expect(s.objectNamed(objectDef()).mock(faker, ".foo")).toStrictEqual(
+      s.objectNamed(objectDef()).mock(faker, ".foo")
     );
 
-    expect(objectNamed(objectDef()).mock(faker, ".foo")).not.toStrictEqual(
-      objectNamed(objectDef()).mock(faker)
+    expect(s.objectNamed(objectDef()).mock(faker, ".foo")).not.toStrictEqual(
+      s.objectNamed(objectDef()).mock(faker)
     );
-    expect(objectNamed(objectDef()).mock(faker)).not.toStrictEqual(
-      objectNamed(objectDef()).mock(faker, ".foo")
+    expect(s.objectNamed(objectDef()).mock(faker)).not.toStrictEqual(
+      s.objectNamed(objectDef()).mock(faker, ".foo")
     );
   });
 
@@ -325,43 +328,47 @@ describe("object", () => {
       { _type: "foo", foo: true, bar: "foo" },
       { _type: "foo", foo: false, bar: "bar" },
     ]).toContainEqual(
-      objectNamed({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
-          },
-          {
-            name: "bar",
-            type: string(),
-          },
-        ],
-        mock: (faker) =>
-          faker.helpers.arrayElement([
-            { _type: "foo", foo: true, bar: "foo" },
-            { _type: "foo", foo: false, bar: "bar" },
-          ] as const),
-      }).mock(faker)
+      s
+        .objectNamed({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+            {
+              name: "bar",
+              type: s.string(),
+            },
+          ],
+          mock: (faker) =>
+            faker.helpers.arrayElement([
+              { _type: "foo", foo: true, bar: "foo" },
+              { _type: "foo", foo: false, bar: "bar" },
+            ] as const),
+        })
+        .mock(faker)
     ));
 
   it("sets preview.select", () =>
     expect(
-      objectNamed({
-        name: "foo",
-        fields: [
-          {
-            name: "foo",
-            type: boolean(),
+      s
+        .objectNamed({
+          name: "foo",
+          fields: [
+            {
+              name: "foo",
+              type: s.boolean(),
+            },
+          ],
+          preview: {
+            select: {
+              title: "someTitle",
+              media: "someMedia",
+            },
           },
-        ],
-        preview: {
-          select: {
-            title: "someTitle",
-            media: "someMedia",
-          },
-        },
-      }).schema()
+        })
+        .schema()
     ).toHaveProperty("preview", {
       select: {
         title: "someTitle",
@@ -370,17 +377,17 @@ describe("object", () => {
     }));
 
   it("allows a function selection value", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: string(),
+          type: s.string(),
         },
         {
           name: "bar",
           optional: true,
-          type: string(),
+          type: s.string(),
         },
       ],
       preview: {
@@ -422,12 +429,12 @@ describe("object", () => {
   });
 
   it("allows defining the zod", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
       fields: [
         {
           name: "foo",
-          type: boolean({
+          type: s.boolean({
             zod: (zod) => zod.transform((value) => (value ? 1 : 0)),
           }),
         },
@@ -452,17 +459,17 @@ describe("object", () => {
   });
 
   it("types custom validation", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "foo",
       fields: [
         {
           name: "foo",
           optional: true,
-          type: boolean(),
+          type: s.boolean(),
         },
         {
           name: "bar",
-          type: string(),
+          type: s.string(),
         },
       ],
       validation: (Rule) =>
@@ -488,14 +495,14 @@ describe("object", () => {
   });
 
   it("handles deep references", () => {
-    const type = objectNamed({
+    const type = s.objectNamed({
       name: "type",
       title: "Title",
       fields: [
         {
           name: "value",
           title: "Value",
-          type: string(),
+          type: s.string(),
         },
       ],
     });
@@ -505,7 +512,7 @@ describe("object", () => {
       value: "foo",
     };
 
-    const referencingType = objectNamed({
+    const referencingType = s.objectNamed({
       name: "referencingType",
       title: "Referencing Title",
       fields: [
@@ -520,9 +527,9 @@ describe("object", () => {
     const referencingValue = {
       _type: "referencingType",
       value,
-    } as InferValue<typeof referencingType>;
+    } as s.infer<typeof referencingType>;
 
-    const deepReferencingType = objectNamed({
+    const deepReferencingType = s.objectNamed({
       name: "deepReferencingType",
       title: "Deep Referencing Title",
       fields: [
@@ -537,7 +544,7 @@ describe("object", () => {
     const deepReferencingValue = {
       _type: "deepReferencingType",
       referencingValue,
-    } as InferValue<typeof deepReferencingType>;
+    } as s.infer<typeof deepReferencingType>;
 
     type Assertions = [
       Expect<

@@ -1,23 +1,23 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
 import { z } from "zod";
 
-import { text } from ".";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
 
 describe("text", () => {
   it("builds a sanity config", () =>
-    expect(text().schema()).toStrictEqual({
+    expect(s.text().schema()).toStrictEqual({
       type: "text",
       validation: expect.any(Function),
     }));
 
   it("passes through schema values", () =>
-    expect(text({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(s.text({ hidden: false }).schema()).toHaveProperty("hidden", false));
 
   it("parses into a string", () => {
-    const type = text();
+    const type = s.text();
 
     const value = "foo";
     const parsedValue = type.parse(value);
@@ -28,7 +28,7 @@ describe("text", () => {
   });
 
   it("resolves into a string", () => {
-    const type = text();
+    const type = s.text();
 
     const value = "foo";
     const resolvedValue = type.parse(value);
@@ -39,7 +39,7 @@ describe("text", () => {
   });
 
   it("sets min", () => {
-    const type = text({ min: 3 });
+    const type = s.text({ min: 3 });
 
     const rule = mockRule();
 
@@ -58,7 +58,7 @@ describe("text", () => {
   });
 
   it("sets max", () => {
-    const type = text({ max: 4 });
+    const type = s.text({ max: 4 });
 
     const rule = mockRule();
 
@@ -77,7 +77,7 @@ describe("text", () => {
   });
 
   it("sets length", () => {
-    const type = text({ length: 3 });
+    const type = s.text({ length: 3 });
 
     const rule = mockRule();
 
@@ -96,7 +96,7 @@ describe("text", () => {
   });
 
   it("sets regex", () => {
-    const type = text({ regex: /^foo$/ });
+    const type = s.text({ regex: /^foo$/ });
 
     const rule = mockRule();
 
@@ -115,27 +115,33 @@ describe("text", () => {
   });
 
   it("mocks some paragraphs", () =>
-    expect(text().mock(faker)).toStrictEqual(expect.any(String)));
+    expect(s.text().mock(faker)).toStrictEqual(expect.any(String)));
 
   it("mocks the same value with the same path", () => {
-    expect(text().mock(faker)).toStrictEqual(text().mock(faker));
-    expect(text().mock(faker, ".foo")).toStrictEqual(
-      text().mock(faker, ".foo")
+    expect(s.text().mock(faker)).toStrictEqual(s.text().mock(faker));
+    expect(s.text().mock(faker, ".foo")).toStrictEqual(
+      s.text().mock(faker, ".foo")
     );
 
-    expect(text().mock(faker, ".foo")).not.toStrictEqual(text().mock(faker));
-    expect(text().mock(faker)).not.toStrictEqual(text().mock(faker, ".foo"));
+    expect(s.text().mock(faker, ".foo")).not.toStrictEqual(
+      s.text().mock(faker)
+    );
+    expect(s.text().mock(faker)).not.toStrictEqual(
+      s.text().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
     expect(["Option 1", "Option 2"]).toContainEqual(
-      text({
-        mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
-      }).mock(faker)
+      s
+        .text({
+          mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = text({
+    const type = s.text({
       zod: (zod) => zod.transform((value) => value.length),
     });
 
@@ -148,7 +154,7 @@ describe("text", () => {
   });
 
   it("types custom validation", () => {
-    const type = text({
+    const type = s.text({
       validation: (Rule) =>
         Rule.custom((value) => {
           type Assertions = [Expect<Equal<typeof value, string | undefined>>];

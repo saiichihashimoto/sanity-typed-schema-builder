@@ -1,25 +1,27 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
 import { z } from "zod";
 
-import { string } from ".";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("string", () => {
   it("builds a sanity config", () =>
-    expect(string().schema()).toStrictEqual({
+    expect(s.string().schema()).toStrictEqual({
       type: "string",
       options: undefined,
       validation: expect.any(Function),
     }));
 
   it("passes through schema values", () =>
-    expect(string({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(s.string({ hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
   it("parses into a string", () => {
-    const type = string();
+    const type = s.string();
 
     const value = "foo";
     const parsedValue = type.parse(value);
@@ -30,7 +32,7 @@ describe("string", () => {
   });
 
   it("resolves into a string", () => {
-    const type = string();
+    const type = s.string();
 
     const value = "foo";
     const resolvedValue = type.parse(value);
@@ -41,7 +43,7 @@ describe("string", () => {
   });
 
   it("sets min", () => {
-    const type = string({ min: 3 });
+    const type = s.string({ min: 3 });
 
     const rule = mockRule();
 
@@ -60,7 +62,7 @@ describe("string", () => {
   });
 
   it("sets max", () => {
-    const type = string({ max: 4 });
+    const type = s.string({ max: 4 });
 
     const rule = mockRule();
 
@@ -79,7 +81,7 @@ describe("string", () => {
   });
 
   it("sets length", () => {
-    const type = string({ length: 3 });
+    const type = s.string({ length: 3 });
 
     const rule = mockRule();
 
@@ -98,7 +100,7 @@ describe("string", () => {
   });
 
   it("sets regex", () => {
-    const type = string({ regex: /^foo$/ });
+    const type = s.string({ regex: /^foo$/ });
 
     const rule = mockRule();
 
@@ -117,31 +119,33 @@ describe("string", () => {
   });
 
   it("mocks a word", () =>
-    expect(string().mock(faker)).toStrictEqual(expect.any(String)));
+    expect(s.string().mock(faker)).toStrictEqual(expect.any(String)));
 
   it("mocks the same value with the same path", () => {
-    expect(string().mock(faker)).toStrictEqual(string().mock(faker));
-    expect(string().mock(faker, ".foo")).toStrictEqual(
-      string().mock(faker, ".foo")
+    expect(s.string().mock(faker)).toStrictEqual(s.string().mock(faker));
+    expect(s.string().mock(faker, ".foo")).toStrictEqual(
+      s.string().mock(faker, ".foo")
     );
 
-    expect(string().mock(faker, ".foo")).not.toStrictEqual(
-      string().mock(faker)
+    expect(s.string().mock(faker, ".foo")).not.toStrictEqual(
+      s.string().mock(faker)
     );
-    expect(string().mock(faker)).not.toStrictEqual(
-      string().mock(faker, ".foo")
+    expect(s.string().mock(faker)).not.toStrictEqual(
+      s.string().mock(faker, ".foo")
     );
   });
 
   it("allows defining the mocks", () =>
     expect(["Option 1", "Option 2"]).toContainEqual(
-      string({
-        mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
-      }).mock(faker)
+      s
+        .string({
+          mock: (faker) => faker.helpers.arrayElement(["Option 1", "Option 2"]),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = string({
+    const type = s.string({
       zod: (zod) => zod.transform((value) => value.length),
     });
 
@@ -154,7 +158,7 @@ describe("string", () => {
   });
 
   it("types custom validation", () => {
-    const type = string({
+    const type = s.string({
       validation: (Rule) =>
         Rule.custom((value) => {
           type Assertions = [Expect<Equal<typeof value, string | undefined>>];
@@ -171,13 +175,13 @@ describe("string", () => {
   });
 
   it("types values from list", () => {
-    const type = string({
+    const type = s.string({
       options: {
         list: ["foo", { title: "Bar", value: "bar" }],
       },
     });
 
-    const value = "foo" as InferValue<typeof type>;
+    const value = "foo" as s.infer<typeof type>;
     const parsedValue = type.parse(value);
     const resolvedValue = type.resolve(value);
 

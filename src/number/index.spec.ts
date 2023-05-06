@@ -1,25 +1,27 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
 import { z } from "zod";
 
-import { number } from ".";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("number", () => {
   it("builds a sanity config", () =>
-    expect(number().schema()).toStrictEqual({
+    expect(s.number().schema()).toStrictEqual({
       type: "number",
       validation: expect.any(Function),
       options: undefined,
     }));
 
   it("passes through schema values", () =>
-    expect(number({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(s.number({ hidden: false }).schema()).toHaveProperty(
+      "hidden",
+      false
+    ));
 
   it("parses into a number", () => {
-    const type = number();
+    const type = s.number();
 
     const value = 5;
     const parsedValue = type.parse(value);
@@ -30,7 +32,7 @@ describe("number", () => {
   });
 
   it("resolves into a number", () => {
-    const type = number();
+    const type = s.number();
 
     const value = 5;
     const resolvedValue = type.resolve(value);
@@ -41,7 +43,7 @@ describe("number", () => {
   });
 
   it("sets min", () => {
-    const type = number({ min: 1 });
+    const type = s.number({ min: 1 });
 
     const rule = mockRule();
 
@@ -60,7 +62,7 @@ describe("number", () => {
   });
 
   it("sets max", () => {
-    const type = number({ max: 6 });
+    const type = s.number({ max: 6 });
 
     const rule = mockRule();
 
@@ -79,7 +81,7 @@ describe("number", () => {
   });
 
   it("sets greaterThan", () => {
-    const type = number({ greaterThan: 1 });
+    const type = s.number({ greaterThan: 1 });
 
     const rule = mockRule();
 
@@ -98,7 +100,7 @@ describe("number", () => {
   });
 
   it("sets lessThan", () => {
-    const type = number({ lessThan: 6 });
+    const type = s.number({ lessThan: 6 });
 
     const rule = mockRule();
 
@@ -117,7 +119,7 @@ describe("number", () => {
   });
 
   it("sets integer", () => {
-    const type = number({ integer: true });
+    const type = s.number({ integer: true });
 
     const rule = mockRule();
 
@@ -136,7 +138,7 @@ describe("number", () => {
   });
 
   it("sets positive", () => {
-    const type = number({ positive: true });
+    const type = s.number({ positive: true });
 
     const rule = mockRule();
 
@@ -155,7 +157,7 @@ describe("number", () => {
   });
 
   it("sets negative", () => {
-    const type = number({ negative: true });
+    const type = s.number({ negative: true });
 
     const rule = mockRule();
 
@@ -174,7 +176,7 @@ describe("number", () => {
   });
 
   it("sets precision", () => {
-    const type = number({ precision: 2 });
+    const type = s.number({ precision: 2 });
 
     const rule = mockRule();
 
@@ -189,31 +191,33 @@ describe("number", () => {
   });
 
   it("mocks a number", () =>
-    expect(number().mock(faker)).toStrictEqual(expect.any(Number)));
+    expect(s.number().mock(faker)).toStrictEqual(expect.any(Number)));
 
   it("mocks the same value with the same path", () => {
-    expect(number().mock(faker)).toStrictEqual(number().mock(faker));
-    expect(number().mock(faker, ".foo")).toStrictEqual(
-      number().mock(faker, ".foo")
+    expect(s.number().mock(faker)).toStrictEqual(s.number().mock(faker));
+    expect(s.number().mock(faker, ".foo")).toStrictEqual(
+      s.number().mock(faker, ".foo")
     );
 
-    expect(number().mock(faker, ".foo")).not.toStrictEqual(
-      number().mock(faker)
+    expect(s.number().mock(faker, ".foo")).not.toStrictEqual(
+      s.number().mock(faker)
     );
-    expect(number().mock(faker)).not.toStrictEqual(
-      number().mock(faker, ".foo")
+    expect(s.number().mock(faker)).not.toStrictEqual(
+      s.number().mock(faker, ".foo")
     );
   });
 
   it("allows defining the mocks", () =>
     expect([3, 4]).toContainEqual(
-      number({
-        mock: (faker) => faker.helpers.arrayElement([3, 4]),
-      }).mock(faker)
+      s
+        .number({
+          mock: (faker) => faker.helpers.arrayElement([3, 4]),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = number({
+    const type = s.number({
       zod: (zod) => zod.transform((value) => `${value}`),
     });
 
@@ -226,7 +230,7 @@ describe("number", () => {
   });
 
   it("types custom validation", () => {
-    const type = number({
+    const type = s.number({
       validation: (Rule) =>
         Rule.custom((value) => {
           type Assertions = [Expect<Equal<typeof value, number | undefined>>];
@@ -243,13 +247,13 @@ describe("number", () => {
   });
 
   it("types values from list", () => {
-    const type = number({
+    const type = s.number({
       options: {
         list: [3, { title: "Four", value: 4 }],
       },
     });
 
-    const value = 3 as InferValue<typeof type>;
+    const value = 3 as s.infer<typeof type>;
     const parsedValue = type.parse(value);
     const resolvedValue = type.resolve(value);
 

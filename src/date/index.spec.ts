@@ -1,22 +1,22 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
 import { z } from "zod";
 
-import { date } from ".";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
 
 describe("date", () => {
   it("builds a sanity config", () =>
-    expect(date().schema()).toStrictEqual({
+    expect(s.date().schema()).toStrictEqual({
       type: "date",
     }));
 
   it("passes through schema values", () =>
-    expect(date({ hidden: false }).schema()).toHaveProperty("hidden", false));
+    expect(s.date({ hidden: false }).schema()).toHaveProperty("hidden", false));
 
   it("parses into a string", () => {
-    const type = date();
+    const type = s.date();
 
     const value = "2017-02-12";
     const parsedValue = type.parse(value);
@@ -27,7 +27,7 @@ describe("date", () => {
   });
 
   it("resolves into a string", () => {
-    const type = date();
+    const type = s.date();
 
     const value = "2017-02-12";
     const resolvedValue = type.resolve(value);
@@ -38,7 +38,7 @@ describe("date", () => {
   });
 
   it("mocks a string", () => {
-    const value = date().mock(faker);
+    const value = s.date().mock(faker);
 
     expect(value).toStrictEqual(expect.any(String));
 
@@ -48,25 +48,31 @@ describe("date", () => {
   });
 
   it("mocks the same value with the same path", () => {
-    expect(date().mock(faker)).toStrictEqual(date().mock(faker));
-    expect(date().mock(faker, ".foo")).toStrictEqual(
-      date().mock(faker, ".foo")
+    expect(s.date().mock(faker)).toStrictEqual(s.date().mock(faker));
+    expect(s.date().mock(faker, ".foo")).toStrictEqual(
+      s.date().mock(faker, ".foo")
     );
 
-    expect(date().mock(faker, ".foo")).not.toStrictEqual(date().mock(faker));
-    expect(date().mock(faker)).not.toStrictEqual(date().mock(faker, ".foo"));
+    expect(s.date().mock(faker, ".foo")).not.toStrictEqual(
+      s.date().mock(faker)
+    );
+    expect(s.date().mock(faker)).not.toStrictEqual(
+      s.date().mock(faker, ".foo")
+    );
   });
 
   it("allows defining the mocks", () =>
     expect(["2010-05-06", "2011-04-27"]).toContainEqual(
-      date({
-        mock: (faker) =>
-          faker.helpers.arrayElement(["2010-05-06", "2011-04-27"]),
-      }).mock(faker)
+      s
+        .date({
+          mock: (faker) =>
+            faker.helpers.arrayElement(["2010-05-06", "2011-04-27"]),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = date({
+    const type = s.date({
       zod: (zod) => zod.transform((value) => value.length),
     });
 
@@ -79,7 +85,7 @@ describe("date", () => {
   });
 
   it("types custom validation", () => {
-    const type = date({
+    const type = s.date({
       validation: (Rule) =>
         Rule.custom((value) => {
           type Assertions = [Expect<Equal<typeof value, string | undefined>>];

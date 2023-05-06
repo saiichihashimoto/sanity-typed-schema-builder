@@ -1,24 +1,24 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
 
-import { boolean } from ".";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
 
 describe("boolean", () => {
   it("builds a sanity config", () =>
-    expect(boolean().schema()).toStrictEqual({
+    expect(s.boolean().schema()).toStrictEqual({
       type: "boolean",
     }));
 
   it("passes through schema values", () =>
-    expect(boolean({ hidden: false }).schema()).toHaveProperty(
+    expect(s.boolean({ hidden: false }).schema()).toHaveProperty(
       "hidden",
       false
     ));
 
   it("parses into a boolean", () => {
-    const type = boolean();
+    const type = s.boolean();
 
     const value = true;
     const parsedValue = type.parse(value);
@@ -29,7 +29,7 @@ describe("boolean", () => {
   });
 
   it("resolves into a boolean", () => {
-    const type = boolean();
+    const type = s.boolean();
 
     const value = true;
     const resolvedValue = type.resolve(value);
@@ -40,31 +40,33 @@ describe("boolean", () => {
   });
 
   it("mocks a boolean", () =>
-    expect(boolean().mock(faker)).toStrictEqual(expect.any(Boolean)));
+    expect(s.boolean().mock(faker)).toStrictEqual(expect.any(Boolean)));
 
   it("mocks the same value with the same path", () => {
-    expect(boolean().mock(faker)).toStrictEqual(boolean().mock(faker));
-    expect(boolean().mock(faker, ".foo")).toStrictEqual(
-      boolean().mock(faker, ".foo")
+    expect(s.boolean().mock(faker)).toStrictEqual(s.boolean().mock(faker));
+    expect(s.boolean().mock(faker, ".foo")).toStrictEqual(
+      s.boolean().mock(faker, ".foo")
     );
 
-    expect(boolean().mock(faker, ".foo")).not.toStrictEqual(
-      boolean().mock(faker)
+    expect(s.boolean().mock(faker, ".foo")).not.toStrictEqual(
+      s.boolean().mock(faker)
     );
-    expect(boolean().mock(faker)).not.toStrictEqual(
-      boolean().mock(faker, ".foo")
+    expect(s.boolean().mock(faker)).not.toStrictEqual(
+      s.boolean().mock(faker, ".foo")
     );
   });
 
   it("allows defining the mocks", () =>
     expect([true]).toContainEqual(
-      boolean({
-        mock: (faker) => faker.helpers.arrayElement([true]),
-      }).mock(faker)
+      s
+        .boolean({
+          mock: (faker) => faker.helpers.arrayElement([true]),
+        })
+        .mock(faker)
     ));
 
   it("allows defining the zod", () => {
-    const type = boolean({
+    const type = s.boolean({
       zod: (zod) => zod.transform((value) => value.toString()),
     });
 
@@ -77,7 +79,7 @@ describe("boolean", () => {
   });
 
   it("types custom validation", () => {
-    const type = boolean({
+    const type = s.boolean({
       validation: (Rule) =>
         Rule.custom((value) => {
           type Assertions = [Expect<Equal<typeof value, boolean | undefined>>];

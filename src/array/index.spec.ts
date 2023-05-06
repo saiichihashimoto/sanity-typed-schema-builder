@@ -1,33 +1,27 @@
 import { describe, expect, it } from "@jest/globals";
+import { s } from "@sanity-typed/schema-builder";
 import { z } from "zod";
 
-import { array } from ".";
-import { boolean } from "../boolean";
-import { object } from "../object";
-import { objectNamed } from "../objectNamed";
-import { string } from "../string";
 import { mockRule } from "../test-utils";
 import type { Equal, Expect } from "../test-utils";
-import type { InferValue } from "../types";
 
 describe("array", () => {
   it("builds a sanity config", () =>
-    expect(array({ of: [boolean()] }).schema()).toStrictEqual({
+    expect(s.array({ of: [s.boolean()] }).schema()).toStrictEqual({
       type: "array",
       of: [{ type: "boolean" }],
       validation: expect.any(Function),
     }));
 
   it("passes through schema values", () =>
-    expect(array({ of: [boolean()], hidden: false }).schema()).toHaveProperty(
-      "hidden",
-      false
-    ));
+    expect(
+      s.array({ of: [s.boolean()], hidden: false }).schema()
+    ).toHaveProperty("hidden", false));
 
   it("adds primitive types", () => {
-    const type = array({
+    const type = s.array({
       of: [
-        boolean({
+        s.boolean({
           zod: (zod) => zod.transform((value) => value.toString()),
           zodResolved: (zod) =>
             zod.transform((value) => value.toString().length),
@@ -35,7 +29,7 @@ describe("array", () => {
       ],
     });
 
-    const value = [true] as InferValue<typeof type>;
+    const value = [true] as s.infer<typeof type>;
     const parsedValue = type.parse(value);
     const resolvedValue = type.resolve(value);
 
@@ -50,13 +44,13 @@ describe("array", () => {
   });
 
   it("adds keyed nonprimitive types", () => {
-    const type = array({
+    const type = s.array({
       of: [
-        object({
+        s.object({
           fields: [
             {
               name: "foo",
-              type: boolean({
+              type: s.boolean({
                 zod: (zod) => zod.transform((value) => value.toString()),
                 zodResolved: (zod) =>
                   zod.transform((value) => value.toString().length),
@@ -85,7 +79,7 @@ describe("array", () => {
     const value = [
       { _key: "a", foo: true },
       { _key: "b", foo: false },
-    ] as InferValue<typeof type>;
+    ] as s.infer<typeof type>;
     const parsedValue = type.parse(value);
     const resolvedValue = type.resolve(value);
 
@@ -106,8 +100,8 @@ describe("array", () => {
   });
 
   it("creates union with primitive types", () => {
-    const type = array({
-      of: [boolean(), string()],
+    const type = s.array({
+      of: [s.boolean(), s.string()],
     });
 
     const schema = type.schema();
@@ -122,7 +116,7 @@ describe("array", () => {
       },
     ]);
 
-    const value = [true, "a"] as InferValue<typeof type>;
+    const value = [true, "a"] as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -174,26 +168,26 @@ describe("array", () => {
   });
 
   it('creates discriminated union with nonprimitive "_type" types', () => {
-    const objectNamedType1 = objectNamed({
+    const objectNamedType1 = s.objectNamed({
       name: "a",
       fields: [
         {
           name: "foo",
-          type: boolean(),
+          type: s.boolean(),
         },
       ],
     });
-    const objectNamedType2 = objectNamed({
+    const objectNamedType2 = s.objectNamed({
       name: "b",
       fields: [
         {
           name: "foo",
-          type: string(),
+          type: s.string(),
         },
       ],
     });
 
-    const type = array({
+    const type = s.array({
       of: [objectNamedType1.ref(), objectNamedType2.ref()],
     });
 
@@ -219,7 +213,7 @@ describe("array", () => {
         _type: "b",
         foo: "hello",
       },
-    ] as InferValue<typeof type>;
+    ] as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -296,7 +290,7 @@ describe("array", () => {
   });
 
   it("sets min", () => {
-    const type = array({ min: 2, of: [boolean()] });
+    const type = s.array({ min: 2, of: [s.boolean()] });
 
     const rule = mockRule();
 
@@ -304,7 +298,7 @@ describe("array", () => {
 
     expect(rule.min).toHaveBeenCalledWith(2);
 
-    const value = [true, false] as InferValue<typeof type>;
+    const value = [true, false] as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -320,7 +314,7 @@ describe("array", () => {
   });
 
   it("sets max", () => {
-    const type = array({ max: 3, of: [boolean()] });
+    const type = s.array({ max: 3, of: [s.boolean()] });
 
     const rule = mockRule();
 
@@ -328,7 +322,7 @@ describe("array", () => {
 
     expect(rule.max).toHaveBeenCalledWith(3);
 
-    const value = [true, false, true] as InferValue<typeof type>;
+    const value = [true, false, true] as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -354,7 +348,7 @@ describe("array", () => {
   });
 
   it("sets length", () => {
-    const type = array({ length: 2, of: [boolean()] });
+    const type = s.array({ length: 2, of: [s.boolean()] });
 
     const rule = mockRule();
 
@@ -362,7 +356,7 @@ describe("array", () => {
 
     expect(rule.length).toHaveBeenCalledWith(2);
 
-    const value = [true, false] as InferValue<typeof type>;
+    const value = [true, false] as s.infer<typeof type>;
     const parsedValue = type.parse(value);
 
     type Assertions = [
@@ -382,9 +376,9 @@ describe("array", () => {
   });
 
   it("allows defining the zod", () => {
-    const type = array({
+    const type = s.array({
       of: [
-        boolean({ zod: (zod) => zod.transform((value) => (value ? 1 : 0)) }),
+        s.boolean({ zod: (zod) => zod.transform((value) => (value ? 1 : 0)) }),
       ],
       zod: (zod) =>
         zod.transform((values) =>
@@ -400,21 +394,21 @@ describe("array", () => {
   });
 
   it("types custom validation", () => {
-    const type = array({
+    const type = s.array({
       of: [
-        object({
+        s.object({
           fields: [
             {
               name: "foo",
-              type: boolean(),
+              type: s.boolean(),
             },
           ],
         }),
-        object({
+        s.object({
           fields: [
             {
               name: "bar",
-              type: boolean(),
+              type: s.boolean(),
             },
           ],
         }),
